@@ -1,0 +1,21 @@
+#include <iostream>
+
+#include <math.h>
+
+using namespace std;
+
+bool is_integer(double val, double precision)
+{
+  float intpart;
+  float frac = modf(val, &intpart);
+  return frac < precision || frac > 1 - precision;
+}
+
+int main(int argc, char **argv)
+{
+  double precision = 1e-6;
+  double x = stod(argv[1]);
+  cout << "x = " << x << ". is_integer(x) = " << is_integer(x, precision) << '\n'; 
+  
+
+}
