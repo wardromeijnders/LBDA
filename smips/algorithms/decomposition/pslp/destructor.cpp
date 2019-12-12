@@ -1,5 +1,3 @@
 #include "pslp.h"
 
-Pslp::~Pslp()
-{  
-}
+Pslp::~Pslp() {}

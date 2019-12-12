@@ -2,5 +2,5 @@
 
 void ZK::optimize()
 {
-  GRBoptimize(d_model);
+    GRBoptimize(d_model);
 }

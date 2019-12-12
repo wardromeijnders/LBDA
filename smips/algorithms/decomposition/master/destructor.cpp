@@ -2,6 +2,6 @@
 
 Master::~Master()
 {
-  //cout << "master destructor called\n";
-  GRBfreemodel(d_cmodel);
+    // cout << "master destructor called\n";
+    GRBfreemodel(d_cmodel);
 }
