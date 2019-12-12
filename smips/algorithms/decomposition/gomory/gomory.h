@@ -1,22 +1,21 @@
 #ifndef GOMORY_H
 #define GOMORY_H
 
-#include "gurobi_c++.h"
-
 #include "../../../problem_data/problem.h"
+#include "gurobi_c++.h"
 
 
 using namespace std;
 
 class Gomory
 {
-  public:
+public:
     GRBModel d_model;
     size_t d_m2, d_n2;
-    size_t d_ss_leq, d_ss_geq;    
+    size_t d_ss_leq, d_ss_geq;
     GRBConstr *d_constrs;
     GRBVar *d_vars;
-    double *d_l2, *d_u2;     
+    double *d_l2, *d_u2;
     Gomory(GRBEnv &env, Problem &problem);
     Gomory(const Gomory &other);
     ~Gomory();

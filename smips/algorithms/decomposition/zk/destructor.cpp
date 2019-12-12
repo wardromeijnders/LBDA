@@ -2,6 +2,6 @@
 
 ZK::~ZK()
 {
-  if (d_model)
-    GRBfreemodel(d_model);
+    if (d_model)
+        GRBfreemodel(d_model);
 }
