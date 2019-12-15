@@ -1,5 +1,7 @@
 #include "decompositions/lagrangian.h"
 
+#include <algorithm>
+
 Lagrangian::Lagrangian(const Lagrangian &other) :
     d_model(other.d_model),
     d_n1(other.d_n1),

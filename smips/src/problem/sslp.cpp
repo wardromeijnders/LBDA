@@ -1,5 +1,7 @@
 #include "problem.h"
 
+#include <fstream>
+
 void Problem::sslp(size_t nServers, size_t nClients, size_t S)
 {
     clear_sub();

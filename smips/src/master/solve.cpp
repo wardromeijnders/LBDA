@@ -1,6 +1,5 @@
 #include "master.h"
 
-#include <string>
 
 Master::Solution Master::solve()
 {
@@ -11,8 +10,9 @@ Master::Solution Master::solve()
     Solution sol;
 
     sol.xVals = new double[d_n1];
-    GRBgetdblattrarray(d_cmodel, "X", 1, d_n1, sol.xVals);
 
+    GRBgetdblattrarray(d_cmodel, "X", 1, d_n1, sol.xVals);
     GRBgetdblattrelement(d_cmodel, "X", 0, &(sol.thetaVal));
+
     return sol;
 }

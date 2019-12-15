@@ -1,6 +1,5 @@
 #include "benders.h"
 
-
 void Benders::ald_affine(double tol, size_t maxRounds)
 {
   Cglp cglp(d_env, d_master);

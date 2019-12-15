@@ -6,6 +6,5 @@
 #include "deqform.h"
 
 #include <gurobi_c++.h>
-#include <gurobi_c.h>
 
 #endif  // MAIN_H

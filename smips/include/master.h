@@ -4,10 +4,7 @@
 #include "problem.h"
 
 #include <gurobi_c++.h>
-#include <gurobi_c.h>
-#include <iostream>
-#include <vector>
-
+#include <iosfwd>
 
 class Master
 {
@@ -48,13 +45,15 @@ public:
                      double *x,
                      double theta,
                      double tol);
+
+    // adds the cut kappa theta >= beta^T (x,s) + gamma (this cuts also
+    // features slacks)
     bool add_zk_cut(double *beta,
                     double gamma,
                     double kappa,
                     double *x,
                     double theta,
-                    double tol);  // adds the cut kappa theta >= beta^T (x,s) +
-                                  // gamma (this cuts also features slacks)
+                    double tol);
 
     struct Solution
     {

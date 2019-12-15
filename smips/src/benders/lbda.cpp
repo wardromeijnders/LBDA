@@ -1,5 +1,7 @@
 #include "benders.h"
 
+#include <chrono>
+
 void Benders::lbda(double *alpha, double gomoryTimeLimit, double tol)
 {
     d_gomory.setTimeLimit(gomoryTimeLimit);

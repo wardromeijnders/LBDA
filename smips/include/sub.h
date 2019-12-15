@@ -4,7 +4,7 @@
 #include "problem.h"
 
 #include <gurobi_c++.h>
-
+#include <iosfwd>
 
 class Sub
 {

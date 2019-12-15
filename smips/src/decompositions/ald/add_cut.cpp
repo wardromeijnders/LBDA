@@ -1,6 +1,5 @@
 #include "decompositions/ald.h"
 
-
 void Ald::add_cut(size_t nVars,
                   size_t nCuts,
                   double *coef_x,

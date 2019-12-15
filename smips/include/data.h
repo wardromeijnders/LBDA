@@ -1,10 +1,8 @@
 #ifndef DATA_H
 #define DATA_H
 
-#include <algorithm>
+#include <iosfwd>
 #include <random>
-#include <vector>
-
 
 class Data
 {

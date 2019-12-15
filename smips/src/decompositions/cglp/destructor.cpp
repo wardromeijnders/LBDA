@@ -1,6 +1,5 @@
 #include "decompositions/cglp.h"
 
-
 Cglp::~Cglp()
 {
     delete[] d_pi_x;

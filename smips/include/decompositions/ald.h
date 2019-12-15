@@ -3,9 +3,7 @@
 
 #include "problem.h"
 
-#include <algorithm>
 #include <gurobi_c++.h>
-#include <gurobi_c.h>
 
 
 class Ald

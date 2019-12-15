@@ -1,5 +1,7 @@
 #include "problem.h"
 
+#include <fstream>
+
 void Problem::classic_ri()
 {
     clear_sub();

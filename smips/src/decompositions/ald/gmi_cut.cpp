@@ -1,7 +1,6 @@
 #include "decompositions/ald.h"
 
-#include <iterator>
-
+#include <algorithm>
 
 void Ald::gmi_cut(int row,
                   double yval,

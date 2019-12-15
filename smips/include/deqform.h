@@ -3,10 +3,8 @@
 
 #include "problem.h"
 
-#include <algorithm>
 #include <gurobi_c++.h>
-#include <vector>
-
+#include <iosfwd>
 
 class DeqForm
 {

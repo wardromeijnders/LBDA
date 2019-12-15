@@ -3,10 +3,8 @@
 
 #include "data.h"
 
-#include <algorithm>
-#include <fstream>  // for reading data
 #include <gurobi_c++.h>
-#include <vector>
+#include <iosfwd>
 
 // TODO: enforce CCR assumption
 

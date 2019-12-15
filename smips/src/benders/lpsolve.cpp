@@ -1,5 +1,7 @@
 #include "benders.h"
 
+#include <chrono>
+
 void Benders::lpSolve(double tol)
 {
     auto t1 = std::chrono::high_resolution_clock::now();
