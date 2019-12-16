@@ -19,7 +19,9 @@ public:
     GRBmodel *d_model;
 
     Ald(GRBenv *env, Problem &problem);
+
     Ald(const Ald &other);
+
     ~Ald();
 
     void update(double *rhs);

@@ -10,9 +10,10 @@ class ZK
 {
 public:
     size_t d_n1;
-    size_t d_p1;
     size_t d_n2;
+    size_t d_p1;
     size_t d_p2;
+
     size_t d_nVars;
     size_t d_nConstrs;
 
@@ -24,9 +25,13 @@ public:
     std::vector<double> d_tau;
 
     GRBmodel *d_model;
+
     ZK(GRBenv *env, Problem &problem, size_t scenario);
+
     ZK(const ZK &other);
+
     ZK(ZK &&other);
+
     ~ZK();
 
     void update(double *x, double theta);  // computes and updates rhs
@@ -39,10 +44,9 @@ public:
                std::vector<double> &gamma,
                size_t maxRounds);
 
-    void subgradient(double &alpha,
-                     double *beta,
-                     double &kappa,
-                     double weight);  // v >= alpha + beta^T x + tau * theta
+    // v >= alpha + beta^T x + tau * theta
+    void subgradient(double &alpha, double *beta, double &kappa, double weight);
+
     void optimize();
 
     bool is_integer(double val, double precision = 1e-6);

@@ -29,6 +29,7 @@ public:
     std::vector<GRBConstr> d_constrs_cons;
 
     Cglp(GRBEnv &env, Master &master);
+
     ~Cglp();
 
     void add_disjunction(

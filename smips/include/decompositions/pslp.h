@@ -29,7 +29,9 @@ public:
     std::vector<double> &d_probs;
 
     Pslp(GRBEnv &env, GRBenv *c_env, Problem &problem);
+
     Pslp(const Pslp &other);
+
     ~Pslp() = default;
 
     void zk_cut(double *x,

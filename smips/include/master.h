@@ -30,15 +30,17 @@ public:
     // storing the optimality cut coefficients
     // vector<vector<double>> d_xcoefs;
 
-    Master(GRBEnv &env,
-           GRBenv *c_env,
-           Problem &problem);  // initializes d_model and its variables
+    // initializes d_model and its variables
+    Master(GRBEnv &env, GRBenv *c_env, Problem &problem);
+
     Master(const Master &other);
+
     ~Master();  // deletes vars and frees d_cmodel
 
     // adds cut theta >= beta^T x + gamma, if this cut is violated (ret = true),
     // else cut is not added (ret = false).
     bool addCut(double *beta, double gamma, double *x, double theta, double tol);
+
     bool add_ald_cut(double *beta,
                      double gamma,
                      double tau,

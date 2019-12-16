@@ -31,11 +31,10 @@ public:
     double d_MIPGap;
     double d_runTime;
 
-    DeqForm(GRBEnv &env,
-            Problem &problem);  // using the problem data, d_model is
-                                // initialized status is set to 1
+    // using the problem data, d_model is initialized
+    DeqForm(GRBEnv &env, Problem &problem);
 
-    ~DeqForm();  // deletes vars (dynamically allocated to the heap blabla)
+    ~DeqForm();
 
     void init_fs(size_t n1,
                  size_t p1,
@@ -47,6 +46,7 @@ public:
                  double *c,
                  double *rhs,
                  std::vector<std::vector<double>> &Amat);
+
     void init_ss(size_t n1,
                  size_t n2,
                  size_t p2,
@@ -61,9 +61,9 @@ public:
                  std::vector<std::vector<double>> &Tmat,
                  std::vector<std::vector<double>> &Wmat,
                  std::vector<std::vector<double>> &omega);
-    void solve(
-        double time_limit = 1e20);  // solves grbModel, updates status to 1 or
-                                    // 2, updates xvals, updates MIPGap
+
+    // solves grbModel, updates status, updates xvals, updates MIPGap
+    void solve(double time_limit = 1e20);
 };
 
 #endif

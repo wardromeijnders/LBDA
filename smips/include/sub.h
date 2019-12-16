@@ -19,7 +19,9 @@ public:
     GRBVar *d_vars;
 
     Sub(GRBEnv &env, Problem &problem);
+
     Sub(Sub const &other);
+
     ~Sub();
 
     void update(double *rhs);
@@ -38,6 +40,7 @@ public:
     };
 
     Multipliers solve();
+
     GomInfo solve2();
 };
 
