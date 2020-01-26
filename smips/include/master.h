@@ -8,17 +8,22 @@
 
 class Master
 {
-public:
+    struct Solution
+    {
+        double *xVals;
+        double thetaVal;
+    };
+
     // GRBVar *d_xVars;
     // GRBVar d_theta;
     // GRBModel d_model;
     GRBmodel *d_cmodel;
 
     // internal storage: only valid for regular l-shaped and lbda cuts
-    std::vector<std::vector<double>> d_xcoefs;
-    std::vector<double> d_cons;
+    std::vector<std::vector<double>> d_xCoeffs;
+    std::vector<double> d_cuts;
 
-    // slack variable identities s = kappa * theta - beta * x - gamma
+    // slack variable identities slack = kappa * theta - beta * x - gamma
     std::vector<double> d_kappa;
     std::vector<std::vector<double>> d_beta;
     std::vector<double> d_gamma;
@@ -26,44 +31,29 @@ public:
     size_t d_n1;
     size_t d_nSlacks;
 
-
     // storing the optimality cut coefficients
-    // vector<vector<double>> d_xcoefs;
+    // vector<vector<double>> d_xCoeffs;
 
-    // initializes d_model and its variables
+public:
     Master(GRBEnv &env, GRBenv *c_env, Problem &problem);
 
-    Master(const Master &other);
+    Master(Master const &other);
 
-    ~Master();  // deletes vars and frees d_cmodel
+    ~Master();
 
-    // adds cut theta >= beta^T x + gamma, if this cut is violated (ret = true),
-    // else cut is not added (ret = false).
+    /**
+     * Adds cut <code>theta >= beta^T x + gamma</code> if this cut is violated.
+     * @return  Is the cut violated? If true, the cut was added; else not.
+     */
     bool addCut(double *beta, double gamma, double *x, double theta, double tol);
 
-    bool add_ald_cut(double *beta,
-                     double gamma,
-                     double tau,
-                     double *x,
-                     double theta,
-                     double tol);
+    [[nodiscard]] std::vector<double> const &cuts() const;
 
-    // adds the cut kappa theta >= beta^T (x,s) + gamma (this cuts also
-    // features slacks)
-    bool add_zk_cut(double *beta,
-                    double gamma,
-                    double kappa,
-                    double *x,
-                    double theta,
-                    double tol);
+    [[nodiscard]] std::vector<std::vector<double>> const &xCoeffs() const;
 
-    struct Solution
-    {
-        double *xVals;
-        double thetaVal;
-    };
+    [[nodiscard]] size_t n1() const;
 
-    Solution solve();  // solves the gurobimodel
+    Solution const solve();
 };
 
 #endif

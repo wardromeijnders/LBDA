@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.2)
 
 set(SOURCES
-		copy_ctor.cpp
+		copyconstructor.cpp
 		destructor.cpp
 		solve.cpp
-		solve2.cpp
+		gominfo.cpp
+		multipliers.cpp
 		sub.cpp
 		update.cpp)
 

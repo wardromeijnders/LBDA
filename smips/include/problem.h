@@ -10,7 +10,25 @@
 
 class Problem
 {
+    Data d_gen;  // used to generate (random) data
+
+    GRBModel d_sub;  // subproblem, used for evaluation of cx + Q(x) (more
+                     // precisely, of v(omega, x)).
+
+    // useful to quickly update rhs of d_sub (heap allocated)
+    GRBConstr *d_constrs;
+
+    // is d_sub initialized. (destructor will only call delete[] on d_constrs
+    // if yes)
+    bool d_sub_initialized;
+
+    void initSub();  // initializes the subproblem, and sets rhs = 0. Called by
+                     // evaluate() when evaluate is called for the first time.
+
+    void clearSub();  // should be called if problem data changes
+
 public:
+    // TODO make these members private
     // size parameters
     size_t d_m1;
     size_t d_m2;
@@ -18,7 +36,7 @@ public:
     size_t d_n2;
     size_t d_p1;
     size_t d_p2;
-    size_t d_q1;
+    size_t d_q1;  // TODO unused?
     size_t d_q2;
     size_t d_S;
 
@@ -47,21 +65,8 @@ public:
     std::vector<std::vector<double>> d_omega;
     std::vector<double> d_probs;
 
-    Data d_gen;  // used to generate (random) data
-
-    GRBModel d_sub;  // subproblem, used for evaluation of cx + Q(x) (more
-                     // precisely, of v(omega, x))
-
-    // useful to quickly update rhs of d_sub (heap allocated)
-    GRBConstr *d_constrs;
-
-    // is d_sub initialized. (destructor will only call
-    // delete[] on d_constrs if yes)
-    bool d_sub_initialized;
-
     Problem(Data &generator, GRBEnv &env);
 
-    // initializes size parameters, d_gen, and d_sub
     Problem(size_t n1,
             size_t p1,
             size_t m1,
@@ -80,27 +85,29 @@ public:
 
     ~Problem();
 
-    void randomInstance(
-        int A_low = 1,
-        int A_high = 6,
-        int T_low = 1,
-        int T_high = 6,
-        int W_low = 1,
-        int W_high = 6,
-        int c_low = 1,
-        int c_high = 5,
-        int b_low = 1,
-        int b_high = 5,
-        int q_low = 5,
-        int q_high = 10);  // initializes A, T, W, b, c, q (>= constraints)
+    // Initializes A, T, W, b, c, q (>= constraints)
+    void randomInstance(int A_low = 1,
+                        int A_high = 6,
+                        int T_low = 1,
+                        int T_high = 6,
+                        int W_low = 1,
+                        int W_high = 6,
+                        int c_low = 1,
+                        int c_high = 5,
+                        int b_low = 1,
+                        int b_high = 5,
+                        int q_low = 5,
+                        int q_high = 10);
 
-    void enforce_ccr(double penalty);
+    void enforceCcr(double penalty);
 
-    void set_omega_gaus(double mean, double sd);  // initializes d_omega
-    void set_bounds(std::vector<double> &l1,
-                    std::vector<double> &u1,
-                    std::vector<double> &l2,
-                    std::vector<double> &u2);
+    // initializes d_omega
+    void setGaussianOmega(double mean, double sd);
+
+    void setBounds(std::vector<double> &l1,
+                   std::vector<double> &u1,
+                   std::vector<double> &l2,
+                   std::vector<double> &u2);
 
     void sizes(size_t S);
 
@@ -108,17 +115,13 @@ public:
                bool fs_continuous,
                bool ss_binary,
                bool standard_T = true);
+
     void sslp(size_t nServers, size_t nClients, size_t S);
 
     void classic_ri();
 
     // evaluates cx + Q(x) (does not check feasibility)
-    double evaluate(double *x);
-
-    void init_sub();  // initializes the subproblem, and sets rhs = 0. Called by
-                      // evaluate() if evaluate is called for the first time
-
-    void clear_sub();  // should be called if problem data changes
+    double evaluate(double const *x);
 };
 
 #endif

@@ -13,7 +13,7 @@ void DeqForm::solve(double time_limit)
     {
         d_status = status::SOLVED;
 
-        if (d_MIP)
+        if (d_isMip)
             d_MIPGap = d_model.get(GRB_DoubleAttr_MIPGap);
 
         d_objVal = d_model.get(GRB_DoubleAttr_ObjVal);

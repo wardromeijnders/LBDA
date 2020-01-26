@@ -13,7 +13,7 @@ void Problem::randomInstance(int A_low,
                              int q_low,
                              int q_high)
 {
-    clear_sub();
+    clearSub();
 
     d_Amat = d_gen.rand_unif_mat(d_m1, d_n1, A_low, A_high);
     d_Tmat = d_gen.rand_unif_mat(d_m2, d_n1, T_low, T_high);

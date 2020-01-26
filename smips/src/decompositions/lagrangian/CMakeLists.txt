@@ -4,7 +4,7 @@ set(HEADERS
 		../../../include/decompositions/lagrangian.h)
 
 set(SOURCES
-		copy_ctor.cpp
+		copyconstructor.cpp
 		destructor.cpp
 		lagrangian.cpp
 		solve.cpp

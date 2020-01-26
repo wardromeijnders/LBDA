@@ -8,7 +8,6 @@
 
 class Gomory
 {
-public:
     size_t d_m2;
     size_t d_n2;
     size_t d_ss_leq;
@@ -21,6 +20,7 @@ public:
     GRBConstr *d_constrs;
     GRBVar *d_vars;
 
+public:
     Gomory(GRBEnv &env, Problem &problem);
 
     Gomory(const Gomory &other);

@@ -18,7 +18,7 @@ Gomory::Gomory(GRBEnv &env, Problem &problem) :
     double *q = problem.d_q.data();  // transform cost vector and omega to
                                      // c-style array add variables
 
-    d_vars = d_model.addVars(d_l2, d_u2, q, vTypes, NULL, d_n2);
+    d_vars = d_model.addVars(d_l2, d_u2, q, vTypes, nullptr, d_n2);
 
     // constraint senses
     char senses[d_m2];
@@ -44,6 +44,6 @@ Gomory::Gomory(GRBEnv &env, Problem &problem) :
     }
 
     // add constraints
-    d_constrs = d_model.addConstrs(Wy, senses, rhs, NULL, d_m2);
+    d_constrs = d_model.addConstrs(Wy, senses, rhs, nullptr, d_m2);
     d_model.update();
 }

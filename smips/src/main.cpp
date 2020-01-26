@@ -1,6 +1,6 @@
 #include "main.h"
 
-int main(int argc, char **argv)
+int main()
 {
     Data rand(31415);
 
@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     env.set(GRB_IntParam_Threads, 1);
 
     GRBenv *c_env;
-    GRBloadenv(&c_env, NULL);
+    GRBloadenv(&c_env, nullptr);
     GRBsetintparam(c_env, "OutputFlag", 0);
     GRBsetintparam(c_env, "Threads", 1);
 
@@ -39,6 +39,13 @@ int main(int argc, char **argv)
     Benders lbda = lshaped;
     lbda.lbda(alpha, 1.0);
     x = lbda.d_xvals;
+    for (size_t var = 0; var != n1; ++var)
+        std::cout << x[var] << ' ';
+    std::cout << "\ncx + Q(x) = " << problem.evaluate(x) << '\n';
+
+    Benders sb = lshaped;
+    sb.strongBenders();
+    x = sb.d_xvals;
     for (size_t var = 0; var != n1; ++var)
         std::cout << x[var] << ' ';
     std::cout << "\ncx + Q(x) = " << problem.evaluate(x) << '\n';

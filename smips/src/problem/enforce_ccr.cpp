@@ -1,6 +1,6 @@
 #include "problem.h"
 
-void Problem::enforce_ccr(double penalty)
+void Problem::enforceCcr(double penalty)
 {
     // we have to introduce new continuous variables (change n2)
     // we have to update q

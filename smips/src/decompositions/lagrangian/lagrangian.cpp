@@ -13,9 +13,9 @@ Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
 
     d_z_vars = d_model.addVars(problem.d_l1.data(),
                                problem.d_u1.data(),
-                               NULL,
+                               nullptr,
                                zTypes,
-                               NULL,
+                               nullptr,
                                d_n1);  // cost coeffs set by update()
 
     // TODO: include first-stage constraints
@@ -33,7 +33,7 @@ Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
                                      problem.d_u2.data(),
                                      q,
                                      yTypes,
-                                     NULL,
+                                     nullptr,
                                      d_n2);
 
     size_t ss_leq = problem.d_ss_leq;
@@ -59,7 +59,7 @@ Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
     }
 
     // add constraints
-    d_constrs = d_model.addConstrs(TxWy, senses, rhs, NULL, d_m2);
+    d_constrs = d_model.addConstrs(TxWy, senses, rhs, nullptr, d_m2);
     d_model.update();
 
     delete[] y_vars;

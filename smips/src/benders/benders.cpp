@@ -13,8 +13,6 @@ Benders::Benders(GRBEnv &env, GRBenv *c_env, Problem &problem) :
     d_sub(env, problem),
     d_lr(env, problem),
     d_gomory(env, problem),
-    d_ald(c_env, problem),
-    d_pslp(env, c_env, problem),
     d_visited(problem.d_S),
     d_objectives(problem.d_S)
 {

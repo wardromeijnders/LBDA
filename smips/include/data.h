@@ -6,9 +6,9 @@
 
 class Data
 {
-public:
     std::mt19937 d_engine;
 
+public:
     Data(int seed = std::random_device{}());  // initializes d_engine with random
                                               // seed, unless seed is specified
 

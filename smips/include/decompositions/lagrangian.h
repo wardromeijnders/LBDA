@@ -8,7 +8,6 @@
 
 class Lagrangian
 {
-public:
     size_t d_m2;
     size_t d_n1;
     size_t d_n2;
@@ -17,6 +16,7 @@ public:
     GRBConstr *d_constrs;
     GRBVar *d_z_vars;
 
+public:
     Lagrangian(GRBEnv &env, Problem &problem);
 
     Lagrangian(const Lagrangian &other);

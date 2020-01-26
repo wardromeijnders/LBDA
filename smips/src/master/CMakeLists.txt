@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 3.2)
 
 set(SOURCES
-		add_ald_cut.cpp
-		add_zk_cut.cpp
 		addcut.cpp
-		copy_ctor.cpp
+		copyconstructor.cpp
+		cuts.cpp
 		destructor.cpp
 		master.cpp
-		solve.cpp)
+		n1.cpp
+		solve.cpp
+		xcoeffs.cpp)
 
 add_library(master ${SOURCES})

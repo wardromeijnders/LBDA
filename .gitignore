@@ -34,5 +34,5 @@
 # Jetbrains IDEs
 .idea/
 
-# CMake
-cmake-build-debug/
+# CMake and build files
+build/

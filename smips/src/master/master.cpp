@@ -4,59 +4,58 @@ Master::Master(GRBEnv &env, GRBenv *c_env, Problem &problem) :
     d_n1(problem.d_n1),
     d_nSlacks(problem.d_fs_leq + problem.d_fs_geq)
 {
-    size_t n1 = problem.d_n1;
-    size_t m1 = problem.d_m1;
-    size_t p1 = problem.d_p1;
+    GRBnewmodel(c_env,  // The C API gives access to advanced simplex routines.
+                &d_cmodel,
+                nullptr,
+                0,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr,
+                nullptr);
 
-    std::vector<std::vector<double>> &Amat = problem.d_Amat;
-
-    double *c = problem.d_c.data();
-    double *rhs = problem.d_b.data();
-
-    // instantiating c-api gurobi gurobimodel (in order to use advanced simplex
-    // routines)
-    GRBnewmodel(c_env, &d_cmodel, NULL, 0, NULL, NULL, NULL, NULL, NULL);
-    GRBaddvar(d_cmodel,
+    GRBaddvar(d_cmodel,  // theta
               0,
-              NULL,
-              NULL,
+              nullptr,
+              nullptr,
               1.0,
               problem.d_L,
               1e20,
               GRB_CONTINUOUS,
-              NULL);  // theta
+              nullptr);
 
-    char vtypes[n1];
-    std::fill_n(vtypes, p1, GRB_INTEGER);
-    std::fill(vtypes + p1, vtypes + n1, GRB_CONTINUOUS);
+    char vtypes[d_n1];
+    std::fill_n(vtypes, problem.d_p1, GRB_INTEGER);
+    std::fill(vtypes + problem.d_p1, vtypes + d_n1, GRB_CONTINUOUS);
 
-    GRBaddvars(d_cmodel,
-               n1,
+    GRBaddvars(d_cmodel,  // first-stage (x) variables.
+               d_n1,
                0,
-               NULL,
-               NULL,
-               NULL,
-               c,
+               nullptr,
+               nullptr,
+               nullptr,
+               problem.d_c.data(),
                problem.d_l1.data(),
                problem.d_u1.data(),
                vtypes,
-               NULL);  // xvars
+               nullptr);
 
-    // adding constraints
-    int cind[n1];
-    std::iota(cind, cind + n1, 1);
+    // Add constraints.
+    int cind[d_n1];
+    std::iota(cind, cind + d_n1, 1);
 
-    for (size_t con = 0; con != m1; ++con)
+    double *rhs = problem.d_b.data();
+
+    for (size_t con = 0; con != problem.d_m1; ++con)
         GRBaddconstr(d_cmodel,
-                     n1,
+                     d_n1,
                      cind,
-                     Amat[con].data(),
+                     problem.d_Amat[con].data(),
                      GRB_EQUAL,
                      rhs[con],
-                     NULL);
+                     nullptr);
 
-
-    // adding slacks
+    // Add slack variables.
     int vbeg[d_nSlacks];
     std::iota(vbeg, vbeg + d_nSlacks, 0);
 
@@ -74,27 +73,27 @@ Master::Master(GRBEnv &env, GRBenv *c_env, Problem &problem) :
                vbeg,
                vind,
                vval,
-               NULL,
-               NULL,
-               NULL,
-               NULL,
-               NULL);
+               nullptr,
+               nullptr,
+               nullptr,
+               nullptr,
+               nullptr);
 
-    // storing slack identities
+    // Store slack identities
     for (size_t con = 0; con != fs_leq; ++con)
     {
         d_kappa.push_back(0);
-        d_beta.push_back(Amat[con]);
+        d_beta.push_back(problem.d_Amat[con]);
         d_gamma.push_back(-rhs[con]);
     }
 
     for (size_t con = fs_leq; con != d_nSlacks; ++con)
     {
         d_kappa.push_back(0);
-        std::vector<double> &beta = Amat[con];
-        std::vector<double> minus_beta(n1);
+        std::vector<double> &beta = problem.d_Amat[con];
+        std::vector<double> minus_beta(d_n1);
 
-        for (size_t var = 0; var != n1; ++var)
+        for (size_t var = 0; var != d_n1; ++var)
             minus_beta[var] = -beta[var];
 
         d_beta.push_back(minus_beta);

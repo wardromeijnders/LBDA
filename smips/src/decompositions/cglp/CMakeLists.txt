@@ -4,9 +4,9 @@ set(HEADERS
 		../../../include/decompositions/cglp.h)
 
 set(SOURCES
-		add_disjunction.cpp
+		adddisjunction.cpp
 		cglp.cpp
-		chg_row.cpp
+		changelastrow.cpp
 		destructor.cpp
 		solve.cpp)
 
