@@ -11,14 +11,14 @@ void DeqForm::initSecondStage(size_t n1,
                               double *ub,
                               double *probs,
                               double *q,
-                              std::vector<std::vector<double>> &Tmat,
-                              std::vector<std::vector<double>> &Wmat,
-                              std::vector<std::vector<double>> &omega)
+                              arma::mat &Tmat,
+                              arma::mat &Wmat,
+                              arma::mat &omega)
 {
     GRBLinExpr Tx[m2];
     for (size_t conIdx = 0; conIdx != m2; ++conIdx)
     {
-        double *row = Tmat[conIdx].data();
+        double *row = Tmat.colptr(conIdx);
         Tx[conIdx].addTerms(row, d_xVars, n1);
     }
 
@@ -42,7 +42,7 @@ void DeqForm::initSecondStage(size_t n1,
         for (size_t var = 0; var != n2; ++var)
             costs[var] = prob * q[var];
 
-        double *rhsOmega = omega[s].data();
+        double *rhsOmega = omega.colptr(s);
 
         // add variables
         GRBVar *yVars = d_model.addVars(lb, ub, costs, vTypes2, nullptr, n2);
@@ -51,7 +51,7 @@ void DeqForm::initSecondStage(size_t n1,
         // TODO: I've removed a duplication for TxWy here, which did not compile
         for (size_t conIdx = 0; conIdx != m2; ++conIdx)
         {
-            double *row = Wmat[conIdx].data();
+            double *row = Wmat.colptr(conIdx);
             Tx[conIdx].addTerms(row, yVars, n2);
         }
 

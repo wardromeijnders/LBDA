@@ -6,11 +6,12 @@ void Problem::initSub()
     std::fill(vTypes, vTypes + d_p2, GRB_INTEGER);
     std::fill(vTypes + d_p2, vTypes + d_n2, GRB_CONTINUOUS);
 
-    // cost vector
-    double *qPtr = d_q.data();  // transform cost vector and omega to c-style
-                                // array add variables
-    GRBVar *vars
-        = d_sub.addVars(d_l2.data(), d_u2.data(), qPtr, vTypes, nullptr, d_n2);
+    GRBVar *vars = d_sub.addVars(d_l2.memptr(),
+                                 d_u2.memptr(),
+                                 d_q.memptr(),
+                                 vTypes,
+                                 nullptr,
+                                 d_n2);
 
     // constraint senses
     char senses[d_m2];
@@ -26,10 +27,7 @@ void Problem::initSub()
 
     GRBLinExpr Wy[d_m2];
     for (size_t conIdx = 0; conIdx != d_m2; ++conIdx)
-    {
-        double *row = d_Wmat[conIdx].data();
-        Wy[conIdx].addTerms(row, vars, d_n2);
-    }
+        Wy[conIdx].addTerms(d_Wmat.colptr(conIdx), vars, d_n2);
 
     // add constraints
     d_constrs = d_sub.addConstrs(Wy, senses, rhs, nullptr, d_m2);

@@ -9,7 +9,7 @@ void DeqForm::initFirstStage(size_t n1,
                              double *ub,
                              double *c,
                              double *rhs,
-                             std::vector<std::vector<double>> &Amat)
+                             arma::mat &Amat)
 {
     // variables
     char vTypes[n1];
@@ -20,10 +20,7 @@ void DeqForm::initFirstStage(size_t n1,
     // constraints
     GRBLinExpr lhsExprs[m1];
     for (size_t conIdx = 0; conIdx != m1; ++conIdx)
-    {
-        double *row = Amat[conIdx].data();
-        lhsExprs[conIdx].addTerms(row, d_xVars, n1);
-    }
+        lhsExprs[conIdx].addTerms(Amat.colptr(conIdx), d_xVars, n1);
 
     char senses[m1];
     std::fill(senses, senses + fs_leq, GRB_LESS_EQUAL);

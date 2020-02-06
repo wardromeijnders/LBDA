@@ -1,18 +1,18 @@
 #include "decompositions/lagrangian.h"
 
-Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
+Lagrangian::Lagrangian(GRBEnv &env, Problem const &problem) :
+    Relaxation(env),
     d_m2(problem.d_m2),
     d_n1(problem.d_n1),
-    d_n2(problem.d_n2),
-    d_model(env)
+    d_n2(problem.d_n2)
 {
     // adding first-stage variables (z)
     char zTypes[d_n1];
     std::fill_n(zTypes, problem.d_p1, GRB_INTEGER);
     std::fill_n(zTypes + problem.d_p1, d_n1 - problem.d_p1, GRB_CONTINUOUS);
 
-    d_z_vars = d_model.addVars(problem.d_l1.data(),
-                               problem.d_u1.data(),
+    d_z_vars = d_model.addVars(problem.d_l1.memptr(),
+                               problem.d_u1.memptr(),
                                nullptr,
                                zTypes,
                                nullptr,
@@ -26,12 +26,9 @@ Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
     std::fill_n(yTypes, problem.d_p2, GRB_INTEGER);
     std::fill_n(yTypes + problem.d_p2, d_n2 - problem.d_p2, GRB_CONTINUOUS);
 
-    // cost vector
-    double *q = problem.d_q.data();  // transform cost vector and omega to
-                                     // c-style array add variables
-    GRBVar *y_vars = d_model.addVars(problem.d_l2.data(),
-                                     problem.d_u2.data(),
-                                     q,
+    GRBVar *y_vars = d_model.addVars(problem.d_l2.memptr(),
+                                     problem.d_u2.memptr(),
+                                     problem.d_q.memptr(),
                                      yTypes,
                                      nullptr,
                                      d_n2);
@@ -54,8 +51,8 @@ Lagrangian::Lagrangian(GRBEnv &env, Problem &problem) :
 
     for (size_t conIdx = 0; conIdx != d_m2; ++conIdx)
     {
-        TxWy[conIdx].addTerms(problem.d_Tmat[conIdx].data(), d_z_vars, d_n1);
-        TxWy[conIdx].addTerms(problem.d_Wmat[conIdx].data(), y_vars, d_n2);
+        TxWy[conIdx].addTerms(problem.d_Tmat.colptr(conIdx), d_z_vars, d_n1);
+        TxWy[conIdx].addTerms(problem.d_Wmat.colptr(conIdx), y_vars, d_n2);
     }
 
     // add constraints

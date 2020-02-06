@@ -3,15 +3,16 @@
 
 #include "data.h"
 
+#include <armadillo>
 #include <gurobi_c++.h>
 #include <iosfwd>
 
-// TODO: enforce CCR assumption
 
 class Problem
 {
     Data d_gen;  // used to generate (random) data
 
+    // TODO this is not the place - should move to the actual solver stuff.
     GRBModel d_sub;  // subproblem, used for evaluation of cx + Q(x) (more
                      // precisely, of v(omega, x)).
 
@@ -37,7 +38,7 @@ public:
     size_t d_p1;
     size_t d_p2;
     size_t d_q1;  // TODO unused?
-    size_t d_q2;
+    size_t d_q2;  // TODO unused?
     size_t d_S;
 
     double d_L;  // lb of Q
@@ -48,22 +49,22 @@ public:
     size_t d_ss_leq;
     size_t d_ss_geq;
 
-    std::vector<double> d_l1;
-    std::vector<double> d_u1;
-    std::vector<double> d_l2;
-    std::vector<double> d_u2;
+    arma::vec d_l1;
+    arma::vec d_u1;
+    arma::vec d_l2;
+    arma::vec d_u2;
 
-    std::vector<double> d_c;
-    std::vector<double> d_b;
-    std::vector<double> d_q;
+    arma::vec d_c;
+    arma::vec d_b;
+    arma::vec d_q;
 
-    std::vector<std::vector<double>> d_Amat;
-    std::vector<std::vector<double>> d_Tmat;
-    std::vector<std::vector<double>> d_Wmat;
+    arma::mat d_Amat;
+    arma::mat d_Tmat;
+    arma::mat d_Wmat;
 
     // rows of d_omega correspond to scenarios
-    std::vector<std::vector<double>> d_omega;
-    std::vector<double> d_probs;
+    arma::mat d_omega;
+    arma::vec d_probs;
 
     Problem(Data &generator, GRBEnv &env);
 
@@ -99,15 +100,12 @@ public:
                         int q_low = 5,
                         int q_high = 10);
 
-    void enforceCcr(double penalty);
+    void enforceCcr(double penalty);  // TODO: enforce CCR assumption
 
     // initializes d_omega
     void setGaussianOmega(double mean, double sd);
 
-    void setBounds(std::vector<double> &l1,
-                   std::vector<double> &u1,
-                   std::vector<double> &l2,
-                   std::vector<double> &u2);
+    void setBounds(arma::vec &l1, arma::vec &u1, arma::vec &l2, arma::vec &u2);
 
     void sizes(size_t S);
 
@@ -121,7 +119,7 @@ public:
     void classic_ri();
 
     // evaluates cx + Q(x) (does not check feasibility)
-    double evaluate(double const *x);
+    double evaluate(arma::vec const &x);
 };
 
 #endif

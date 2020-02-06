@@ -1,11 +1,9 @@
 cmake_minimum_required(VERSION 3.2)
 
 set(SOURCES
-		classic_ri.cpp
+		#classic_ri.cpp
 		clearsub.cpp
-		../data/data.cpp
 		destructor.cpp
-		enforce_ccr.cpp
 		evaluate.cpp
 		initsub.cpp
 		problem.cpp
@@ -13,8 +11,8 @@ set(SOURCES
 		randominstance.cpp
 		setbounds.cpp
 		setgaussianomega.cpp
-		sizes.cpp
-		sslp.cpp
+		#sizes.cpp
+		#sslp.cpp
 		ssv95.cpp)
 
 add_library(problem ${SOURCES})

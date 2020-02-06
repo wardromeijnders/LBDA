@@ -1,6 +1,7 @@
 #include "deqform.h"
 
-void DeqForm::solve(double time_limit)
+
+std::unique_ptr<arma::vec> DeqForm::solve(double time_limit)
 {
     d_model.set(GRB_DoubleParam_TimeLimit, time_limit);
     d_model.optimize();
@@ -18,7 +19,9 @@ void DeqForm::solve(double time_limit)
 
         d_objVal = d_model.get(GRB_DoubleAttr_ObjVal);
         d_objBound = d_model.get(GRB_DoubleAttr_ObjBound);
-        d_xVals = d_model.get(GRB_DoubleAttr_X, d_xVars, d_n1);
         d_runTime = d_model.get(GRB_DoubleAttr_Runtime);
+
+        arma::vec xVals(d_model.get(GRB_DoubleAttr_X, d_xVars, d_n1), d_n1);
+        return std::make_unique<arma::vec>(xVals);
     }
 }

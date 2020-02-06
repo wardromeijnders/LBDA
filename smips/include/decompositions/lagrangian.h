@@ -2,30 +2,29 @@
 #define LAGRANGIAN_H
 
 #include "problem.h"
+#include "relaxation.h"
 
+#include <armadillo>
 #include <gurobi_c++.h>
 
 
-class Lagrangian
+class Lagrangian : public Relaxation
 {
     size_t d_m2;
     size_t d_n1;
     size_t d_n2;
 
-    GRBModel d_model;
     GRBConstr *d_constrs;
     GRBVar *d_z_vars;
 
 public:
-    Lagrangian(GRBEnv &env, Problem &problem);
+    Lagrangian(GRBEnv &env, Problem const &problem);
 
-    Lagrangian(const Lagrangian &other);
+    Lagrangian(Lagrangian const &other);
 
-    ~Lagrangian();
+    ~Lagrangian() override;
 
-    void update(double *rhs, double *pi);
-
-    double solve();
+    void update(arma::vec &rhs, arma::vec &pi);
 };
 
 #endif

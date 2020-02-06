@@ -10,6 +10,8 @@ add_definitions(-Wall -Wextra)
 
 if(CMAKE_BUILD_TYPE MATCHES RELEASE)
 	add_definitions(-O3)
+else()
+	add_definitions(-O1)
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

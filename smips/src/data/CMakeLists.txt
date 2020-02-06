@@ -8,6 +8,6 @@ set(SOURCES
 		rand_gaus_mat.cpp
 		rand_unif_mat.cpp
 		rand_unif_vec.cpp
-		unif_real_vec.cpp)
+		)
 
 add_library(data ${SOURCES})

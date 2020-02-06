@@ -1,6 +1,6 @@
 #include "decompositions/gomory.h"
 
-void Gomory::update(double *rhs, int *vBasis, int *cBasis)
+void Gomory::update(double *rhs, int const *vBasis, int const *cBasis)
 {
     double inf = 1e20;
     // relax appropriate constraints by changing rhs

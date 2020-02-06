@@ -1,30 +1,20 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include <armadillo>
 #include <iosfwd>
 #include <random>
 
 class Data
 {
-    std::mt19937 d_engine;
-
 public:
-    Data(int seed = std::random_device{}());  // initializes d_engine with random
-                                              // seed, unless seed is specified
+    Data(int seed = std::random_device{}());
 
-    std::vector<double> rand_unif_vec(size_t size, int low, int high);
+    arma::vec rand_unif_vec(size_t size, int low, int high);
 
-    std::vector<double> unif_real_vec(size_t size, double low, double high);
+    arma::mat rand_unif_mat(size_t nRows, size_t nCols, int low, int high);
 
-    std::vector<std::vector<double>> rand_unif_mat(size_t nRows,
-                                                   size_t nCols,
-                                                   int low,
-                                                   int high);
-
-    std::vector<std::vector<double>> rand_gaus_mat(size_t nRows,
-                                                   size_t nCols,
-                                                   double mean,
-                                                   double sd);
+    arma::mat rand_gaus_mat(size_t nRows, size_t nCols, double mean, double sd);
 
     void append_minus_eye(std::vector<std::vector<double>> &matrix);
 

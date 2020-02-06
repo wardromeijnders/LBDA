@@ -1,7 +1,8 @@
 #include "decompositions/lagrangian.h"
 
-void Lagrangian::update(double *rhs, double *pi)
+
+void Lagrangian::update(arma::vec &rhs, arma::vec &pi)
 {
-    d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs, d_m2);
-    d_model.set(GRB_DoubleAttr_Obj, d_z_vars, pi, d_n1);
+    d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), d_m2);
+    d_model.set(GRB_DoubleAttr_Obj, d_z_vars, pi.memptr(), d_n1);
 }

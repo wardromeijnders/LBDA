@@ -1,24 +1,25 @@
 #include "decompositions/gomory.h"
 
-Gomory::Gomory(GRBEnv &env, Problem &problem) :
+Gomory::Gomory(GRBEnv &env, Problem const &problem) :
+    Relaxation(env),
     d_m2(problem.d_m2),
     d_n2(problem.d_n2),
     d_ss_leq(problem.d_ss_leq),
     d_ss_geq(problem.d_ss_geq),
-    d_l2(problem.d_l2.data()),
-    d_u2(problem.d_u2.data()),
-    d_model(env)
+    d_l2(problem.d_l2.memptr()),
+    d_u2(problem.d_u2.memptr())
 {
     // variable types
     char vTypes[d_n2];
     std::fill(vTypes, vTypes + problem.d_p2, GRB_INTEGER);
     std::fill(vTypes + problem.d_p2, vTypes + d_n2, GRB_CONTINUOUS);
 
-    // cost vector
-    double *q = problem.d_q.data();  // transform cost vector and omega to
-                                     // c-style array add variables
-
-    d_vars = d_model.addVars(d_l2, d_u2, q, vTypes, nullptr, d_n2);
+    d_vars = d_model.addVars(d_l2,
+                             d_u2,
+                             problem.d_q.memptr(),
+                             vTypes,
+                             nullptr,
+                             d_n2);
 
     // constraint senses
     char senses[d_m2];
@@ -38,10 +39,7 @@ Gomory::Gomory(GRBEnv &env, Problem &problem) :
     GRBLinExpr Wy[d_m2];
 
     for (size_t conIdx = 0; conIdx != d_m2; ++conIdx)
-    {
-        double *row = problem.d_Wmat[conIdx].data();
-        Wy[conIdx].addTerms(row, d_vars, d_n2);
-    }
+        Wy[conIdx].addTerms(problem.d_Wmat.colptr(conIdx), d_vars, d_n2);
 
     // add constraints
     d_constrs = d_model.addConstrs(Wy, senses, rhs, nullptr, d_m2);

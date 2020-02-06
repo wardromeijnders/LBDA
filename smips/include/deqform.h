@@ -3,8 +3,10 @@
 
 #include "problem.h"
 
+#include <armadillo>
 #include <gurobi_c++.h>
 #include <iosfwd>
+#include <memory>
 
 class DeqForm
 {
@@ -27,6 +29,8 @@ class DeqForm
 
     bool d_isMip;
 
+    GRBVar *d_xVars;
+
     void initFirstStage(size_t n1,
                         size_t p1,
                         size_t m1,
@@ -36,7 +40,7 @@ class DeqForm
                         double *ub,
                         double *c,
                         double *rhs,
-                        std::vector<std::vector<double>> &Amat);
+                        arma::mat &Amat);
 
     void initSecondStage(size_t n1,
                          size_t n2,
@@ -49,19 +53,16 @@ class DeqForm
                          double *ub,
                          double *probs,
                          double *q,
-                         std::vector<std::vector<double>> &Tmat,
-                         std::vector<std::vector<double>> &Wmat,
-                         std::vector<std::vector<double>> &omega);
+                         arma::mat &Tmat,
+                         arma::mat &Wmat,
+                         arma::mat &omega);
 
 public:
-    GRBVar *d_xVars;  // TODO make private
-    double *d_xVals;  // TODO make private
-
     DeqForm(GRBEnv &env, Problem &problem);
 
     ~DeqForm();
 
-    void solve(double time_limit = 1e20);
+    std::unique_ptr<arma::vec> solve(double time_limit = 1e20);
 };
 
 #endif

@@ -34,63 +34,63 @@ void Problem::sizes(size_t S)
     d_S = S;
 
     // A, T, and W
-    std::vector<std::vector<double>> Amat;
+    arma::mat Amat;
 
     // filling first N rows of Amat
     size_t start = x_start;
     for (size_t row = 0; row != N; ++row)
     {
-        std::vector<double> Arow(nVars, 0);
+        arma::vec Arow = arma::zeros(nVars);
         size_t nOnes = row + 1;  // number of ones (length of e vector)
         std::fill_n(&Arow[start], nOnes, 1);  // fill with ones
 
         Arow[y_start + row] = -1;  // corresponds to y variable
         start += nOnes;
-        Amat.push_back(Arow);
+        Amat.insert_cols(Amat.n_cols, Arow);
     }
 
     // filling next N rows of Amat
     for (size_t row = 0; row != N; ++row)
     {
-        std::vector<double> Arow(nVars, 0);
-        Arow[y_start + row] = 1;
-        Arow[z_start + row] = -bigM;
-        Amat.push_back(Arow);
+        arma::vec Acol = arma::zeros(nVars);
+        Acol[y_start + row] = 1;
+        Acol[z_start + row] = -bigM;
+        Amat.insert_cols(Amat.n_cols, Acol);
     }
 
     // next row of Amat
-    std::vector<double> Arow(nVars, 0);
-    std::fill_n(&Arow[y_start], N, 1);
-    Amat.push_back(Arow);
+    arma::vec Acol = arma::zeros(nVars);
+    std::fill_n(&Acol[y_start], N, 1);
+    Amat.insert_cols(Amat.n_cols, Acol);
 
     // final N rows of Amat
     for (size_t row = 0; row != N; ++row)
     {
-        std::vector<double> Arow(nVars, 0);
-        Amat.push_back(Arow);
+        arma::vec Acol = arma::zeros(nVars);
+        Amat.insert_cols(Amat.n_cols, Acol);
     }
+
     start = x_start;
     for (size_t idx = 1; idx != N + 1; ++idx)
     {
         for (size_t nz = 0; nz != idx; ++nz)
-            Amat[2 * N + 1 + nz][start + idx - 1 - nz] = 1;
+            Amat( start + idx - 1 - nz, 2 * N + 1 + nz) = 1;
         start += idx;
     }
 
-    std::vector<std::vector<double>> Wmat = Amat;
-    std::vector<std::vector<double>> Tmat(&Amat[0], &Amat[N]);
+    arma::mat Tmat = Amat;
     for (size_t row = 0; row != 2 * N + 1; ++row)
     {
-        std::vector<double> Trow(nVars, 0);
-        Tmat.push_back(Trow);
+        arma::vec Tcol = arma::zeros(nVars);
+        Tmat.insert_cols(Tmat.n_cols, Tcol);
     }
 
     // (incorporating a typo by the original authors)
-    Tmat[5][15] = 0;
-    Tmat[4][15] = -1;
+    Tmat(15, 5) = 0;
+    Tmat(15, 4) = -1;
 
     d_Amat = Amat;
-    d_Wmat = Wmat;
+    d_Wmat = Amat;
     d_Tmat = Tmat;
 
     // enforcing binary decisions
@@ -176,14 +176,16 @@ void Problem::sizes(size_t S)
                    {3.5, 10.5, 17.5, 14, 49, 35, 21, 17.5, 17.5, 7},
                    {3.75, 11.25, 18.75, 15, 52.5, 37.5, 22.5, 18.75, 18.75, 7.5}};
 
-    std::vector<std::vector<double>> omega;
+    arma::mat omega;
 
     for (size_t s = 0; s != d_S; ++s)
     {
-        std::vector<double> scenario(nConstrs, 0);
+        arma::vec scenario = arma::zeros(nConstrs);
+
         scenario[2 * N] = prod_cap;
         std::copy(demands[s].begin(), demands[s].end(), &scenario[2 * N + 1]);
-        omega.push_back(scenario);
+
+        omega.insert_cols(omega.n_cols, scenario);
     }
 
     d_omega = omega;

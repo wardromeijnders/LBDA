@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-Lagrangian::Lagrangian(const Lagrangian &other) :
+Lagrangian::Lagrangian(Lagrangian const &other) :
+    Relaxation(other),
     d_m2(other.d_m2),
     d_n1(other.d_n1),
     d_n2(other.d_n2),
-    d_model(other.d_model),
     d_constrs(d_model.getConstrs())
 {
     GRBVar *vars = d_model.getVars();  // heap allocated

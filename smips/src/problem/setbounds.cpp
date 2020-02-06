@@ -1,9 +1,9 @@
 #include "problem.h"
 
-void Problem::setBounds(std::vector<double> &l1,
-                        std::vector<double> &u1,
-                        std::vector<double> &l2,
-                        std::vector<double> &u2)
+void Problem::setBounds(arma::vec &l1,
+                        arma::vec &u1,
+                        arma::vec &l2,
+                        arma::vec &u2)
 {
     d_l1 = l1;
     d_u1 = u1;

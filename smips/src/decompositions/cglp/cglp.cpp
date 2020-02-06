@@ -1,6 +1,6 @@
 #include "decompositions/cglp.h"
 
-Cglp::Cglp(GRBEnv &env, Master &master) :
+Cglp::Cglp(GRBEnv &env, MasterProblem &master) :
     d_n1(master.n1()),
     d_model(env),
     d_constrs_theta(2 * d_n1),
@@ -54,12 +54,14 @@ Cglp::Cglp(GRBEnv &env, Master &master) :
             lhs[col].addTerms(Gamma_column, lambda, nCuts);
         }
 
-        char senses[d_n1];
-        std::fill_n(senses, d_n1, GRB_GREATER_EQUAL);
+        std::vector<char> senses(d_n1, GRB_GREATER_EQUAL);
+        std::vector<double> rhs(d_n1, 0.);
 
-        double rhs[d_n1];
-        std::fill_n(rhs, d_n1, 0.0);
-        d_constrs_x[term] = d_model.addConstrs(lhs, senses, rhs, nullptr, d_n1);
+        d_constrs_x[term] = d_model.addConstrs(lhs,
+                                               senses.data(),
+                                               rhs.data(),
+                                               nullptr,
+                                               d_n1);
 
         // constraint corresponding to pi_0
         GRBLinExpr lambda_delta;

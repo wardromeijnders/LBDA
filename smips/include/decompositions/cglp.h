@@ -1,7 +1,7 @@
 #ifndef CGLP_H
 #define CGLP_H
 
-#include "master.h"
+#include "masterproblem.h"
 
 #include <gurobi_c++.h>
 
@@ -11,7 +11,7 @@
  * In Cglp::solve() their corresponding values are stored in pi_theta, pi_x,
  * and pi_0, respectively
  */
-class Cglp
+class Cglp  // TODO public Relaxation?
 {
     size_t d_n1;
 
@@ -27,7 +27,7 @@ class Cglp
     std::vector<GRBConstr> d_constrs_cons;
 
 public:
-    Cglp(GRBEnv &env, Master &master);
+    Cglp(GRBEnv &env, MasterProblem &master);
 
     ~Cglp();
 
@@ -36,7 +36,7 @@ public:
 
     void changeLastRow(double *x_coefs, double cons);
 
-    void solve(double &pi_theta, double *pi_x, double &pi_0);
+    double solve(double &pi_theta, double *pi_x, double &pi_0);
 };
 
 #endif
