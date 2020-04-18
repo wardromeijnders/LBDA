@@ -36,3 +36,6 @@
 
 # CMake and build files
 build/
+
+# Papers
+*.pdf

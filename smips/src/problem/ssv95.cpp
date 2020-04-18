@@ -8,29 +8,31 @@ void Problem::ssv95(size_t S,
 {
     clearSub();
 
-    d_n1 = 2;
-    d_m1 = 0;
-    d_fs_leq = 0;
-    d_fs_geq = 0;
-    d_p1 = fs_continuous ? 0 : 2;
-    d_n2 = 4;
-    d_p2 = 4;
-    d_m2 = 2;
-    d_ss_leq = 2;
-    d_ss_geq = 0;
-    d_S = S * S;
+    size_t const n1 = 2;
+    size_t const n2 = 4;
 
-    d_l1 = arma::zeros(d_n1);
-    d_l2 = arma::zeros(d_n2);
-    d_u1 = std::vector<double>(d_n1, 5.0);
+    d_nFirstStageLeqConstraints = 0;
+    d_nFirstStageGeqConstraints = 0;
 
-    double ub = ss_binary ? 1.0 : 1e20;
-    d_u2 = std::vector<double>(d_n2, ub);
+    d_nSecondStageLeqConstraints = 2;
+    d_nSecondStageGeqConstraints = 0;
 
-    d_c = std::vector<double>{-1.5, -4};
-    d_q = std::vector<double>{-16, -19, -23, -28};
+    d_nFirstStageIntVars = fs_continuous ? 0 : 2;
+    d_nSecondStageIntVars = 4;
 
-    d_probs = std::vector<double>(d_S, 1.0 / d_S);
+    size_t nScenarios = S * S;
+
+    d_firstStageLowerBound = arma::zeros(n1);
+    d_secondStageLowerBound = arma::zeros(n2);
+    d_firstStageUpperBound = std::vector<double>(n1, 5.0);
+
+    double ub = ss_binary ? 1.0 : arma::datum::inf;
+    d_secondStageUpperBound = std::vector<double>(n2, ub);
+
+    d_firstStageCoeffs = std::vector<double>{-1.5, -4};
+    d_secondStageCoeffs = std::vector<double>{-16, -19, -23, -28};
+
+    d_scenarioProbabilities = std::vector<double>(nScenarios, 1.0 / nScenarios);
 
     d_L = -320;
 
@@ -44,7 +46,7 @@ void Problem::ssv95(size_t S,
 
     d_Tmat = d_Tmat.t();
 
-    arma::mat omega(d_S, 2);
+    arma::mat omega(nScenarios, 2);
 
     double jump = 10.0 / (S - 1);
     std::vector<double> omega_vals(S);
@@ -60,5 +62,6 @@ void Problem::ssv95(size_t S,
             omega(s, 1) = omega_vals[s2];
         }
 
-    d_omega = omega.t();
+    d_Amat = arma::mat(n1, 0);
+    d_scenarios = omega.t();
 }

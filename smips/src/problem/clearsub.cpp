@@ -2,8 +2,8 @@
 
 void Problem::clearSub()
 {
-    if (not d_sub_initialized)  // if not already initialized
-        return;                 // then do nothing
+    if (not d_isSubProblemInitialised)  // if not already initialized
+        return;                         // then do nothing
 
     // else, clear variables and cosnstraints
     GRBConstr *constrs = d_sub.getConstrs();
@@ -25,5 +25,5 @@ void Problem::clearSub()
 
     // this ensures that: (1) initSub() is called if evaluate()
     // is called, and destructor does not call delete[] d_constrs
-    d_sub_initialized = false;
+    d_isSubProblemInitialised = false;
 }

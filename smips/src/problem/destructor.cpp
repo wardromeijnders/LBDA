@@ -2,6 +2,6 @@
 
 Problem::~Problem()
 {
-    if (d_sub_initialized)
+    if (d_isSubProblemInitialised)
         delete[] d_constrs;
 }

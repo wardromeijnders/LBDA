@@ -1,40 +1,34 @@
 #include "masterproblem.h"
 
-void MasterProblem::addCut(Cut::CutResult &cutResult)
+void MasterProblem::addCut(Decomposition::Cut &cut)
 {
     ++d_nSlacks;
 
-    // slack
-    GRBaddvar(d_cmodel, 0, nullptr, nullptr, 0, 0, 1e20, GRB_CONTINUOUS, nullptr);
+    GRBaddvar(d_cmodel,  // new slack variable
+              0,
+              nullptr,
+              nullptr,
+              0,
+              0,
+              arma::datum::inf,
+              GRB_CONTINUOUS,
+              nullptr);
 
-    // slack variable index (there are d_n1 + 1 + nSlacks variables in the
-    // Gurobi model)
-    size_t slackIdx = d_n1 + d_nSlacks;
+    size_t const n1 = d_problem.Amat().n_rows;
 
-    int cind[d_n1 + 2];
-    std::iota(cind, cind + d_n1 + 1, 0);
+    auto cind = arma::regspace<arma::Col<int>>(0, n1 + 2);
+    cind[n1 + 1] = n1 + d_nSlacks;  // refers to the new slack variable.
 
-    // refers to the last variable (i.e. the slack)
-    cind[d_n1 + 1] = slackIdx;
-    double cval[d_n1 + 1];
-
-    for (size_t var = 0; var != d_n1; ++var)
-        cval[var + 1] = -cutResult.beta[var];
-
-    cval[0] = 1;
-    cval[d_n1 + 1] = -1;  // >= constraint, so slack features with -1
+    arma::vec cval(n1 + 2);
+    cval.subvec(1, n1) = -cut.beta;
+    cval[0] = 1;        // TODO magic numbers (maybe?)
+    cval[n1 + 1] = -1;  // >= constraint, so slack features with -1
 
     GRBaddconstr(d_cmodel,
-                 d_n1 + 2,
-                 cind,
-                 cval,
+                 n1 + 2,
+                 cind.memptr(),
+                 cval.memptr(),
                  GRB_EQUAL,
-                 cutResult.gamma,
+                 cut.gamma,
                  nullptr);
-
-    // add cut to internal storage of master
-    d_xCoeffs.emplace_back(cutResult.beta.memptr(),
-                           cutResult.beta.memptr() + d_n1);
-
-    d_cuts.emplace_back(cutResult.gamma);
 }

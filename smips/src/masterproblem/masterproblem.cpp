@@ -1,9 +1,12 @@
 #include "masterproblem.h"
 
-MasterProblem::MasterProblem(GRBEnv &env, GRBenv *c_env, Problem &problem) :
-    d_n1(problem.d_n1),
-    d_nSlacks(problem.d_fs_leq + problem.d_fs_geq)
+MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
+    d_problem(problem),
+    d_nSlacks(problem.d_nFirstStageLeqConstraints
+              + problem.d_nFirstStageGeqConstraints)
 {
+    auto &Amat = d_problem.Amat();
+
     GRBnewmodel(c_env,  // The C API gives access to advanced simplex routines.
                 &d_cmodel,
                 nullptr,
@@ -19,60 +22,55 @@ MasterProblem::MasterProblem(GRBEnv &env, GRBenv *c_env, Problem &problem) :
               nullptr,
               nullptr,
               1.0,
-              problem.d_L,
-              1e20,
+              d_problem.d_L,
+              arma::datum::inf,
               GRB_CONTINUOUS,
               nullptr);
 
-    char vtypes[d_n1];
-    std::fill_n(vtypes, problem.d_p1, GRB_INTEGER);
-    std::fill(vtypes + problem.d_p1, vtypes + d_n1, GRB_CONTINUOUS);
+    char vTypes[Amat.n_rows];
+    std::fill_n(vTypes, d_problem.nFirstStageIntVars(), GRB_INTEGER);
+    std::fill(vTypes + d_problem.nFirstStageIntVars(),
+              vTypes + Amat.n_rows,
+              GRB_CONTINUOUS);
 
     GRBaddvars(d_cmodel,  // first-stage (x) variables.
-               d_n1,
+               Amat.n_rows,
                0,
                nullptr,
                nullptr,
                nullptr,
-               problem.d_c.memptr(),
-               problem.d_l1.memptr(),
-               problem.d_u1.memptr(),
-               vtypes,
+               d_problem.d_firstStageCoeffs.memptr(),
+               d_problem.d_firstStageLowerBound.memptr(),
+               d_problem.d_firstStageUpperBound.memptr(),
+               vTypes,
                nullptr);
 
-    // Add constraints.
-    int cind[d_n1];
-    std::iota(cind, cind + d_n1, 1);
+    arma::Col<int> cind = arma::ones<arma::Col<int>>(Amat.n_rows);
 
-    double *rhs = problem.d_b.memptr();
-
-    for (size_t con = 0; con != problem.d_m1; ++con)
+    for (size_t con = 0; con != Amat.n_cols; ++con)  // constraints
         GRBaddconstr(d_cmodel,
-                     d_n1,
-                     cind,
-                     problem.d_Amat.colptr(con),
+                     Amat.n_rows,
+                     cind.memptr(),
+                     Amat.colptr(con),
                      GRB_EQUAL,
-                     rhs[con],
+                     d_problem.d_firstStageRhs(con),
                      nullptr);
 
     // Add slack variables.
-    int vbeg[d_nSlacks];
-    std::iota(vbeg, vbeg + d_nSlacks, 0);
+    arma::Col<int> vbeg = arma::linspace<arma::Col<int>>(0,
+                                                         d_nSlacks,
+                                                         d_nSlacks);
 
-    size_t fs_leq = problem.d_fs_leq;
-    size_t fs_geq = problem.d_fs_geq;
-
-    int *vind = vbeg;
-    double vval[d_nSlacks];
-    std::fill_n(vval, fs_leq, 1);
-    std::fill_n(vval + fs_leq, fs_geq, -1);
+    arma::vec vval(d_nSlacks);
+    vval.head(d_problem.d_nFirstStageLeqConstraints).fill(1);
+    vval.tail(d_nSlacks - d_problem.d_nFirstStageLeqConstraints).fill(-1);
 
     GRBaddvars(d_cmodel,
                d_nSlacks,
                d_nSlacks,
-               vbeg,
-               vind,
-               vval,
+               vbeg.memptr(),
+               vbeg.memptr(),
+               vval.memptr(),
                nullptr,
                nullptr,
                nullptr,

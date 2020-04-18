@@ -1,15 +1,27 @@
 #include "masterproblem.h"
 
 
-MasterProblem::Solution const MasterProblem::solve()
+std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
+                                                double tol)
 {
-    GRBoptimize(d_cmodel);
+    while (true)
+    {
+        GRBoptimize(d_cmodel);
 
-    auto xVals = std::make_unique<arma::vec>(d_n1);
-    GRBgetdblattrarray(d_cmodel, "X", 1, d_n1, xVals->memptr());
+        size_t const n1 = d_problem.Amat().n_rows;
 
-    double theta;
-    GRBgetdblattrelement(d_cmodel, "X", 0, &theta);
+        auto xVals = std::make_unique<arma::vec>(n1);
+        GRBgetdblattrarray(d_cmodel, "X", 1, n1, xVals->memptr());
 
-    return Solution{std::move(xVals), theta};
+        double theta;
+        GRBgetdblattrelement(d_cmodel, "X", 0, &theta);
+
+        auto cut = decomposition.computeCut(*xVals);
+
+        // Is the proposed cut violated by the current solution?
+        if (cut.gamma + arma::dot(*xVals, cut.beta) >= theta + tol)
+            addCut(cut);
+        else
+            return xVals;
+    }
 }
