@@ -6,6 +6,8 @@
 #include <iosfwd>
 
 
+// TODO this class is too big, and might need to be cut down a little
+// TODO enforce CCR assumption - talk to NvdL about this
 class Problem
 {
     // TODO this is not the place - should move to the actual solver stuff?
