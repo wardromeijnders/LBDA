@@ -58,9 +58,15 @@ public:
 
     Problem(const Problem &other) = delete;
 
-    ~Problem();
+    /**
+     * Constructs a Problem instance from the passed-in SMPS file location.
+     *
+     * @param location SMPS file location (should not contain any extensions).
+     * @return         Problem instance.
+     */
+    static Problem fromSmps(std::string location);
 
-    void enforceCcr(double penalty);  // TODO: enforce CCR assumption
+    ~Problem();
 
     void ssv95(size_t S,
                bool fs_continuous,
