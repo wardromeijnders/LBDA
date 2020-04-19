@@ -66,7 +66,7 @@ public:
      * @param location SMPS file location (should not contain any extensions).
      * @return         Problem instance.
      */
-    static Problem fromSmps(std::string location);
+    static Problem fromSmps(char const *location);
 
     ~Problem();
 
