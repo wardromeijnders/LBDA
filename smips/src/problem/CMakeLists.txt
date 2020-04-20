@@ -4,6 +4,7 @@ set(SOURCES
 		clearsub.cpp
 		destructor.cpp
 		evaluate.cpp
+		fromsmps.cpp
 		initsub.cpp
 		problem.cpp
 		ssv95.cpp)

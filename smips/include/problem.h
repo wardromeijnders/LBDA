@@ -7,7 +7,7 @@
 
 
 // TODO this class is too big, and might need to be cut down a little
-// TODO enforce CCR assumption - talk to NvdL about this
+// TODO this class should not contain a subproblem, nor need an environment.
 class Problem
 {
     // TODO this is not the place - should move to the actual solver stuff?
@@ -64,9 +64,10 @@ public:
      * Constructs a Problem instance from the passed-in SMPS file location.
      *
      * @param location SMPS file location (should not contain any extensions).
+     * @param env      Gurobi environment in which to operate.
      * @return         Problem instance.
      */
-    static Problem fromSmps(char const *location);
+    static Problem fromSmps(char const *location, GRBEnv &env);
 
     ~Problem();
 

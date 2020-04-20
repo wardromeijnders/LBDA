@@ -1,5 +1,6 @@
 #include "problem.h"
 
+// TODO this should not be a part of Problem
 double Problem::evaluate(arma::vec const &x)
 {
     // computing cx
