@@ -30,6 +30,13 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     auto rStart = arma::Col<int>(nStages);
     auto cStart = arma::Col<int>(nStages);
 
+    // TODO these are matrices, I think - what are their dimensions?
+    auto colLowerbound = arma::vec(nStages);
+    auto colUpperbound = arma::vec(nStages);
+
+    auto rowLowerbound = arma::vec(nStages);
+    auto rowUpperbound = arma::vec(nStages);
+
     for (size_t stage = 0; stage != nStages; ++stage)
     {
         nRows[stage] = core->getNumRows(stage);
@@ -39,8 +46,12 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
         rStart[stage] = core->getRowStart(stage);
         cStart[stage] = core->getColStart(stage);
 
+
         // TODO core data
     }
+
+    std::cout << colLowerbound;
+    std::cout << colUpperbound;
 
     auto probs = arma::vec(nScenarios);
 
