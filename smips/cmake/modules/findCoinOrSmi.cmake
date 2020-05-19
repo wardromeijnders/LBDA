@@ -27,6 +27,4 @@ if (COIN_OR_SMI_FOUND)
     mark_as_advanced(
             COIN_OR_SMI_LIBRARY
             COIN_OR_HOME)
-else ()
-    message("-- Could not find COIN-OR SMI installation.")
 endif ()

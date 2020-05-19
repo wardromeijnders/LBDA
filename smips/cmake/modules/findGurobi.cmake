@@ -26,6 +26,4 @@ if (GUROBI_FOUND)
             GUROBI_C_LIBRARY
             GUROBI_CXX_LIBRARY
             GUROBI_HOME)
-else ()
-    message("-- Could not find Gurobi installation.")
 endif ()
