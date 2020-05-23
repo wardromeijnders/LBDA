@@ -3,6 +3,7 @@
 #include <cassert>
 
 int main(int argc, char **argv)
+try
 {
     // TODO check all output numbers (verification).
     GRBEnv env;
@@ -29,4 +30,8 @@ int main(int argc, char **argv)
     assert(std::abs(problem.evaluate(res)) - 59.8893 <= 0.001);
 
     GRBfreeenv(c_env);
+}
+catch (...)
+{
+    std::cerr << "Unexpected error, terminating.\n";
 }

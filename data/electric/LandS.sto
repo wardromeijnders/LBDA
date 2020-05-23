@@ -1,0 +1,14 @@
+STOCH         LandS
+INDEP         DISCRETE
+    RHS       DEMAND1   3.0            PERIOD2   0.3
+    RHS       DEMAND1   5.0            PERIOD2   0.4
+    RHS       DEMAND1   7.0            PERIOD2   0.3
+*
+    RHS       DEMAND2   2.0            PERIOD2   0.3
+    RHS       DEMAND2   3.0            PERIOD2   0.4
+    RHS       DEMAND2   4.0            PERIOD2   0.3
+*
+    RHS       DEMAND3   1.0            PERIOD2   0.3
+    RHS       DEMAND3   2.0            PERIOD2   0.4
+    RHS       DEMAND3   3.0            PERIOD2   0.3
+ENDATA

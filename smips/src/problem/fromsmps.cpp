@@ -7,14 +7,12 @@
 Problem Problem::fromSmps(char const *location, GRBEnv &env)
 {
     SmiScnModel smi;
-    SmiCoreData *core = nullptr;
-    SmiNodeData *node = nullptr;
 
     // TODO this prints SMPS file information. Do we want to keep that?
     if (smi.readSmps(location) < 0)
         throw "Failed to read file.";
 
-    core = smi.getCore();
+    SmiCoreData *core = smi.getCore();
 
     auto nStages = core->getNumStages();
     auto nScenarios = smi.getNumScenarios();
@@ -26,11 +24,11 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     assert(nStages == 2);
     assert(nScenarios > 0);
 
-    auto nRows = new int[nStages];
-    auto nCols = new int[nStages];
-    auto nInts = new int[nStages];
-    auto rowStart = new int[nStages];
-    auto colStart = new int[nStages];
+    arma::uvec nRows(nStages);
+    arma::uvec nCols(nStages);
+    arma::uvec nInts(nStages);
+    arma::uvec rowStart(nStages);
+    arma::uvec colStart(nStages);
 
     auto clbd_core_ = new double *[nStages];
     auto cubd_core_ = new double *[nStages];
@@ -54,6 +52,7 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
 
         nRows[stage] = core->getNumRows(stage);
         nCols[stage] = core->getNumCols(stage);
+
         nInts[stage] = (int) core->getIntCols(stage).size();
         rowStart[stage] = core->getRowStart(stage);
         colStart[stage] = core->getColStart(stage);
@@ -101,26 +100,27 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     }
 
     /** construct core matrix rows */
-    int j = 0;
+    int rowIdx = 0;
     auto rows_core_ = new CoinPackedVector *[nrows_core_];
+
     for (int s = 0; s < nStages; ++s)
     {
-        node = core->getNode(s);
+        SmiNodeData *node = core->getNode(s);
+
         for (int i = rowStart[s]; i < rowStart[s] + nRows[s]; ++i)
         {
-            if (i != j)  // TODO I assume the core matrix rows are well ordered.
+            if (i != rowIdx)
                 throw "Unexpected core structure";
 
-            rows_core_[j++] = new CoinPackedVector(node->getRowLength(i),
-                                                   node->getRowIndices(i),
-                                                   node->getRowElements(i));
+            rows_core_[rowIdx++] = new CoinPackedVector(node->getRowLength(i),
+                                                        node->getRowIndices(i),
+                                                        node->getRowElements(i));
         }
     }
 
-    assert(j == nrows_core_);
+    assert(rowIdx == nrows_core_);
 
     auto probs = new double[nScenarios];
-    auto mat_scen_ = new CoinPackedMatrix *[nScenarios];
 
     auto clbd_scen_ = new CoinPackedVector *[nScenarios];
     auto cubd_scen_ = new CoinPackedVector *[nScenarios];
@@ -128,55 +128,55 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     auto rlbd_scen_ = new CoinPackedVector *[nScenarios];
     auto rubd_scen_ = new CoinPackedVector *[nScenarios];
 
-    std::map<int, int> scen2stg_;
-    std::vector<int> lens;
+    std::cout << nScenarios << '\n';
 
     for (int scenario = 0; scenario != nScenarios; ++scenario)
     {
         auto const leafNode = smi.getLeafNode(scenario);
-        auto const stage = leafNode->getStage();
-
-        /** add mapping */
-        scen2stg_.insert(std::pair<int, int>(scenario, stage));
 
         probs[scenario] = leafNode->getProb();
 
-        node = leafNode->getNode();
+        SmiNodeData *node = leafNode->getNode();
 
         clbd_scen_[scenario] = new CoinPackedVector(node->getColLowerLength(),
                                                     node->getColLowerIndices(),
                                                     node->getColLowerElements());
+        std::cout << "Col LB\n";
+        for (int idx = 0; idx != node->getColLowerLength(); ++idx)
+            std::cout << (*clbd_scen_[scenario])[idx] << ' ';
+        std::cout << '\n';
 
         cubd_scen_[scenario] = new CoinPackedVector(node->getColUpperLength(),
                                                     node->getColUpperIndices(),
                                                     node->getColUpperElements());
+        std::cout << "Col UB\n";
+        for (int idx = 0; idx != node->getColUpperLength(); ++idx)
+            std::cout << (*cubd_scen_[scenario])[idx] << ' ';
+        std::cout << '\n';
 
         obj_scen_[scenario] = new CoinPackedVector(node->getObjectiveLength(),
                                                    node->getObjectiveIndices(),
                                                    node->getObjectiveElements());
+        std::cout << "Obj\n";
+        for (int idx = 0; idx != node->getObjectiveLength(); ++idx)
+            std::cout << (*obj_scen_[scenario])[idx] << ' ';
+        std::cout << '\n';
 
         rlbd_scen_[scenario] = new CoinPackedVector(node->getRowLowerLength(),
                                                     node->getRowLowerIndices(),
                                                     node->getRowLowerElements());
+        std::cout << "Row LB\n";
+        for (int idx = 0; idx != node->getRowLowerLength(); ++idx)
+            std::cout << (*rlbd_scen_[scenario])[idx] << ' ';
+        std::cout << '\n';
 
         rubd_scen_[scenario] = new CoinPackedVector(node->getRowUpperLength(),
                                                     node->getRowUpperIndices(),
                                                     node->getRowUpperElements());
-
-        lens.resize(nRows[stage]);
-
-        for (j = rowStart[stage]; j < rowStart[stage] + nRows[stage]; ++j)
-            lens[j - rowStart[stage]] = node->getRowLength(j);
-
-        mat_scen_[scenario]
-            = new CoinPackedMatrix(false,
-                                   nCols[stage],
-                                   nRows[stage],
-                                   node->getNumMatrixElements(),
-                                   node->getRowElements(rowStart[stage]),
-                                   node->getRowIndices(rowStart[stage]),
-                                   node->getRowStarts(rowStart[stage]),
-                                   &lens[0]);
+        std::cout << "Row UB\n";
+        for (int idx = 0; idx != node->getRowUpperLength(); ++idx)
+            std::cout << (*rubd_scen_[scenario])[idx] << ' ';
+        std::cout << '\n';
     }
 
     return Problem{env};
