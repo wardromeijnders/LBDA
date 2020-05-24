@@ -4,7 +4,9 @@
 
 #include <cassert>
 
-bool RhsState::parse(Smps &smps, std::string &line)
+using namespace smps::core;
+
+bool RhsState::parse(smps::Smps &smps, std::string &line)
 {
     std::string constr(line.substr(14, 7));
     double value = std::stod(line.substr(24, 11));
@@ -14,7 +16,7 @@ bool RhsState::parse(Smps &smps, std::string &line)
     return true;
 }
 
-bool RhsState::maybeTransition(std::unique_ptr<ParserState> &state,
+bool RhsState::maybeTransition(std::unique_ptr<smps::ParserState> &state,
                                std::string &line)
 {
     // TODO allow BOUNDS/RANGES?

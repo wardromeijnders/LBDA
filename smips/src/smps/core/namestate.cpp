@@ -1,7 +1,10 @@
 #include "smps/core/namestate.h"
 #include "smps/core/rowstate.h"
 
-bool NameState::parse(Smps &smps, std::string &line)
+
+using namespace smps::core;
+
+bool NameState::parse(smps::Smps &smps, std::string &line)
 {
     std::string name(line.substr(14, 7));
     smps.setName(name);
@@ -9,7 +12,7 @@ bool NameState::parse(Smps &smps, std::string &line)
     return true;
 }
 
-bool NameState::maybeTransition(std::unique_ptr<ParserState> &state,
+bool NameState::maybeTransition(std::unique_ptr<smps::ParserState> &state,
                                 std::string &line)
 {
     if (line.starts_with("ROWS"))

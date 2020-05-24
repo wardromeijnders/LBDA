@@ -4,7 +4,7 @@
 
 Problem Problem::fromSmps(char const *location, GRBEnv &env)
 {
-    Smps smps;
+    smps::Smps smps;
     smps.readSmps(location);
 
     return Problem{env};

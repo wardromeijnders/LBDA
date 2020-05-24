@@ -1,7 +1,6 @@
-#include "smps/core/endatastate.h"
+#include "smps/time/endatastate.h"
 
-
-using namespace smps::core;
+using namespace smps::time;
 
 bool EndataState::parse(smps::Smps &smps, std::string &line)
 {

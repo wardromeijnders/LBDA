@@ -6,17 +6,19 @@
 #include <iosfwd>
 #include <memory>
 
-
-class ParserState
+namespace smps
 {
-public:
-    virtual bool parse(Smps &smps, std::string &line) = 0;
+    class ParserState
+    {
+    public:
+        virtual bool parse(Smps &smps, std::string &line) = 0;
 
-    virtual bool maybeTransition(std::unique_ptr<ParserState> &state,
-                                 std::string &line)
-        = 0;
+        virtual bool maybeTransition(std::unique_ptr<ParserState> &state,
+                                     std::string &line)
+            = 0;
 
-    virtual ~ParserState() = default;
-};
+        virtual ~ParserState() = default;
+    };
+}  // namespace smps
 
 #endif  // SMIPS_PARSERSTATE_H

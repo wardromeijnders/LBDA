@@ -1,11 +1,11 @@
-#ifndef SMIPS_CORE_NAMESTATE_H
-#define SMIPS_CORE_NAMESTATE_H
+#ifndef SMIPS_TIME_PERIODSTATE_H
+#define SMIPS_TIME_PERIODSTATE_H
 
 #include "smps/parserstate.h"
 
-namespace smps::core
+namespace smps::time
 {
-    class NameState : public smps::ParserState
+    class PeriodState : public smps::ParserState
     {
     public:
         bool parse(smps::Smps &smps, std::string &line) override;
@@ -13,6 +13,6 @@ namespace smps::core
         bool maybeTransition(std::unique_ptr<smps::ParserState> &state,
                              std::string &line) override;
     };
-}  // namespace smps::core
+}  // namespace smps::time
 
-#endif  // SMIPS_CORE_NAMESTATE_H
+#endif  // SMIPS_TIME_PERIODSTATE_H
