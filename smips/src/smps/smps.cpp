@@ -1,6 +1,7 @@
 #include "smps/smps.h"
 
 #include "smps/core/nonestate.h"
+#include "smps/stoch/nonestate.h"
 #include "smps/time/nonestate.h"
 
 #include <memory>
@@ -17,7 +18,22 @@ void Smps::readSmps(std::string const &location)
 
 void Smps::readStochFile(std::string const &location)
 {
-    // TODO
+    std::ifstream file(location);
+    std::string line;
+
+    std::unique_ptr<ParserState> state = std::make_unique<stoch::NoneState>();
+
+    while (std::getline(file, line))
+    {
+        if (line.starts_with('*'))  // comment
+            continue;
+
+        if (state->maybeTransition(state, line))  // header row
+            continue;
+
+        if (!state->parse(*this, line))  // could not parse - why?
+            std::cerr << "Failed parsing: " << line << '\n';
+    }
 }
 
 void Smps::readTimeFile(std::string const &location)
@@ -65,18 +81,23 @@ std::string const &Smps::name() const
     return d_name;
 }
 
-void Smps::setName(std::string &name)
+bool Smps::setName(std::string &name)
 {
     d_name = trim(name);
+    return true;
 }
 
-void Smps::addObjective(std::string const &name)
+bool Smps::addObjective(std::string const &name)
 {
     if (d_objName.empty())
         d_objName = trim(name);
+    else
+        return false;  // we already have an objective.
+
+    return true;
 }
 
-void Smps::addConstr(std::string const &name, char type)
+bool Smps::addConstr(std::string const &name, char type)
 {
     d_core.resize(d_core.n_rows + 1, d_core.n_cols);
 
@@ -87,9 +108,11 @@ void Smps::addConstr(std::string const &name, char type)
     d_constrSenses(d_core.n_rows - 1) = type;
 
     d_row2idx[trim(name)] = d_core.n_rows - 1;
+
+    return true;
 }
 
-void Smps::addCoeff(std::string const &constr,
+bool Smps::addCoeff(std::string const &constr,
                     std::string const &var,
                     double coeff)
 {
@@ -109,12 +132,38 @@ void Smps::addCoeff(std::string const &constr,
         d_objCoeffs(d_col2idx[cleanVar]) = coeff;
     else if (d_row2idx.contains(cleanConstr))  // is an existing constraint.
         d_core(d_row2idx[cleanConstr], d_col2idx[cleanVar]) = coeff;
+    else
+        return false;  // is another free row (but we already have an objective)
+
+    return true;
 }
 
-void Smps::addRhs(std::string const &constr, double coeff)
+bool Smps::addRhs(std::string const &constr, double coeff)
 {
     std::string cleanConstr = trim(constr);
+
+    if (!d_row2idx.contains(cleanConstr))
+        return false;
+
     d_rhs[d_row2idx[cleanConstr]] = coeff;
+
+    return true;
+}
+
+bool Smps::addStage(std::string const &constr, std::string const &var)
+{
+    auto cleanConstr = trim(constr);
+    auto cleanVar = trim(var);
+
+    if (!d_row2idx.contains(cleanConstr) || !d_col2idx.contains(cleanVar))
+        return false;
+
+    d_stageOffsets.resize(d_stageOffsets.n_rows + 1, 2);
+
+    d_stageOffsets(d_stageOffsets.n_rows - 1, 0) = d_row2idx[cleanConstr];
+    d_stageOffsets(d_stageOffsets.n_rows - 1, 1) = d_col2idx[cleanVar];
+
+    return true;
 }
 
 std::string smps::trim(std::string const &target)

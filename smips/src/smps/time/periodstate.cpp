@@ -6,8 +6,13 @@ using namespace smps::time;
 
 bool PeriodState::parse(smps::Smps &smps, std::string &line)
 {
-    // TODO
-    return false;
+    std::string const var(line.substr(4, 7));
+    std::string const constr(line.substr(14, 7));
+
+    // TODO store period name information? (not really needed, but might be
+    //  nice).
+
+    return smps.addStage(constr, var);
 }
 
 bool PeriodState::maybeTransition(std::unique_ptr<smps::ParserState> &state,

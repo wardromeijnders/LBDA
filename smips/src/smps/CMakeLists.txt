@@ -5,4 +5,4 @@ add_subdirectory(stoch)
 add_subdirectory(time)
 
 add_library(smpslib smps.cpp)
-target_link_libraries(smpslib core time)
+target_link_libraries(smpslib core time stoch)

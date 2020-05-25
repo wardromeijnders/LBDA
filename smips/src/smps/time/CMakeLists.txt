@@ -4,6 +4,6 @@ set(SOURCES
 		endatastate.cpp
         nonestate.cpp
         periodstate.cpp
-        timestate.cpp)
+		stochstate.cpp)
 
 add_library(time ${SOURCES})

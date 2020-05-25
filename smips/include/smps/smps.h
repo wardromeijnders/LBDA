@@ -15,6 +15,8 @@ namespace smps
         arma::vec d_rhs;
         arma::Col<char> d_constrSenses;
 
+        arma::umat d_stageOffsets;
+
         std::map<std::string, int> d_row2idx;
         std::map<std::string, int> d_col2idx;
 
@@ -31,17 +33,19 @@ namespace smps
 
         std::string const &name() const;
 
-        void setName(std::string &name);
+        bool setName(std::string &name);
 
-        void addObjective(std::string const &name);
+        bool addObjective(std::string const &name);
 
-        void addConstr(std::string const &name, char type);
+        bool addConstr(std::string const &name, char type);
 
-        void addCoeff(std::string const &constr,
+        bool addCoeff(std::string const &constr,
                       std::string const &var,
                       double coeff);
 
-        void addRhs(std::string const &constr, double coeff);
+        bool addRhs(std::string const &constr, double coeff);
+
+        bool addStage(std::string const &constr, std::string const &var);
     };
 
     std::string trim(std::string const &target);
