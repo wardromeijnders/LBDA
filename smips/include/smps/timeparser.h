@@ -1,0 +1,5 @@
+
+#ifndef SMIPS_TIMEPARSER_H
+#define SMIPS_TIMEPARSER_H
+
+#endif  // SMIPS_TIMEPARSER_H
