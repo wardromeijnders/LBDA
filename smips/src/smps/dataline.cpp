@@ -4,8 +4,7 @@ using namespace smps;
 
 DataLine::DataLine(const std::string &line)
 {
-    // TODO initialiser lists would be nice, but that's not the world we live
-    //  in, unfortunately.
+    // TODO init section would be nice, but how?
     d_indicator = line.substr(1, 2);
     d_name = line.substr(4, 7);
 
