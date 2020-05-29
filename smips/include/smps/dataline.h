@@ -19,7 +19,19 @@ namespace smps
     public:
         DataLine(std::string const &line);
 
-        // TODO
+        std::string const &indicator() const;
+
+        std::string const &name() const;
+
+        std::string const &firstDataName() const;
+
+        std::pair<std::string, double> firstDataEntry() const;
+
+        bool hasSecondDataEntry() const;
+
+        std::string const &secondDataName() const;
+
+        std::pair<std::string, double> secondDataEntry() const;
     };
 }  // namespace smps
 

@@ -17,5 +17,5 @@ target_link_libraries(smips
         deterministicequivalent
         problem
         master
-        smpslib
+        smps
         ${GUROBI_LIBRARIES})

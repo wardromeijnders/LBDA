@@ -1,79 +1,21 @@
 #include "smps/smps.h"
 
-#include "smps/core/nonestate.h"
-#include "smps/stoch/nonestate.h"
-#include "smps/time/nonestate.h"
-
-#include <memory>
+#include "smps/coreparser.h"
+#include "smps/stochparser.h"
+#include "smps/timeparser.h"
 
 using namespace smps;
 
 void Smps::readSmps(std::string const &location)
 {
-    // TODO deduplicate template methods
-    readCoreFile(location + ".cor");
-    readStochFile(location + ".sto");
-    readTimeFile(location + ".tim");
-}
+    CoreParser coreParser(*this);
+    coreParser.parse(location + ".cor");
 
-void Smps::readStochFile(std::string const &location)
-{
-    std::ifstream file(location);
-    std::string line;
+    TimeParser timeParser(*this);
+    timeParser.parse(location + ".tim");
 
-    std::unique_ptr<ParserState> state = std::make_unique<stoch::NoneState>();
-
-    while (std::getline(file, line))
-    {
-        if (line.starts_with('*'))  // comment
-            continue;
-
-        if (state->maybeTransition(state, line))  // header row
-            continue;
-
-        if (!state->parse(*this, line))  // could not parse - why?
-            std::cerr << "Failed parsing: " << line << '\n';
-    }
-}
-
-void Smps::readTimeFile(std::string const &location)
-{
-    std::ifstream file(location);
-    std::string line;
-
-    std::unique_ptr<ParserState> state = std::make_unique<time::NoneState>();
-
-    while (std::getline(file, line))
-    {
-        if (line.starts_with('*'))  // comment
-            continue;
-
-        if (state->maybeTransition(state, line))  // header row
-            continue;
-
-        if (!state->parse(*this, line))  // could not parse - why?
-            std::cerr << "Failed parsing: " << line << '\n';
-    }
-}
-
-void Smps::readCoreFile(std::string const &location)
-{
-    std::ifstream file(location);
-    std::string line;
-
-    std::unique_ptr<ParserState> state = std::make_unique<core::NoneState>();
-
-    while (std::getline(file, line))
-    {
-        if (line.starts_with('*'))  // comment
-            continue;
-
-        if (state->maybeTransition(state, line))  // header row
-            continue;
-
-        if (!state->parse(*this, line))  // could not parse - why?
-            std::cerr << "Failed parsing: " << line << '\n';
-    }
+    StochParser stochParser(*this);
+    stochParser.parse(location + ".sto");
 }
 
 std::string const &Smps::name() const
@@ -81,7 +23,7 @@ std::string const &Smps::name() const
     return d_name;
 }
 
-bool Smps::setName(std::string &name)
+bool Smps::setName(std::string const &name)
 {
     d_name = trim(name);
     return true;

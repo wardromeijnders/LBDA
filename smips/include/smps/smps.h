@@ -20,12 +20,6 @@ namespace smps
         std::map<std::string, int> d_row2idx;
         std::map<std::string, int> d_col2idx;
 
-        void readCoreFile(std::string const &location);
-
-        void readStochFile(std::string const &location);
-
-        void readTimeFile(std::string const &location);
-
     public:
         Smps() = default;
 
@@ -33,7 +27,7 @@ namespace smps
 
         std::string const &name() const;
 
-        bool setName(std::string &name);
+        bool setName(std::string const &name);
 
         bool addObjective(std::string const &name);
 
