@@ -15,10 +15,6 @@ bool (CoreParser::*(CoreParser::d_actions)[])(smps::DataLine const &)
        &CoreParser::parseRanges,
        &CoreParser::parseEndata};
 
-CoreParser::CoreParser(Smps &smps) : d_smps(smps)
-{
-}
-
 void CoreParser::parse(std::string const &location)
 {
     std::ifstream file(location);
@@ -58,11 +54,6 @@ bool CoreParser::transition(std::string const &line)
         }
 
     return false;
-}
-
-bool CoreParser::parseNone(DataLine const &dataLine)
-{
-    return true;  // nothing to do in initial state.
 }
 
 bool CoreParser::parseName(DataLine const &dataLine)
@@ -113,9 +104,4 @@ bool CoreParser::parseBounds(DataLine const &dataLine)
 bool CoreParser::parseRanges(DataLine const &dataLine)
 {
     return false;  // TODO
-}
-
-bool CoreParser::parseEndata(DataLine const &dataLine)
-{
-    return true;  // finished parsing.
 }

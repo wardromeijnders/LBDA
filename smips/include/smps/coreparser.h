@@ -2,12 +2,14 @@
 #define SMIPS_COREPARSER_H
 
 #include "dataline.h"
-#include "smps.h"
+#include "fileparser.h"
 
 namespace smps
 {
-    class CoreParser
+    class CoreParser : public FileParser
     {
+        using FileParser::FileParser;
+
         enum State
         {
             NONE,
@@ -22,11 +24,7 @@ namespace smps
 
         static bool (CoreParser::*d_actions[])(smps::DataLine const &);
 
-        smps::Smps &d_smps;
-
         State d_state = State::NONE;
-
-        bool parseNone(smps::DataLine const &dataLine);
 
         bool parseName(smps::DataLine const &dataLine);
 
@@ -40,11 +38,7 @@ namespace smps
 
         bool parseRanges(smps::DataLine const &dataLine);
 
-        bool parseEndata(smps::DataLine const &dataLine);
-
     public:
-        CoreParser(Smps &smps);
-
         void parse(std::string const &location);
 
         bool transition(std::string const &line);

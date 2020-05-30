@@ -2,12 +2,14 @@
 #define SMIPS_STOCHPARSER_H
 
 #include "dataline.h"
-#include "smps.h"
+#include "fileparser.h"
 
 namespace smps
 {
-    class StochParser
+    class StochParser : public FileParser
     {
+        using FileParser::FileParser;
+
         enum State
         {
             NONE,
@@ -20,11 +22,7 @@ namespace smps
 
         static bool (StochParser::*d_actions[])(smps::DataLine const &);
 
-        smps::Smps &d_smps;
-
         State d_state = State::NONE;
-
-        bool parseNone(smps::DataLine const &dataLine);
 
         bool parseStoch(smps::DataLine const &dataLine);
 
@@ -34,11 +32,7 @@ namespace smps
 
         bool parseScenarios(smps::DataLine const &dataLine);
 
-        bool parseEndata(smps::DataLine const &dataLine);
-
     public:
-        StochParser(Smps &smps);
-
         void parse(std::string const &location);
 
         bool transition(std::string const &line);

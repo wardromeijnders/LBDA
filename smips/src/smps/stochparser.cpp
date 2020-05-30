@@ -12,10 +12,6 @@ bool (StochParser::*(StochParser::d_actions)[])(smps::DataLine const &)
        &StochParser::parseScenarios,
        &StochParser::parseEndata};
 
-StochParser::StochParser(Smps &smps) : d_smps(smps)
-{
-}
-
 void StochParser::parse(std::string const &location)
 {
     std::ifstream file(location);
@@ -51,14 +47,9 @@ bool StochParser::transition(std::string const &line)
     return false;
 }
 
-bool StochParser::parseNone(smps::DataLine const &dataLine)
-{
-    return true;  // nothing to do in initial state.
-}
-
 bool StochParser::parseStoch(const smps::DataLine &dataLine)
 {
-    return d_smps.addStage(dataLine.firstDataName(), dataLine.name());
+    return d_smps.name() == smps::trim(dataLine.firstDataName());
 }
 
 bool StochParser::parseIndep(smps::DataLine const &dataLine)
@@ -74,9 +65,4 @@ bool StochParser::parseBlocks(smps::DataLine const &dataLine)
 bool StochParser::parseScenarios(smps::DataLine const &dataLine)
 {
     return false;  // TODO
-}
-
-bool StochParser::parseEndata(smps::DataLine const &dataLine)
-{
-    return true;  // finished parsing.
 }
