@@ -41,8 +41,6 @@ namespace smps
 
         bool addStage(std::string const &constr, std::string const &var);
     };
-
-    std::string trim(std::string const &target);
 }  // namespace smps
 
 #endif  // SMIPS_SMPS_H

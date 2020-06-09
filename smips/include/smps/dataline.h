@@ -16,6 +16,8 @@ namespace smps
         std::string d_dataName2;
         std::string d_numeric2;
 
+        static std::string trim(std::string const &target);
+
     public:
         DataLine(std::string const &line);
 

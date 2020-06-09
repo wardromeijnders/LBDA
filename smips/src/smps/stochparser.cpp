@@ -49,7 +49,7 @@ bool StochParser::transition(std::string const &line)
 
 bool StochParser::parseStoch(const smps::DataLine &dataLine)
 {
-    return d_smps.name() == smps::trim(dataLine.firstDataName());
+    return d_smps.name() == dataLine.firstDataName();
 }
 
 bool StochParser::parseIndep(smps::DataLine const &dataLine)

@@ -46,7 +46,7 @@ bool TimeParser::transition(std::string const &line)
 
 bool TimeParser::parseTime(smps::DataLine const &dataLine)
 {
-    return d_smps.name() == smps::trim(dataLine.firstDataName());
+    return d_smps.name() == dataLine.firstDataName();
 }
 
 bool TimeParser::parsePeriods(smps::DataLine const &dataLine)
