@@ -7,6 +7,6 @@ set(SOURCES
 		fromsmps.cpp
 		initsub.cpp
 		problem.cpp
-		ssv95.cpp)
+		)
 
 add_library(problem ${SOURCES})

@@ -40,6 +40,12 @@ namespace smps
         bool addRhs(std::string const &constr, double coeff);
 
         bool addStage(std::string const &constr, std::string const &var);
+
+        arma::sp_mat Amat();
+
+        arma::sp_mat Tmat();
+
+        arma::sp_mat Wmat();
     };
 }  // namespace smps
 

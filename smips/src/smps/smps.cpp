@@ -99,3 +99,27 @@ bool Smps::addStage(std::string const &constr, std::string const &var)
 
     return true;
 }
+
+arma::sp_mat Smps::Amat()
+{
+    auto const rowSpan = arma::span(0, d_stageOffsets(1, 0) - 1);
+    auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
+
+    return d_core.submat(rowSpan, colSpan).t();
+}
+
+arma::sp_mat Smps::Tmat()
+{
+    auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
+    auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
+
+    return d_core.submat(rowSpan, colSpan).t();
+}
+
+arma::sp_mat Smps::Wmat()
+{
+    auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
+    auto const colSpan = arma::span(d_stageOffsets(1, 1), d_core.n_cols - 1);
+
+    return d_core.submat(rowSpan, colSpan).t();
+}

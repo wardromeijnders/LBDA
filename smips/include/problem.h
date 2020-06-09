@@ -22,9 +22,9 @@ class Problem
     size_t d_nFirstStageIntVars = 0;  // TODO make constant!
     size_t d_nSecondStageIntVars = 0;
 
-    arma::mat d_Amat;
-    arma::mat d_Tmat;
-    arma::mat d_Wmat;
+    arma::sp_mat d_Amat;
+    arma::sp_mat d_Tmat;
+    arma::sp_mat d_Wmat;
 
     // Each column corresponds to a single scenario (omega).
     arma::mat d_scenarios;
@@ -58,8 +58,6 @@ public:
 
     Problem(GRBEnv &env);
 
-    Problem(const Problem &other) = delete;
-
     /**
      * Constructs a Problem instance from the passed-in SMPS file location.
      *
@@ -71,68 +69,48 @@ public:
 
     ~Problem();
 
-    void ssv95(size_t S,
-               bool fs_continuous,
-               bool ss_binary,
-               bool standard_T = true);
-
     // evaluates cx + Q(x) (does not check feasibility)
     double evaluate(arma::vec const &x);
 
-    [[nodiscard]] size_t nFirstStageIntVars() const;
+    [[nodiscard]] size_t nFirstStageIntVars() const
+    {
+        return d_nFirstStageIntVars;
+    }
 
-    [[nodiscard]] size_t nSecondStageIntVars() const;
+    [[nodiscard]] size_t nSecondStageIntVars() const
+    {
+        return d_nFirstStageIntVars;
+    }
 
-    [[nodiscard]] size_t nScenarios() const;
+    [[nodiscard]] size_t nScenarios() const
+    {
+        return d_scenarios.n_cols;
+    }
 
-    [[nodiscard]] arma::mat const &Amat() const;
-    [[nodiscard]] arma::mat &Amat();
+    [[nodiscard]] arma::sp_mat const &Amat() const
+    {
+        return d_Amat;
+    }
 
-    [[nodiscard]] arma::mat const &Wmat() const;
+    [[nodiscard]] arma::sp_mat &Amat()
+    {
+        return d_Amat;
+    }
 
-    [[nodiscard]] arma::mat const &Tmat() const;
+    [[nodiscard]] arma::sp_mat const &Wmat() const
+    {
+        return d_Wmat;
+    }
 
-    [[nodiscard]] arma::mat const &scenarios() const;
+    [[nodiscard]] arma::sp_mat const &Tmat() const
+    {
+        return d_Tmat;
+    }
+
+    [[nodiscard]] arma::mat const &scenarios() const
+    {
+        return d_scenarios;
+    }
 };
-
-inline size_t Problem::nFirstStageIntVars() const
-{
-    return d_nFirstStageIntVars;
-};
-
-inline size_t Problem::nSecondStageIntVars() const
-{
-    return d_nSecondStageIntVars;
-};
-
-inline size_t Problem::nScenarios() const
-{
-    return d_scenarios.n_cols;
-}
-
-inline arma::mat const &Problem::Amat() const
-{
-    return d_Amat;
-}
-
-inline arma::mat &Problem::Amat()
-{
-    return d_Amat;
-}
-
-inline arma::mat const &Problem::Wmat() const
-{
-    return d_Wmat;
-}
-
-inline arma::mat const &Problem::Tmat() const
-{
-    return d_Tmat;
-}
-
-inline arma::mat const &Problem::scenarios() const
-{
-    return d_scenarios;
-}
 
 #endif

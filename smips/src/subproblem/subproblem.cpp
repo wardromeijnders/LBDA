@@ -28,7 +28,8 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 
     GRBLinExpr Wy[Wmat.n_cols];  // constraint lhs
     for (size_t conIdx = 0; conIdx != Wmat.n_cols; ++conIdx)
-        Wy[conIdx].addTerms(Wmat.colptr(conIdx), d_vars, Wmat.n_rows);
+        for (auto it = Wmat.begin_col(conIdx); it != Wmat.end_col(conIdx); ++it)
+            Wy[conIdx] += *it * d_vars[it.row()];
 
     d_constrs = d_model.addConstrs(Wy,
                                    senses.memptr(),

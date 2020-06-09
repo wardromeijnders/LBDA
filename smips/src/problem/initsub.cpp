@@ -33,7 +33,8 @@ void Problem::initSub()
 
     GRBLinExpr Wy[d_Wmat.n_cols];
     for (size_t conIdx = 0; conIdx != d_Wmat.n_cols; ++conIdx)
-        Wy[conIdx].addTerms(d_Wmat.colptr(conIdx), vars, d_Wmat.n_rows);
+        for (auto it = d_Wmat.begin_col(conIdx); it != d_Wmat.end_col(conIdx); ++it)
+            Wy[conIdx] += *it * vars[it.row()];
 
     // add constraints
     d_constrs = d_sub.addConstrs(Wy, senses, rhs, nullptr, d_Wmat.n_cols);

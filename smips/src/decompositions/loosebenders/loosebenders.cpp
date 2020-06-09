@@ -34,7 +34,8 @@ LooseBenders::LooseBenders(GRBEnv &env,
     GRBLinExpr lhs[Wmat.n_cols];
 
     for (size_t conIdx = 0; conIdx != Wmat.n_cols; ++conIdx)
-        lhs[conIdx].addTerms(Wmat.colptr(conIdx), d_vars, Wmat.n_rows);
+        for (auto it = Wmat.begin_col(conIdx); it != Wmat.end_col(conIdx); ++it)
+            lhs[conIdx] += *it * d_vars[it.row()];
 
     arma::vec rhs = arma::zeros(Wmat.n_cols);
 

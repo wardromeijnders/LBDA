@@ -7,7 +7,8 @@ void DeterministicEquivalent::initSecondStage()
 
     GRBLinExpr Tx[Tmat.n_cols];
     for (size_t conIdx = 0; conIdx != Tmat.n_cols; ++conIdx)
-        Tx[conIdx].addTerms(Tmat.colptr(conIdx), d_xVars, Tmat.n_rows);
+        for (auto it = Tmat.begin_col(conIdx); it != Tmat.end_col(conIdx); ++it)
+            Tx[conIdx] += *it * d_xVars[it.row()];
 
     // variable types
     char vTypes2[Wmat.n_rows];
@@ -47,7 +48,8 @@ void DeterministicEquivalent::initSecondStage()
         // lhs expression of second-stage constraints, including Wy
         // TODO: I've removed a duplication for TxWy here, which did not compile
         for (size_t conIdx = 0; conIdx != Wmat.n_cols; ++conIdx)
-            Tx[conIdx].addTerms(Wmat.colptr(conIdx), yVars, Wmat.n_rows);
+            for (auto it = Wmat.begin_col(conIdx); it != Wmat.end_col(conIdx); ++it)
+                Tx[conIdx] += *it * yVars[it.row()];
 
         auto const omega = d_problem.scenarios().colptr(scenario);
         GRBConstr *constrs = d_model.addConstrs(Tx,

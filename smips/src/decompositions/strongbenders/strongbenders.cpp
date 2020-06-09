@@ -58,8 +58,11 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 
     for (size_t conIdx = 0; conIdx != Tmat.n_cols; ++conIdx)
     {
-        TxWy[conIdx].addTerms(Tmat.colptr(conIdx), d_z_vars, Tmat.n_rows);
-        TxWy[conIdx].addTerms(Wmat.colptr(conIdx), y_vars, Wmat.n_rows);
+        for (auto it = Wmat.begin_col(conIdx); it != Wmat.end_col(conIdx); ++it)
+            TxWy[conIdx] += *it * y_vars[it.row()];
+
+        for (auto it = Tmat.begin_col(conIdx); it != Tmat.end_col(conIdx); ++it)
+            TxWy[conIdx] += *it * d_z_vars[it.row()];
     }
 
     // add constraints

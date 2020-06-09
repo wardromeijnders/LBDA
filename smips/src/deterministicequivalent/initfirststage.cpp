@@ -11,6 +11,7 @@ void DeterministicEquivalent::initFirstStage()
     std::fill_n(vTypes + d_problem.nFirstStageIntVars(),
                 Amat.n_rows - d_problem.nFirstStageIntVars(),
                 GRB_CONTINUOUS);
+
     d_xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
                               d_problem.d_firstStageUpperBound.memptr(),
                               d_problem.d_firstStageCoeffs.memptr(),
@@ -21,7 +22,8 @@ void DeterministicEquivalent::initFirstStage()
     // constraints
     GRBLinExpr lhsExprs[Amat.n_cols];
     for (size_t conIdx = 0; conIdx != Amat.n_cols; ++conIdx)
-        lhsExprs[conIdx].addTerms(Amat.colptr(conIdx), d_xVars, Amat.n_rows);
+        for (auto it = Amat.begin_col(conIdx); it != Amat.end_col(conIdx); ++it)
+            lhsExprs[conIdx] += *it * d_xVars[it.row()];
 
     char senses[Amat.n_cols];
     std::fill(senses,
