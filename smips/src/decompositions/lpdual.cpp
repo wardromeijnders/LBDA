@@ -1,8 +1,13 @@
-#include "decompositions/loosebenders.h"
+#include "decompositions/lpdual.h"
+
 #include "subproblem.h"
 
+LpDual::LpDual(GRBEnv &env, Problem const &problem) :
+    Decomposition(env, problem)
+{
+}
 
-LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
+LpDual::Cut LpDual::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
@@ -20,14 +25,11 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
         sub.update(omega - Tx);
         sub.solve();
 
-        auto const info = sub.gomInfo();
+        auto const info = sub.multipliers();
         double const prob = d_problem.d_scenarioProbabilities[scenario];
 
-        // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
-        // lambda^T alpha.
-        arma::vec rhs = omega - d_alpha;
-        gamma += prob * computeGomory(scenario, rhs, info.vBasis, info.cBasis);
-        gamma += prob * arma::dot(info.lambda, d_alpha);
+        gamma += prob * arma::dot(info.lambda, omega);
+        gamma += prob * arma::dot(info.pi_u, d_problem.d_secondStageUpperBound);
 
         dual -= prob * info.lambda;
     }

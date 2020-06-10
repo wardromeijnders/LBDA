@@ -92,3 +92,74 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
 
     GRBupdatemodel(d_cmodel);
 }
+
+MasterProblem::MasterProblem(MasterProblem const &other) :
+    d_problem(other.d_problem),
+    d_nSlacks(other.d_nSlacks)
+{
+    GRBupdatemodel(other.d_cmodel);
+    d_cmodel = GRBcopymodel(other.d_cmodel);
+}
+
+MasterProblem::~MasterProblem()
+{
+    GRBfreemodel(d_cmodel);
+}
+
+void MasterProblem::addCut(Decomposition::Cut &cut)
+{
+    d_nSlacks++;
+
+    GRBaddvar(d_cmodel,  // new slack variable
+              0,
+              nullptr,
+              nullptr,
+              0,
+              0,
+              arma::datum::inf,
+              GRB_CONTINUOUS,
+              nullptr);
+
+    size_t const n1 = d_problem.Amat().n_rows;
+
+    auto cind = arma::regspace<arma::Col<int>>(0, n1 + 2);
+    cind[n1 + 1] = n1 + d_nSlacks;  // refers to the new slack variable.
+
+    arma::vec cval(n1 + 2);
+    cval.subvec(1, n1) = -cut.beta;
+    cval[0] = 1;        // TODO magic numbers (maybe?)
+    cval[n1 + 1] = -1;  // >= constraint, so slack features with -1
+
+    GRBaddconstr(d_cmodel,
+                 n1 + 2,
+                 cind.memptr(),
+                 cval.memptr(),
+                 GRB_EQUAL,
+                 cut.gamma,
+                 nullptr);
+}
+
+std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
+                                                double tol)
+{
+    while (true)
+    {
+        GRBoptimize(d_cmodel);
+
+        size_t const n1 = d_problem.Amat().n_rows;
+
+        auto xVals = std::make_unique<arma::vec>(n1);
+        GRBgetdblattrarray(d_cmodel, "X", 1, n1, xVals->memptr());
+
+        double theta;
+        GRBgetdblattrelement(d_cmodel, "X", 0, &theta);
+
+        auto cut = decomposition.computeCut(*xVals);
+
+        // Is the proposed cut violated by the current solution?
+        if (cut.gamma + arma::dot(*xVals, cut.beta) >= theta + tol)
+            addCut(cut);
+        else
+            return xVals;
+    }
+}
