@@ -42,6 +42,10 @@ namespace smps
 
         bool addRhs(std::string const &constr, double coeff);
 
+        bool addLowerBound(std::string const &var, double bound);
+
+        bool addUpperBound(std::string const &var, double bound);
+
         bool addStage(std::string const &constr, std::string const &var);
 
         arma::sp_mat Amat();
@@ -53,6 +57,14 @@ namespace smps
         arma::vec firstStageObjCoeffs();
 
         arma::vec secondStageObjCoeffs();
+
+        arma::vec firstStageLowerBound();
+
+        arma::vec firstStageUpperBound();
+
+        arma::vec secondStageLowerBound();
+
+        arma::vec secondStageUpperBound();
     };
 }  // namespace smps
 

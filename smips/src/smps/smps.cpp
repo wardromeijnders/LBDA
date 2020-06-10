@@ -130,6 +130,23 @@ arma::sp_mat Smps::Wmat()
     return d_core.submat(rowSpan, colSpan).t();
 }
 
+bool Smps::addLowerBound(std::string const &var, double bound)
+{
+    if (d_lowerBounds.size() != d_core.n_rows)  // not initialised before
+        d_lowerBounds = arma::zeros(d_core.n_rows);
+
+    d_lowerBounds[d_row2idx[var]] = bound;
+    return true;
+}
+
+bool Smps::addUpperBound(std::string const &var, double bound)
+{
+    if (d_upperBounds.size() != d_core.n_rows)  // not initialised before
+        d_upperBounds = arma::vec(d_core.n_rows).fill(arma::datum::inf);
+
+    d_upperBounds[d_row2idx[var]] = bound;
+    return true;
+}
 
 arma::vec Smps::firstStageObjCoeffs()
 {
@@ -139,4 +156,36 @@ arma::vec Smps::firstStageObjCoeffs()
 arma::vec Smps::secondStageObjCoeffs()
 {
     return d_objCoeffs.subvec(d_stageOffsets(1, 1), d_objCoeffs.size() - 1);
+}
+
+arma::vec Smps::firstStageLowerBound()
+{
+    if (d_lowerBounds.size() != d_core.n_rows)
+        d_lowerBounds = arma::zeros(d_core.n_rows);
+
+    return d_lowerBounds.subvec(0, d_stageOffsets(1, 0) - 1);
+}
+
+arma::vec Smps::firstStageUpperBound()
+{
+    if (d_upperBounds.size() != d_core.n_rows)
+        d_upperBounds = arma::vec(d_core.n_rows).fill(arma::datum::inf);
+
+    return d_upperBounds.subvec(0, d_stageOffsets(1, 0) - 1);
+}
+
+arma::vec Smps::secondStageLowerBound()
+{
+    if (d_lowerBounds.size() != d_core.n_rows)
+        d_lowerBounds = arma::zeros(d_core.n_rows);
+
+    return d_lowerBounds.subvec(d_stageOffsets(1, 0), d_lowerBounds.size() - 1);
+}
+
+arma::vec Smps::secondStageUpperBound()
+{
+    if (d_upperBounds.size() != d_core.n_rows)
+        d_upperBounds = arma::vec(d_core.n_rows).fill(arma::datum::inf);
+
+    return d_upperBounds.subvec(d_stageOffsets(1, 0), d_lowerBounds.size() - 1);
 }

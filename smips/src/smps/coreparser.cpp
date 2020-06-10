@@ -98,7 +98,16 @@ bool CoreParser::parseRhs(DataLine const &dataLine)
 
 bool CoreParser::parseBounds(DataLine const &dataLine)
 {
-    return false;  // TODO
+    // TODO check if this works.
+    auto [var, bound] = dataLine.firstDataEntry();
+
+    if (dataLine.indicator() == "LO")  // lower bound
+        return d_smps.addLowerBound(var, bound);
+
+    if (dataLine.indicator() == "UP")  // upper bound
+        return d_smps.addUpperBound(var, bound);
+
+    return false;
 }
 
 bool CoreParser::parseRanges(DataLine const &dataLine)
