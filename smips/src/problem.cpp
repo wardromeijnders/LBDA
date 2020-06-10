@@ -81,6 +81,9 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     problem.d_Wmat = smps.Wmat();
     problem.d_Tmat = smps.Tmat();
 
+    problem.d_firstStageCoeffs = smps.firstStageObjCoeffs();
+    problem.d_secondStageCoeffs = smps.secondStageObjCoeffs();
+
     // TODO
 
     return problem;

@@ -129,3 +129,14 @@ arma::sp_mat Smps::Wmat()
 
     return d_core.submat(rowSpan, colSpan).t();
 }
+
+
+arma::vec Smps::firstStageObjCoeffs()
+{
+    return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);
+}
+
+arma::vec Smps::secondStageObjCoeffs()
+{
+    return d_objCoeffs.subvec(d_stageOffsets(1, 1), d_objCoeffs.size() - 1);
+}

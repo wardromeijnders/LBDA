@@ -15,6 +15,9 @@ namespace smps
         arma::vec d_rhs;
         arma::Col<char> d_constrSenses;
 
+        arma::vec d_lowerBounds; // TODO (BOUNDS section in core file)
+        arma::vec d_upperBounds;
+
         arma::umat d_stageOffsets;
 
         std::map<std::string, int> d_row2idx;
@@ -46,6 +49,10 @@ namespace smps
         arma::sp_mat Tmat();
 
         arma::sp_mat Wmat();
+
+        arma::vec firstStageObjCoeffs();
+
+        arma::vec secondStageObjCoeffs();
     };
 }  // namespace smps
 

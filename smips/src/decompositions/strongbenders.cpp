@@ -26,7 +26,6 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 
     // adding second-stage variables (y)
     auto const &Wmat = problem.Wmat();
-    auto const &Tmat = d_problem.Tmat();
 
     // variable types
     char yTypes[Wmat.n_rows];
@@ -44,6 +43,8 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 
     size_t ss_leq = problem.d_nSecondStageLeqConstraints;
     size_t ss_geq = problem.d_nSecondStageGeqConstraints;
+
+    auto const &Tmat = d_problem.Tmat();
 
     // constraint senses
     char senses[Tmat.n_cols];
