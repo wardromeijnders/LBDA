@@ -102,6 +102,8 @@ bool Smps::addStage(std::string const &constr, std::string const &var)
 
 arma::sp_mat Smps::Amat()
 {
+    // Of the entire core tableau, the A matrix (first stage constraints on x)
+    // is given by the top-left, first stage matrix.
     auto const rowSpan = arma::span(0, d_stageOffsets(1, 0) - 1);
     auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
 
@@ -110,6 +112,8 @@ arma::sp_mat Smps::Amat()
 
 arma::sp_mat Smps::Tmat()
 {
+    // Given by the bottom-left matrix. These are the second-stage constraint
+    // coefficients on the first-stage variables x.
     auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
     auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
 
@@ -118,6 +122,8 @@ arma::sp_mat Smps::Tmat()
 
 arma::sp_mat Smps::Wmat()
 {
+    // Given by the bottom-right matrix. These are the second-stage constraint
+    // coefficients on the second-stage variables y.
     auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
     auto const colSpan = arma::span(d_stageOffsets(1, 1), d_core.n_cols - 1);
 

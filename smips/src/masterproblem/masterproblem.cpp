@@ -45,32 +45,45 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
                vTypes,
                nullptr);
 
-    arma::Col<int> cind = arma::ones<arma::Col<int>>(Amat.n_rows);
-
     for (size_t con = 0; con != Amat.n_cols; ++con)  // constraints
+    {
+        auto const col = Amat.col(con);
+        std::vector<int> ind;
+        std::vector<double> val;
+
+        // TODO this is not that nice, I think
+        for (auto it = Amat.begin_col(con); it != Amat.end_col(con); ++it)
+        {
+            ind.push_back(it.row());
+            val.push_back(*it);
+        }
+
         GRBaddconstr(d_cmodel,
                      Amat.n_rows,
-                     cind.memptr(),
-                     Amat.colptr(con),
+                     ind.data(),
+                     val.data(),
                      GRB_EQUAL,
                      d_problem.d_firstStageRhs(con),
                      nullptr);
+    }
 
     // Add slack variables.
     arma::Col<int> vbeg = arma::linspace<arma::Col<int>>(0,
                                                          d_nSlacks,
                                                          d_nSlacks);
 
-    arma::vec vval(d_nSlacks);
-    vval.head(d_problem.d_nFirstStageLeqConstraints).fill(1);
-    vval.tail(d_nSlacks - d_problem.d_nFirstStageLeqConstraints).fill(-1);
+    double vval[d_nSlacks];
+    std::fill_n(vTypes, d_problem.d_nFirstStageLeqConstraints, 1.);
+    std::fill(vval + d_problem.d_nFirstStageLeqConstraints,
+              vval + d_nSlacks,
+              -1.);
 
     GRBaddvars(d_cmodel,
                d_nSlacks,
                d_nSlacks,
                vbeg.memptr(),
                vbeg.memptr(),
-               vval.memptr(),
+               vval,
                nullptr,
                nullptr,
                nullptr,

@@ -18,9 +18,10 @@ class MasterProblem
     Problem &d_problem;
 
     /**
-     * Gurobi model that contains the master problem instance.
+     * Pointer to the Gurobi (C) model. The C API gives access to advanced
+     * simplex routines. TODO do we need this? Can't we get this from C++?
      */
-    GRBModel d_model;
+    GRBmodel *d_cmodel;
 
     /**
      * Number of slack variables in the Gurobi model instance.
@@ -28,7 +29,7 @@ class MasterProblem
     size_t d_nSlacks;
 
 public:
-    MasterProblem(GRBEnv &c_env, Problem &problem);
+    MasterProblem(GRBenv *c_env, Problem &problem);
 
     MasterProblem(MasterProblem const &other);
 
