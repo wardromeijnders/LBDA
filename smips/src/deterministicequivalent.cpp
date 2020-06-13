@@ -38,21 +38,9 @@ void DeterministicEquivalent::initFirstStage()
     for (auto iter = Amat.begin(); iter != Amat.end(); ++iter)
         lhs[iter.col()] += *iter * d_xVars[iter.row()];
 
-    char senses[Amat.n_cols];
-    std::fill(senses,
-              senses + d_problem.d_nFirstStageLeqConstraints,
-              GRB_LESS_EQUAL);
-    std::fill(senses + d_problem.d_nFirstStageLeqConstraints,
-              senses + d_problem.d_nFirstStageLeqConstraints
-                  + d_problem.d_nFirstStageGeqConstraints,
-              GRB_GREATER_EQUAL);
-    std::fill(senses + d_problem.d_nFirstStageLeqConstraints
-                  + d_problem.d_nFirstStageGeqConstraints,
-              senses + Amat.n_cols,
-              GRB_EQUAL);
-
+    auto const &senses = d_problem.firstStageConstrSenses();
     GRBConstr *constrs = d_model.addConstrs(lhs,
-                                            senses,
+                                            senses.memptr(),
                                             d_problem.d_firstStageRhs.memptr(),
                                             nullptr,
                                             Amat.n_cols);
@@ -76,19 +64,7 @@ void DeterministicEquivalent::initSecondStage()
                 Wmat.n_rows - d_problem.nSecondStageIntVars(),
                 GRB_CONTINUOUS);
 
-    // constraint senses
-    char senses2[Tmat.n_cols];
-    std::fill(senses2,
-              senses2 + d_problem.d_nSecondStageLeqConstraints,
-              GRB_LESS_EQUAL);
-    std::fill(senses2 + d_problem.d_nSecondStageLeqConstraints,
-              senses2 + d_problem.d_nSecondStageLeqConstraints
-                  + d_problem.d_nSecondStageGeqConstraints,
-              GRB_GREATER_EQUAL);
-    std::fill(senses2 + d_problem.d_nSecondStageLeqConstraints
-                  + d_problem.d_nSecondStageGeqConstraints,
-              senses2 + Tmat.n_cols,
-              GRB_EQUAL);
+    auto const &senses = d_problem.secondStageConstrSenses();
 
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
@@ -110,7 +86,7 @@ void DeterministicEquivalent::initSecondStage()
 
         auto const omega = d_problem.scenarios().colptr(scenario);
         GRBConstr *constrs = d_model.addConstrs(Tx,
-                                                senses2,
+                                                senses.memptr(),
                                                 omega,
                                                 nullptr,
                                                 Wmat.n_cols);

@@ -41,20 +41,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
                                      nullptr,
                                      Wmat.n_rows);
 
-    size_t ss_leq = problem.d_nSecondStageLeqConstraints;
-    size_t ss_geq = problem.d_nSecondStageGeqConstraints;
-
     auto const &Tmat = d_problem.Tmat();
-
-    // constraint senses
-    char senses[Tmat.n_cols];
-    std::fill(senses, senses + ss_leq, GRB_LESS_EQUAL);
-    std::fill(senses + ss_leq, senses + ss_leq + ss_geq, GRB_GREATER_EQUAL);
-    std::fill(senses + ss_leq + ss_geq, senses + Tmat.n_cols, GRB_EQUAL);
-
-    // constraint rhs
-    double rhs[Tmat.n_cols];
-    std::fill(rhs, rhs + Tmat.n_cols, 0.0);
 
     // constraint lhs
     GRBLinExpr TxWy[Tmat.n_cols];
@@ -65,8 +52,15 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
         TxWy[iter.col()] += *iter * d_z_vars[iter.row()];
 
-    // add constraints
-    d_constrs = d_model.addConstrs(TxWy, senses, rhs, nullptr, Tmat.n_cols);
+    auto const &senses = d_problem.secondStageConstrSenses();
+    arma::vec rhs = arma::zeros(Tmat.n_cols);
+
+    d_constrs = d_model.addConstrs(TxWy,
+                                   senses.memptr(),
+                                   rhs.memptr(),
+                                   nullptr,
+                                   Tmat.n_cols);
+
     d_model.update();
 
     delete[] y_vars;

@@ -14,8 +14,7 @@ namespace smps
         arma::sp_mat d_core;
         arma::vec d_rhs;
         arma::Col<char> d_constrSenses;
-
-        arma::vec d_lowerBounds; // TODO (BOUNDS section in core file)
+        arma::vec d_lowerBounds;
         arma::vec d_upperBounds;
 
         arma::umat d_stageOffsets;
@@ -57,6 +56,10 @@ namespace smps
         arma::vec firstStageObjCoeffs();
 
         arma::vec secondStageObjCoeffs();
+
+        arma::Col<char> firstStageConstrSenses();
+
+        arma::Col<char> secondStageConstrSenses();
 
         arma::vec firstStageLowerBound();
 

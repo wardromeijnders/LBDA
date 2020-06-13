@@ -158,6 +158,17 @@ arma::vec Smps::secondStageObjCoeffs()
     return d_objCoeffs.subvec(d_stageOffsets(1, 1), d_objCoeffs.size() - 1);
 }
 
+arma::Col<char> Smps::firstStageConstrSenses()
+{
+    return d_constrSenses.subvec(0, d_stageOffsets(1, 0) - 1);
+}
+
+arma::Col<char> Smps::secondStageConstrSenses()
+{
+    return d_constrSenses.subvec(d_stageOffsets(1, 0),
+                                 d_constrSenses.size() - 1);
+}
+
 arma::vec Smps::firstStageLowerBound()
 {
     if (d_lowerBounds.size() != d_core.n_cols)

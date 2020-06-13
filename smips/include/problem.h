@@ -7,7 +7,6 @@
 
 
 // TODO this class is too big, and might need to be cut down a little
-// TODO this class should not contain a subproblem, nor need an environment.
 class Problem
 {
     // TODO this is not the place - should move to the actual solver stuff?
@@ -22,6 +21,9 @@ class Problem
     size_t d_nFirstStageIntVars = 0;  // TODO make constant!
     size_t d_nSecondStageIntVars = 0;
 
+    arma::Col<char> d_firstStageConstrSenses;
+    arma::Col<char> d_secondStageConstrSenses;
+
     arma::sp_mat d_Amat;
     arma::sp_mat d_Tmat;
     arma::sp_mat d_Wmat;
@@ -32,18 +34,9 @@ class Problem
     void initSub();  // initializes the subproblem, and sets rhs = 0. Called by
                      // evaluate() when evaluate is called for the first time.
 
-    void clearSub();  // should be called if problem data changes
-
 public:
     // TODO make these members private
-    double d_L = 0;  // lb of Q - TODO is this a sensible default?
-
-    // number of >= and <= constraints in the first and second stage
-    size_t d_nFirstStageLeqConstraints;
-    size_t d_nFirstStageGeqConstraints;
-
-    size_t d_nSecondStageLeqConstraints;
-    size_t d_nSecondStageGeqConstraints;
+    double d_L = 0;  // lb on Q - TODO is this a sensible default?
 
     arma::vec d_firstStageLowerBound;
     arma::vec d_firstStageUpperBound;
@@ -72,42 +65,52 @@ public:
     // evaluates cx + Q(x) (does not check feasibility)
     double evaluate(arma::vec const &x);
 
-    [[nodiscard]] size_t nFirstStageIntVars() const
+    size_t nFirstStageIntVars() const
     {
         return d_nFirstStageIntVars;
     }
 
-    [[nodiscard]] size_t nSecondStageIntVars() const
+    size_t nSecondStageIntVars() const
     {
         return d_nFirstStageIntVars;
     }
 
-    [[nodiscard]] size_t nScenarios() const
+    arma::Col<char> const &firstStageConstrSenses() const
+    {
+        return d_firstStageConstrSenses;
+    }
+
+    arma::Col<char> const &secondStageConstrSenses() const
+    {
+        return d_secondStageConstrSenses;
+    }
+
+    size_t nScenarios() const
     {
         return d_scenarios.n_cols;
     }
 
-    [[nodiscard]] arma::sp_mat const &Amat() const
+    arma::sp_mat const &Amat() const
     {
         return d_Amat;
     }
 
-    [[nodiscard]] arma::sp_mat &Amat()
+    arma::sp_mat &Amat()
     {
         return d_Amat;
     }
 
-    [[nodiscard]] arma::sp_mat const &Wmat() const
+    arma::sp_mat const &Wmat() const
     {
         return d_Wmat;
     }
 
-    [[nodiscard]] arma::sp_mat const &Tmat() const
+    arma::sp_mat const &Tmat() const
     {
         return d_Tmat;
     }
 
-    [[nodiscard]] arma::mat const &scenarios() const
+    arma::mat const &scenarios() const
     {
         return d_scenarios;
     }

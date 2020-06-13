@@ -27,18 +27,12 @@ LooseBenders::LooseBenders(GRBEnv &env,
                              nullptr,
                              Wmat.n_rows);
 
-    arma::Col<char> senses(Wmat.n_cols);
-    senses.fill(GRB_GREATER_EQUAL);
-    senses.head(d_problem.d_nSecondStageLeqConstraints).fill(GRB_LESS_EQUAL);
-    senses
-        .tail(Wmat.n_cols - d_problem.d_nSecondStageLeqConstraints
-              - d_problem.d_nSecondStageGeqConstraints)
-        .fill(GRB_EQUAL);
 
     GRBLinExpr lhs[Wmat.n_cols];
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
         lhs[iter.col()] += *iter * d_vars[iter.row()];
 
+    auto const &senses = d_problem.secondStageConstrSenses();
     arma::vec rhs = arma::zeros(Wmat.n_cols);
 
     d_constrs = d_model.addConstrs(lhs,
@@ -127,17 +121,19 @@ void LooseBenders::update(arma::vec &rhs,
                           arma::Col<int> const &vBasis,
                           arma::Col<int> const &cBasis)
 {
-    size_t const ss_leq = d_problem.d_nSecondStageLeqConstraints;
-    size_t const ss_geq = d_problem.d_nSecondStageGeqConstraints;
+    auto const &senses = d_problem.secondStageConstrSenses();
 
-    // Relax <= and >= constraints if they are non-binding.
-    rhs(arma::find(cBasis.head(ss_leq) == GRB_BASIC)).fill(arma::datum::inf);
+    for (size_t idx = 0; idx != senses.size(); ++idx)
+    {
+        if (cBasis[idx] != GRB_BASIC || senses[idx] == GRB_EQUAL)
+            continue;
 
-    // TODO clean this up
-    // >= constraints
-    for (size_t con = ss_leq; con != ss_leq + ss_geq; ++con)
-        if (cBasis[con] == GRB_BASIC)
-            rhs[con] = -arma::datum::inf;
+        if (senses[idx] == GRB_LESS_EQUAL)
+            rhs[idx] = arma::datum::inf;
+
+        if (senses[idx] == GRB_GREATER_EQUAL)
+            rhs[idx] = -arma::datum::inf;
+    }
 
     auto const &Wmat = d_problem.Wmat();
 

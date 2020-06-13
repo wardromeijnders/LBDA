@@ -1,9 +1,7 @@
 #include "masterproblem.h"
 
 MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
-    d_problem(problem),
-    d_nSlacks(problem.d_nFirstStageLeqConstraints
-              + problem.d_nFirstStageGeqConstraints)
+    d_problem(problem)
 {
     auto &Amat = d_problem.Amat();
 
@@ -54,8 +52,8 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
         // TODO this is not that nice, I think
         for (auto it = Amat.begin_col(con); it != Amat.end_col(con); ++it)
         {
-            ind.push_back(it.row());
-            val.push_back(*it);
+            ind.emplace_back(it.row());
+            val.emplace_back(*it);
         }
 
         GRBaddconstr(d_cmodel,
@@ -67,23 +65,27 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
                      nullptr);
     }
 
-    // Add slack variables.
-    arma::Col<int> vbeg = arma::linspace<arma::Col<int>>(0,
-                                                         d_nSlacks,
-                                                         d_nSlacks);
+    std::vector<int> vbeg;
+    std::vector<double> vval;
 
-    double vval[d_nSlacks];
-    std::fill_n(vTypes, d_problem.d_nFirstStageLeqConstraints, 1.);
-    std::fill(vval + d_problem.d_nFirstStageLeqConstraints,
-              vval + d_nSlacks,
-              -1.);
+    auto const &senses = d_problem.firstStageConstrSenses();
+
+    for (size_t idx = 0; idx != senses.size(); ++idx)
+        if (senses[idx] != GRB_EQUAL)
+        {
+            d_nSlacks++;
+
+            // Is either <= or >=.
+            vval.emplace_back(senses[idx] == GRB_LESS_EQUAL ? 1. : -1.);
+            vbeg.emplace_back(idx);
+        }
 
     GRBaddvars(d_cmodel,
                d_nSlacks,
                d_nSlacks,
-               vbeg.memptr(),
-               vbeg.memptr(),
-               vval,
+               vbeg.data(),
+               vbeg.data(),
+               vval.data(),
                nullptr,
                nullptr,
                nullptr,
@@ -94,8 +96,7 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
 }
 
 MasterProblem::MasterProblem(MasterProblem const &other) :
-    d_problem(other.d_problem),
-    d_nSlacks(other.d_nSlacks)
+    d_problem(other.d_problem), d_nSlacks(other.d_nSlacks)
 {
     GRBupdatemodel(other.d_cmodel);
     d_cmodel = GRBcopymodel(other.d_cmodel);
@@ -127,7 +128,7 @@ void MasterProblem::addCut(Decomposition::Cut &cut)
 
     arma::vec cval(n1 + 2);
     cval.subvec(1, n1) = -cut.beta;
-    cval[0] = 1;        // TODO magic numbers (maybe?)
+    cval[0] = 1;        // theta coefficient
     cval[n1 + 1] = -1;  // >= constraint, so slack features with -1
 
     GRBaddconstr(d_cmodel,

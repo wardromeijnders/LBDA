@@ -13,34 +13,6 @@ Problem::~Problem()
         delete[] d_constrs;
 }
 
-void Problem::clearSub()
-{
-    if (not d_isSubProblemInitialised)  // if not already initialized
-        return;                         // then do nothing
-
-    // else, clear variables and cosnstraints
-    GRBConstr *constrs = d_sub.getConstrs();
-    GRBVar *vars = d_sub.getVars();
-
-    size_t nConstrs = d_sub.get(GRB_IntAttr_NumConstrs);
-    size_t nVars = d_sub.get(GRB_IntAttr_NumVars);
-
-    for (size_t idx = 0; idx != nConstrs; ++idx)
-        d_sub.remove(constrs[idx]);
-
-    for (size_t idx = 0; idx != nVars; ++idx)
-        d_sub.remove(vars[idx]);
-
-    delete[] constrs;  // heap allocated and no longer required
-    delete[] vars;
-
-    delete[] d_constrs;  // heap allocated, but d_sub is cleared
-
-    // this ensures that: (1) initSub() is called if evaluate()
-    // is called, and destructor does not call delete[] d_constrs
-    d_isSubProblemInitialised = false;
-}
-
 // TODO this should not be a part of Problem
 double Problem::evaluate(arma::vec const &x)
 {
@@ -84,6 +56,9 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     problem.d_firstStageCoeffs = smps.firstStageObjCoeffs();
     problem.d_secondStageCoeffs = smps.secondStageObjCoeffs();
 
+    problem.d_firstStageConstrSenses = smps.firstStageConstrSenses();
+    problem.d_secondStageConstrSenses = smps.secondStageConstrSenses();
+
     problem.d_firstStageLowerBound = smps.firstStageLowerBound();
     problem.d_firstStageUpperBound = smps.firstStageUpperBound();
     problem.d_secondStageLowerBound = smps.secondStageLowerBound();
@@ -109,28 +84,18 @@ void Problem::initSub()
                                  nullptr,
                                  d_Wmat.n_rows);
 
-    // constraint senses
-    char senses[d_Wmat.n_cols];
-    std::fill(senses, senses + d_nSecondStageLeqConstraints, GRB_LESS_EQUAL);
-    std::fill(senses + d_nSecondStageLeqConstraints,
-              senses + d_nSecondStageLeqConstraints
-                  + d_nSecondStageGeqConstraints,
-              GRB_GREATER_EQUAL);
-    std::fill(senses + d_nSecondStageLeqConstraints
-                  + d_nSecondStageGeqConstraints,
-              senses + d_Wmat.n_cols,
-              GRB_EQUAL);
-
-    // constraint rhs
-    double rhs[d_Wmat.n_cols];
-    std::fill(rhs, rhs + d_Wmat.n_cols, 0.0);
-
     GRBLinExpr Wy[d_Wmat.n_cols];
     for (auto iter = d_Wmat.begin(); iter != d_Wmat.end(); ++iter)
         Wy[iter.col()] += *iter * vars[iter.row()];
 
-    // add constraints
-    d_constrs = d_sub.addConstrs(Wy, senses, rhs, nullptr, d_Wmat.n_cols);
+    arma::vec rhs = arma::zeros(d_Wmat.n_cols);
+
+    d_constrs = d_sub.addConstrs(Wy,
+                                 d_secondStageConstrSenses.memptr(),
+                                 rhs.memptr(),
+                                 nullptr,
+                                 d_Wmat.n_cols);
+
     d_isSubProblemInitialised = true;
 
     delete[] vars;
