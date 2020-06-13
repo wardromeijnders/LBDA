@@ -68,6 +68,8 @@ namespace smps
         arma::vec secondStageLowerBound();
 
         arma::vec secondStageUpperBound();
+
+        arma::vec firstStageRhs();
     };
 }  // namespace smps
 

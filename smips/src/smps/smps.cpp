@@ -200,3 +200,8 @@ arma::vec Smps::secondStageUpperBound()
 
     return d_upperBounds.subvec(d_stageOffsets(1, 1), d_lowerBounds.size() - 1);
 }
+
+arma::vec Smps::firstStageRhs()
+{
+    return d_rhs.subvec(0, d_stageOffsets(1, 0) - 1);
+}

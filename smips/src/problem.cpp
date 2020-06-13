@@ -64,6 +64,8 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     problem.d_secondStageLowerBound = smps.secondStageLowerBound();
     problem.d_secondStageUpperBound = smps.secondStageUpperBound();
 
+    problem.d_firstStageRhs = smps.firstStageRhs();
+
     // TODO
 
     return problem;
