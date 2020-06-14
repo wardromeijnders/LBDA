@@ -64,6 +64,6 @@ COLUMNS
     Y43       OPLIM4    1.0
     Y43       DEMAND3   1.0
 RHS
-    RHS       MINCAP    12.0
+    RHS       MINCAP    14.0
     RHS       BUDGET    120.0
 ENDATA

@@ -280,7 +280,7 @@ arma::vec Smps::indepScenProbabilities()
         nScenarios *= distr.size();
 
     arma::vec probabilities(nScenarios);
-    probabilities.fill(1 / nScenarios);
+    probabilities.fill(1. / nScenarios);
 
     return probabilities;
 }

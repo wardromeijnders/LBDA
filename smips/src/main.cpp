@@ -25,7 +25,6 @@ int main(int argc, char **argv)
 
     std::cout << res;
     std::cout << "\ncx + Q(x) = " << problem.evaluate(res) << '\n';
-    assert(std::abs(problem.evaluate(res)) - 59.8893 <= 0.001);
 
     GRBfreeenv(c_env);
 }

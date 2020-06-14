@@ -21,7 +21,7 @@ double Problem::evaluate(arma::vec const &x)
         initSub();  // initialize subproblem, rhs = 0.0
 
     double Q = 0.0;
-    arma::vec Tx = d_Tmat * x;
+    arma::vec Tx = (x.t() * d_Tmat).t();  // TODO simplify
 
     for (size_t scenario = 0; scenario != nScenarios(); ++scenario)
     {

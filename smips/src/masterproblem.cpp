@@ -50,12 +50,12 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
              it != Amat.end_col(constraint);
              ++it)
         {
-            ind.emplace_back(it.row());
+            ind.emplace_back(it.row() + 1);  //skip theta!
             val.emplace_back(*it);
         }
 
         GRBaddconstr(d_cmodel,
-                     Amat.n_rows,
+                     ind.size(),
                      ind.data(),
                      val.data(),
                      GRB_EQUAL,
