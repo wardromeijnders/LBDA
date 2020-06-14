@@ -26,7 +26,7 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
         sub.solve();
 
         auto const info = sub.multipliers();
-        double const prob = d_problem.d_scenarioProbabilities[scenario];
+        double const prob = d_problem.probability(scenario);
 
         gamma += prob * arma::dot(info.lambda, omega);
         gamma += prob * arma::dot(info.pi_u, d_problem.d_secondStageUpperBound);

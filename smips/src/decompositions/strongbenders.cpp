@@ -9,35 +9,22 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     auto const &Amat = problem.Amat();
 
     // adding first-stage variables (z)
-    char zTypes[Amat.n_rows];
-    std::fill_n(zTypes, problem.nFirstStageIntVars(), GRB_INTEGER);
-    std::fill_n(zTypes + problem.nFirstStageIntVars(),
-                Amat.n_rows - problem.nFirstStageIntVars(),
-                GRB_CONTINUOUS);
-
     d_z_vars = d_model.addVars(problem.d_firstStageLowerBound.memptr(),
                                problem.d_firstStageUpperBound.memptr(),
                                nullptr,
-                               zTypes,
+                               problem.firstStageVarTypes().memptr(),
                                nullptr,
                                Amat.n_rows);
 
     // TODO: include first-stage constraints
 
-    // adding second-stage variables (y)
     auto const &Wmat = problem.Wmat();
 
-    // variable types
-    char yTypes[Wmat.n_rows];
-    std::fill_n(yTypes, problem.nSecondStageIntVars(), GRB_INTEGER);
-    std::fill_n(yTypes + problem.nSecondStageIntVars(),
-                Wmat.n_rows - problem.nSecondStageIntVars(),
-                GRB_CONTINUOUS);
-
+    // adding second-stage variables (y)
     GRBVar *y_vars = d_model.addVars(problem.d_secondStageLowerBound.memptr(),
                                      problem.d_secondStageUpperBound.memptr(),
-                                     problem.d_secondStageCoeffs.memptr(),
-                                     yTypes,
+                                     problem.secondStageCoeffs().memptr(),
+                                     problem.secondStageVarTypes().memptr(),
                                      nullptr,
                                      Wmat.n_rows);
 
@@ -83,15 +70,15 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 
     double gamma = 0;
 
-    for (size_t s = 0; s != d_problem.nScenarios(); ++s)
+    for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
-        arma::vec omega = d_problem.scenarios().col(s);
+        arma::vec omega = d_problem.scenarios().col(scenario);
 
         sub.update(omega - Tx);
         sub.solve();
 
         auto const info = sub.multipliers();
-        double const prob = d_problem.d_scenarioProbabilities[s];
+        double const prob = d_problem.probability(scenario);
 
         arma::vec pi = Tmat * info.lambda;
 

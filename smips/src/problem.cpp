@@ -16,15 +16,12 @@ Problem::~Problem()
 // TODO this should not be a part of Problem
 double Problem::evaluate(arma::vec const &x)
 {
-    // computing cx
-    double cx = arma::dot(d_firstStageCoeffs, x);
-    arma::vec Tx = d_Tmat * x;
-
     // computing Q(x)
     if (not d_isSubProblemInitialised)
         initSub();  // initialize subproblem, rhs = 0.0
 
     double Q = 0.0;
+    arma::vec Tx = d_Tmat * x;
 
     for (size_t scenario = 0; scenario != nScenarios(); ++scenario)
     {
@@ -33,13 +30,10 @@ double Problem::evaluate(arma::vec const &x)
         d_sub.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), d_Wmat.n_cols);
         d_sub.optimize();
 
-        auto res = d_scenarioProbabilities[scenario];
-        res *= d_sub.get(GRB_DoubleAttr_ObjVal);
-
-        Q += res;
+        Q += probability(scenario) * d_sub.get(GRB_DoubleAttr_ObjVal);
     }
 
-    return cx + Q;
+    return arma::dot(d_firstStageCoeffs, x) + Q;
 }
 
 Problem Problem::fromSmps(char const *location, GRBEnv &env)
@@ -59,6 +53,9 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
     problem.d_firstStageConstrSenses = smps.firstStageConstrSenses();
     problem.d_secondStageConstrSenses = smps.secondStageConstrSenses();
 
+    problem.d_firstStageVarTypes = smps.firstStageVarTypes();
+    problem.d_secondStageVarTypes = smps.secondStageVarTypes();
+
     problem.d_firstStageLowerBound = smps.firstStageLowerBound();
     problem.d_firstStageUpperBound = smps.firstStageUpperBound();
     problem.d_secondStageLowerBound = smps.secondStageLowerBound();
@@ -73,16 +70,10 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
 
 void Problem::initSub()
 {
-    char vTypes[d_Wmat.n_rows];
-    std::fill(vTypes, vTypes + nSecondStageIntVars(), GRB_INTEGER);
-    std::fill(vTypes + nSecondStageIntVars(),
-              vTypes + d_Wmat.n_rows,
-              GRB_CONTINUOUS);
-
     GRBVar *vars = d_sub.addVars(d_secondStageLowerBound.memptr(),
                                  d_secondStageUpperBound.memptr(),
                                  d_secondStageCoeffs.memptr(),
-                                 vTypes,
+                                 d_secondStageVarTypes.memptr(),
                                  nullptr,
                                  d_Wmat.n_rows);
 

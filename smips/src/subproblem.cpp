@@ -6,12 +6,12 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 {
     auto const &Wmat = d_problem.Wmat();
 
-    arma::Col<char> vTypes(Wmat.n_rows);
+    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int?
     vTypes.fill(GRB_CONTINUOUS);
 
     d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
                              d_problem.d_secondStageUpperBound.memptr(),
-                             d_problem.d_secondStageCoeffs.memptr(),
+                             d_problem.secondStageCoeffs().memptr(),
                              vTypes.memptr(),
                              nullptr,
                              Wmat.n_rows);
@@ -85,7 +85,7 @@ SubProblem::Multipliers const SubProblem::multipliers()
 
         // If the variable is at the upper bound, the shadow price is equal to
         // the reduced costs. Else the shadow price is zero.
-        piUb = d_problem.d_secondStageCoeffs - arma::vec(piUbPtr, Wmat.n_rows);
+        piUb = d_problem.secondStageCoeffs() - arma::vec(piUbPtr, Wmat.n_rows);
         piUb(arma::find(vBasis != GRB_NONBASIC_UPPER)).fill(0.);
 
         delete[] vBasisPtr;

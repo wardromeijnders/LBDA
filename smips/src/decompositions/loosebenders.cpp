@@ -16,14 +16,10 @@ LooseBenders::LooseBenders(GRBEnv &env,
 {
     auto const &Wmat = d_problem.Wmat();
 
-    arma::Col<char> vTypes(Wmat.n_rows);
-    vTypes.head(problem.nSecondStageIntVars()).fill(GRB_INTEGER);
-    vTypes.tail(Wmat.n_rows - problem.nSecondStageIntVars()).fill(GRB_CONTINUOUS);
-
     d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
                              d_problem.d_secondStageUpperBound.memptr(),
-                             problem.d_secondStageCoeffs.memptr(),
-                             vTypes.memptr(),
+                             problem.secondStageCoeffs().memptr(),
+                             problem.secondStageVarTypes().memptr(),
                              nullptr,
                              Wmat.n_rows);
 
@@ -70,7 +66,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
         sub.solve();
 
         auto const info = sub.gomInfo();
-        double const prob = d_problem.d_scenarioProbabilities[scenario];
+        double const prob = d_problem.probability(scenario);
 
         // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
         // lambda^T alpha.

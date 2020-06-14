@@ -16,24 +16,15 @@ DeterministicEquivalent::~DeterministicEquivalent()
 
 void DeterministicEquivalent::initFirstStage()
 {
-    // TODO clean this up
     auto const &Amat = d_problem.Amat();
-
-    // variables
-    char vTypes[Amat.n_rows];
-    std::fill_n(vTypes, d_problem.nFirstStageIntVars(), GRB_INTEGER);
-    std::fill_n(vTypes + d_problem.nFirstStageIntVars(),
-                Amat.n_rows - d_problem.nFirstStageIntVars(),
-                GRB_CONTINUOUS);
 
     d_xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
                               d_problem.d_firstStageUpperBound.memptr(),
-                              d_problem.d_firstStageCoeffs.memptr(),
-                              vTypes,
+                              d_problem.firstStageCoeffs().memptr(),
+                              d_problem.firstStageVarTypes().memptr(),
                               nullptr,
                               Amat.n_rows);
 
-    // constraints
     GRBLinExpr lhs[Amat.n_cols];
     for (auto iter = Amat.begin(); iter != Amat.end(); ++iter)
         lhs[iter.col()] += *iter * d_xVars[iter.row()];
@@ -41,7 +32,7 @@ void DeterministicEquivalent::initFirstStage()
     auto const &senses = d_problem.firstStageConstrSenses();
     GRBConstr *constrs = d_model.addConstrs(lhs,
                                             senses.memptr(),
-                                            d_problem.d_firstStageRhs.memptr(),
+                                            d_problem.firstStageRhs().memptr(),
                                             nullptr,
                                             Amat.n_cols);
 
@@ -57,26 +48,17 @@ void DeterministicEquivalent::initSecondStage()
     for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
         Tx[iter.col()] += *iter * d_xVars[iter.row()];
 
-    // variable types
-    char vTypes2[Wmat.n_rows];
-    std::fill_n(vTypes2, d_problem.nSecondStageIntVars(), GRB_INTEGER);
-    std::fill_n(vTypes2 + d_problem.nSecondStageIntVars(),
-                Wmat.n_rows - d_problem.nSecondStageIntVars(),
-                GRB_CONTINUOUS);
-
-    auto const &senses = d_problem.secondStageConstrSenses();
-
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
-        double const prob = d_problem.d_scenarioProbabilities[scenario];
-        arma::vec const costs = prob * d_problem.d_secondStageCoeffs;
+        double const prob = d_problem.probability(scenario);
+        arma::vec const costs = prob * d_problem.secondStageCoeffs();
 
         // add variables
         GRBVar *yVars = d_model
                             .addVars(d_problem.d_secondStageLowerBound.memptr(),
                                      d_problem.d_secondStageUpperBound.memptr(),
                                      costs.memptr(),
-                                     vTypes2,
+                                     d_problem.secondStageVarTypes().memptr(),
                                      nullptr,
                                      Wmat.n_rows);
 
@@ -84,7 +66,9 @@ void DeterministicEquivalent::initSecondStage()
         for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
             Tx[iter.col()] += *iter * yVars[iter.row()];
 
+        auto const &senses = d_problem.secondStageConstrSenses();
         auto const omega = d_problem.scenarios().colptr(scenario);
+
         GRBConstr *constrs = d_model.addConstrs(Tx,
                                                 senses.memptr(),
                                                 omega,

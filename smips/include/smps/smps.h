@@ -14,6 +14,7 @@ namespace smps
         arma::sp_mat d_core;
         arma::vec d_rhs;
         arma::Col<char> d_constrSenses;
+        arma::Col<char> d_varTypes;
         arma::vec d_lowerBounds;
         arma::vec d_upperBounds;
 
@@ -60,6 +61,10 @@ namespace smps
         arma::Col<char> firstStageConstrSenses();
 
         arma::Col<char> secondStageConstrSenses();
+
+        arma::Col<char> firstStageVarTypes();
+
+        arma::Col<char> secondStageVarTypes();
 
         arma::vec firstStageLowerBound();
 

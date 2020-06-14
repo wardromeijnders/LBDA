@@ -25,32 +25,30 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
               GRB_CONTINUOUS,
               nullptr);
 
-    char vTypes[Amat.n_rows];
-    std::fill_n(vTypes, d_problem.nFirstStageIntVars(), GRB_INTEGER);
-    std::fill(vTypes + d_problem.nFirstStageIntVars(),
-              vTypes + Amat.n_rows,
-              GRB_CONTINUOUS);
-
     GRBaddvars(d_cmodel,  // first-stage (x) variables.
                Amat.n_rows,
                0,
                nullptr,
                nullptr,
                nullptr,
-               d_problem.d_firstStageCoeffs.memptr(),
+               d_problem.firstStageCoeffs().memptr(),
                d_problem.d_firstStageLowerBound.memptr(),
                d_problem.d_firstStageUpperBound.memptr(),
-               vTypes,
+               d_problem.firstStageVarTypes().memptr(),
                nullptr);
 
-    for (size_t con = 0; con != Amat.n_cols; ++con)  // constraints
+    auto const &rhs = d_problem.firstStageRhs();
+
+    for (size_t constraint = 0; constraint != Amat.n_cols; ++constraint)
     {
-        auto const col = Amat.col(con);
+        // TODO this is not that nice, I think
+        auto const col = Amat.col(constraint);
         std::vector<int> ind;
         std::vector<double> val;
 
-        // TODO this is not that nice, I think
-        for (auto it = Amat.begin_col(con); it != Amat.end_col(con); ++it)
+        for (auto it = Amat.begin_col(constraint);
+             it != Amat.end_col(constraint);
+             ++it)
         {
             ind.emplace_back(it.row());
             val.emplace_back(*it);
@@ -61,7 +59,7 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
                      ind.data(),
                      val.data(),
                      GRB_EQUAL,
-                     d_problem.d_firstStageRhs(con),
+                     rhs(constraint),
                      nullptr);
     }
 
@@ -129,7 +127,7 @@ void MasterProblem::addCut(Decomposition::Cut &cut)
     arma::vec cval(n1 + 2);
     cval.subvec(1, n1) = -cut.beta;
     cval[0] = 1;        // theta coefficient
-    cval[n1 + 1] = -1;  // >= constraint, so slack features with -1
+    cval[n1 + 1] = -1;  // slack coefficient (>= constraint)
 
     GRBaddconstr(d_cmodel,
                  n1 + 2,

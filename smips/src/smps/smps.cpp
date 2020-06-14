@@ -4,6 +4,8 @@
 #include "smps/stochparser.h"
 #include "smps/timeparser.h"
 
+#include <gurobi_c++.h>
+
 using namespace smps;
 
 void Smps::readSmps(std::string const &location)
@@ -169,6 +171,22 @@ arma::Col<char> Smps::secondStageConstrSenses()
                                  d_constrSenses.size() - 1);
 }
 
+arma::Col<char> Smps::firstStageVarTypes()
+{
+    arma::Col<char> varTypes(d_stageOffsets(1, 1));
+    varTypes.fill(GRB_CONTINUOUS);  // TODO allow also for integer variables.
+
+    return varTypes;
+}
+
+arma::Col<char> Smps::secondStageVarTypes()
+{
+    arma::Col<char> varTypes(d_core.n_cols - d_stageOffsets(1, 1));
+    varTypes.fill(GRB_CONTINUOUS);  // TODO allow also for integer variables.
+
+    return varTypes;
+}
+
 arma::vec Smps::firstStageLowerBound()
 {
     if (d_lowerBounds.size() != d_core.n_cols)
@@ -198,7 +216,7 @@ arma::vec Smps::secondStageUpperBound()
     if (d_upperBounds.size() != d_core.n_cols)
         d_upperBounds = arma::vec(d_core.n_cols).fill(arma::datum::inf);
 
-    return d_upperBounds.subvec(d_stageOffsets(1, 1), d_lowerBounds.size() - 1);
+    return d_upperBounds.subvec(d_stageOffsets(1, 1), d_upperBounds.size() - 1);
 }
 
 arma::vec Smps::firstStageRhs()
