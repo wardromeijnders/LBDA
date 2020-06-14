@@ -18,10 +18,17 @@ namespace smps
         arma::vec d_lowerBounds;
         arma::vec d_upperBounds;
 
+        // Constraint index to vector of (value, prob) pairs.
+        std::map<int, std::vector<std::pair<double, double>>> d_indep;
+
         arma::umat d_stageOffsets;
 
         std::map<std::string, int> d_row2idx;
         std::map<std::string, int> d_col2idx;
+
+        arma::mat generateIndepScenarios();
+
+        arma::vec indepScenProbabilities();
 
     public:
         Smps() = default;
@@ -47,6 +54,9 @@ namespace smps
         bool addUpperBound(std::string const &var, double bound);
 
         bool addStage(std::string const &constr, std::string const &var);
+
+        bool addIndep(std::string const &constr,
+                      std::pair<double, double> value);
 
         arma::sp_mat Amat();
 
@@ -75,6 +85,10 @@ namespace smps
         arma::vec secondStageUpperBound();
 
         arma::vec firstStageRhs();
+
+        arma::mat generateScenarios();
+
+        arma::vec scenarioProbabilities();
     };
 }  // namespace smps
 

@@ -63,7 +63,8 @@ Problem Problem::fromSmps(char const *location, GRBEnv &env)
 
     problem.d_firstStageRhs = smps.firstStageRhs();
 
-    // TODO
+    problem.d_scenarios = smps.generateScenarios();
+    problem.d_scenarioProbabilities = smps.scenarioProbabilities();
 
     return problem;
 }

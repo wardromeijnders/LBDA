@@ -150,6 +150,12 @@ bool Smps::addUpperBound(std::string const &var, double bound)
     return true;
 }
 
+bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
+{
+    d_indep[d_row2idx[constr]].emplace_back(value);
+    return true;
+}
+
 arma::vec Smps::firstStageObjCoeffs()
 {
     return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);
@@ -222,4 +228,59 @@ arma::vec Smps::secondStageUpperBound()
 arma::vec Smps::firstStageRhs()
 {
     return d_rhs.subvec(0, d_stageOffsets(1, 0) - 1);
+}
+
+arma::mat Smps::generateScenarios()
+{
+    if (d_indep.size() > 0)
+        return generateIndepScenarios();
+
+    return arma::mat();  // TODO
+}
+
+arma::vec Smps::scenarioProbabilities()
+{
+    if (d_indep.size() > 0)
+        return indepScenProbabilities();
+
+    return arma::vec();  // TODO
+}
+
+arma::mat Smps::generateIndepScenarios()
+{
+    // This is loosely based on https://stackoverflow.com/a/48271759/4316405.
+    size_t nScenarios = 1;
+
+    for (auto const &[idx, distr] : d_indep)
+        nScenarios *= distr.size();
+
+    // Second-stage RHS (rows) for each scenario (cols).
+    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0), nScenarios);
+
+    for (size_t scenario = 0; scenario != nScenarios; ++scenario)
+    {
+        auto temp = scenario;
+
+        for (auto const &[constr, vec] : d_indep)
+        {
+            auto index = temp % vec.size();
+            temp /= vec.size();
+            scenarios(constr - d_stageOffsets(1, 0), scenario) = vec[index].first;
+        }
+    }
+
+    return scenarios;
+}
+
+arma::vec Smps::indepScenProbabilities()
+{
+    size_t nScenarios = 1;
+
+    for (auto const &[idx, distr] : d_indep)
+        nScenarios *= distr.size();
+
+    arma::vec probabilities(nScenarios);
+    probabilities.fill(1 / nScenarios);
+
+    return probabilities;
 }

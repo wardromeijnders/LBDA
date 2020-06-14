@@ -3,7 +3,6 @@
 #include <cassert>
 
 int main(int argc, char **argv)
-try
 {
     // TODO check all output numbers (verification).
     GRBEnv env;
@@ -21,8 +20,7 @@ try
 
     // TODO CLI selection of decomposition strategy?
     StrongBenders sbDecomposition{env, problem};
-    auto master3 = MasterProblem(master);
-    auto ptr = master3.solve(sbDecomposition);
+    auto ptr = master.solve(sbDecomposition);
     auto res = *ptr;
 
     std::cout << res;
@@ -30,8 +28,4 @@ try
     assert(std::abs(problem.evaluate(res)) - 59.8893 <= 0.001);
 
     GRBfreeenv(c_env);
-}
-catch (...)
-{
-    std::cerr << "Unexpected error, terminating.\n";
 }

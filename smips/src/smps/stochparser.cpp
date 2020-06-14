@@ -40,6 +40,10 @@ bool StochParser::transition(std::string const &line)
     for (size_t idx = 0; idx != std::size(names); ++idx)
         if (line.starts_with(names[idx]))
         {
+            if (idx > 1 && idx < 5 && line.find("DISCRETE") == std::string::npos)
+                std::cerr << "Stoch file: DISCRETE was not specified, but is"
+                             " assumed.\n";
+
             d_state = static_cast<State>(idx);
             return true;
         }
@@ -54,7 +58,16 @@ bool StochParser::parseStoch(const smps::DataLine &dataLine)
 
 bool StochParser::parseIndep(smps::DataLine const &dataLine)
 {
-    return false;  // TODO
+    if (dataLine.name() != "RHS")
+    {
+        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        return false;
+    }
+
+    auto [constr, value] = dataLine.firstDataEntry();
+    auto [_, prob] = dataLine.secondDataEntry();
+
+    return d_smps.addIndep(constr, std::make_pair(value, prob));
 }
 
 bool StochParser::parseBlocks(smps::DataLine const &dataLine)
