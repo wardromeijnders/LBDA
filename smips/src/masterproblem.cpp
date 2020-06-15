@@ -7,12 +7,12 @@ MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
     d_model.addVar(d_problem.d_L, arma::datum::inf, 1.0, GRB_CONTINUOUS);
 
     auto &Amat = d_problem.Amat();
-    GRBVar *xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
-                                    d_problem.d_firstStageUpperBound.memptr(),
-                                    d_problem.firstStageCoeffs().memptr(),
-                                    d_problem.firstStageVarTypes().memptr(),
-                                    nullptr,
-                                    Amat.n_rows);
+    auto *xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
+                                  d_problem.d_firstStageUpperBound.memptr(),
+                                  d_problem.firstStageCoeffs().memptr(),
+                                  d_problem.firstStageVarTypes().memptr(),
+                                  nullptr,
+                                  Amat.n_rows);
 
     GRBLinExpr lhs[Amat.n_cols];
 
