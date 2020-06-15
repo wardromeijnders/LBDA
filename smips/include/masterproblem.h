@@ -23,11 +23,6 @@ class MasterProblem
      */
     GRBmodel *d_cmodel;
 
-    /**
-     * Number of slack variables in the Gurobi model instance.
-     */
-    size_t d_nSlacks = 0;
-
 public:
     MasterProblem(GRBenv *c_env, Problem &problem);
 

@@ -38,6 +38,7 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
                nullptr);
 
     auto const &rhs = d_problem.firstStageRhs();
+    auto const &senses = d_problem.firstStageConstrSenses();
 
     for (size_t constraint = 0; constraint != Amat.n_cols; ++constraint)
     {
@@ -50,7 +51,7 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
              it != Amat.end_col(constraint);
              ++it)
         {
-            ind.emplace_back(it.row() + 1);  //skip theta!
+            ind.emplace_back(it.row() + 1);  // skip theta!
             val.emplace_back(*it);
         }
 
@@ -58,43 +59,16 @@ MasterProblem::MasterProblem(GRBenv *c_env, Problem &problem) :
                      ind.size(),
                      ind.data(),
                      val.data(),
-                     GRB_EQUAL,
+                     senses(constraint),
                      rhs(constraint),
                      nullptr);
     }
-
-    std::vector<int> vbeg;
-    std::vector<double> vval;
-
-    auto const &senses = d_problem.firstStageConstrSenses();
-
-    for (size_t idx = 0; idx != senses.size(); ++idx)
-        if (senses[idx] != GRB_EQUAL)
-        {
-            d_nSlacks++;
-
-            // Is either <= or >=.
-            vval.emplace_back(senses[idx] == GRB_LESS_EQUAL ? 1. : -1.);
-            vbeg.emplace_back(idx);
-        }
-
-    GRBaddvars(d_cmodel,
-               d_nSlacks,
-               d_nSlacks,
-               vbeg.data(),
-               vbeg.data(),
-               vval.data(),
-               nullptr,
-               nullptr,
-               nullptr,
-               nullptr,
-               nullptr);
 
     GRBupdatemodel(d_cmodel);
 }
 
 MasterProblem::MasterProblem(MasterProblem const &other) :
-    d_problem(other.d_problem), d_nSlacks(other.d_nSlacks)
+    d_problem(other.d_problem)
 {
     GRBupdatemodel(other.d_cmodel);
     d_cmodel = GRBcopymodel(other.d_cmodel);
@@ -107,33 +81,19 @@ MasterProblem::~MasterProblem()
 
 void MasterProblem::addCut(Decomposition::Cut &cut)
 {
-    d_nSlacks++;
-
-    GRBaddvar(d_cmodel,  // new slack variable
-              0,
-              nullptr,
-              nullptr,
-              0,
-              0,
-              arma::datum::inf,
-              GRB_CONTINUOUS,
-              nullptr);
-
     size_t const n1 = d_problem.Amat().n_rows;
 
-    auto cind = arma::regspace<arma::Col<int>>(0, n1 + 2);
-    cind[n1 + 1] = n1 + d_nSlacks;  // refers to the new slack variable.
+    auto cind = arma::regspace<arma::Col<int>>(0, n1 + 1);
 
-    arma::vec cval(n1 + 2);
+    arma::vec cval(n1 + 1);
     cval.subvec(1, n1) = -cut.beta;
-    cval[0] = 1;        // theta coefficient
-    cval[n1 + 1] = -1;  // slack coefficient (>= constraint)
+    cval[0] = 1;  // theta coefficient
 
     GRBaddconstr(d_cmodel,
-                 n1 + 2,
+                 n1 + 1,
                  cind.memptr(),
                  cval.memptr(),
-                 GRB_EQUAL,
+                 GRB_GREATER_EQUAL,
                  cut.gamma,
                  nullptr);
 }

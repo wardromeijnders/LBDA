@@ -26,7 +26,7 @@ namespace smps
         std::map<std::string, int> d_row2idx;
         std::map<std::string, int> d_col2idx;
 
-        arma::mat generateIndepScenarios();
+        arma::mat genIndepScenarios();
 
         arma::vec indepScenProbabilities();
 

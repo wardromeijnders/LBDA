@@ -233,7 +233,7 @@ arma::vec Smps::firstStageRhs()
 arma::mat Smps::generateScenarios()
 {
     if (d_indep.size() > 0)
-        return generateIndepScenarios();
+        return genIndepScenarios();
 
     return arma::mat();  // TODO
 }
@@ -246,7 +246,7 @@ arma::vec Smps::scenarioProbabilities()
     return arma::vec();  // TODO
 }
 
-arma::mat Smps::generateIndepScenarios()
+arma::mat Smps::genIndepScenarios()
 {
     // This is loosely based on https://stackoverflow.com/a/48271759/4316405.
     size_t nScenarios = 1;
@@ -279,8 +279,21 @@ arma::vec Smps::indepScenProbabilities()
     for (auto const &[idx, distr] : d_indep)
         nScenarios *= distr.size();
 
-    arma::vec probabilities(nScenarios);
-    probabilities.fill(1. / nScenarios);
+    arma::vec probabilities = arma::ones(nScenarios);
+
+    // TODO this partially duplicates genIndepScenarios above.
+    for (size_t scenario = 0; scenario != nScenarios; ++scenario)
+    {
+        auto temp = scenario;
+
+        for (auto const &[constr, vec] : d_indep)
+        {
+            auto index = temp % vec.size();
+            temp /= vec.size();
+
+            probabilities(scenario) *= vec[index].second;
+        }
+    }
 
     return probabilities;
 }
