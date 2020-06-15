@@ -10,6 +10,8 @@ namespace smps
     {
         using FileParser::FileParser;
 
+        bool d_parseInts = false;
+
         enum State
         {
             NONE,

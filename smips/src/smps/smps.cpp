@@ -51,28 +51,32 @@ bool Smps::addConstr(std::string const &name, char type)
     d_constrSenses.resize(d_core.n_rows);
     d_constrSenses(d_core.n_rows - 1) = type;
 
-    d_row2idx[name] = d_core.n_rows - 1;
+    d_constr2idx[name] = d_core.n_rows - 1;
 
     return true;
 }
 
 bool Smps::addCoeff(std::string const &constr,
                     std::string const &var,
-                    double coeff)
+                    double coeff,
+                    char varType)
 {
-    if (!d_col2idx.contains(var))  // a new variable.
+    if (!d_var2idx.contains(var))  // a new variable.
     {
         d_core.resize(d_core.n_rows, d_core.n_cols + 1);
-        d_col2idx[var] = d_core.n_cols - 1;
+        d_var2idx[var] = d_core.n_cols - 1;
 
         d_objCoeffs.resize(d_core.n_cols);
         d_objCoeffs(d_core.n_cols - 1) = 0;
+
+        d_varTypes.resize(d_core.n_cols);
+        d_varTypes(d_core.n_cols - 1) = varType;
     }
 
     if (constr == d_objName)  // is an objective coefficient.
-        d_objCoeffs(d_col2idx[var]) = coeff;
-    else if (d_row2idx.contains(constr))  // is an existing constraint.
-        d_core(d_row2idx[constr], d_col2idx[var]) = coeff;
+        d_objCoeffs(d_var2idx[var]) = coeff;
+    else if (d_constr2idx.contains(constr))  // is an existing constraint.
+        d_core(d_constr2idx[constr], d_var2idx[var]) = coeff;
     else
         return false;  // is another free row (but we already have an objective)
 
@@ -81,23 +85,23 @@ bool Smps::addCoeff(std::string const &constr,
 
 bool Smps::addRhs(std::string const &constr, double coeff)
 {
-    if (!d_row2idx.contains(constr))
+    if (!d_constr2idx.contains(constr))
         return false;
 
-    d_rhs[d_row2idx[constr]] = coeff;
+    d_rhs[d_constr2idx[constr]] = coeff;
 
     return true;
 }
 
 bool Smps::addStage(std::string const &constr, std::string const &var)
 {
-    if (!d_row2idx.contains(constr) || !d_col2idx.contains(var))
+    if (!d_constr2idx.contains(constr) || !d_var2idx.contains(var))
         return false;
 
     d_stageOffsets.resize(d_stageOffsets.n_rows + 1, 2);
 
-    d_stageOffsets(d_stageOffsets.n_rows - 1, 0) = d_row2idx[constr];
-    d_stageOffsets(d_stageOffsets.n_rows - 1, 1) = d_col2idx[var];
+    d_stageOffsets(d_stageOffsets.n_rows - 1, 0) = d_constr2idx[constr];
+    d_stageOffsets(d_stageOffsets.n_rows - 1, 1) = d_var2idx[var];
 
     return true;
 }
@@ -137,7 +141,7 @@ bool Smps::addLowerBound(std::string const &var, double bound)
     if (d_lowerBounds.size() != d_core.n_cols)  // not initialised before
         d_lowerBounds = arma::zeros(d_core.n_cols);
 
-    d_lowerBounds[d_col2idx[var]] = bound;
+    d_lowerBounds[d_var2idx[var]] = bound;
     return true;
 }
 
@@ -146,19 +150,24 @@ bool Smps::addUpperBound(std::string const &var, double bound)
     if (d_upperBounds.size() != d_core.n_cols)  // not initialised before
         d_upperBounds = arma::vec(d_core.n_cols).fill(arma::datum::inf);
 
-    d_upperBounds[d_col2idx[var]] = bound;
+    d_upperBounds[d_var2idx[var]] = bound;
     return true;
 }
 
 bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
 {
-    d_indep[d_row2idx[constr]].emplace_back(value);
+    d_indep[d_constr2idx[constr]].emplace_back(value);
     return true;
 }
 
 arma::vec Smps::firstStageObjCoeffs()
 {
     return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);
+}
+
+bool Smps::addVarType(std::string const &var, char type)
+{
+    d_varTypes(d_var2idx[var]) = type;
 }
 
 arma::vec Smps::secondStageObjCoeffs()
@@ -179,18 +188,12 @@ arma::Col<char> Smps::secondStageConstrSenses()
 
 arma::Col<char> Smps::firstStageVarTypes()
 {
-    arma::Col<char> varTypes(d_stageOffsets(1, 1));
-    varTypes.fill(GRB_CONTINUOUS);  // TODO allow also for integer variables.
-
-    return varTypes;
+    return d_varTypes.subvec(0, d_stageOffsets(1, 1) - 1);
 }
 
 arma::Col<char> Smps::secondStageVarTypes()
 {
-    arma::Col<char> varTypes(d_core.n_cols - d_stageOffsets(1, 1));
-    varTypes.fill(GRB_CONTINUOUS);  // TODO allow also for integer variables.
-
-    return varTypes;
+    return d_varTypes.subvec(d_stageOffsets(1, 1), d_varTypes.size() - 1);
 }
 
 arma::vec Smps::firstStageLowerBound()

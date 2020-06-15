@@ -23,8 +23,8 @@ namespace smps
 
         arma::umat d_stageOffsets;
 
-        std::map<std::string, int> d_row2idx;
-        std::map<std::string, int> d_col2idx;
+        std::map<std::string, int> d_constr2idx;
+        std::map<std::string, int> d_var2idx;
 
         arma::mat genIndepScenarios();
 
@@ -45,7 +45,8 @@ namespace smps
 
         bool addCoeff(std::string const &constr,
                       std::string const &var,
-                      double coeff);
+                      double coeff,
+                      char varType);
 
         bool addRhs(std::string const &constr, double coeff);
 
@@ -57,6 +58,8 @@ namespace smps
 
         bool addIndep(std::string const &constr,
                       std::pair<double, double> value);
+
+        bool addVarType(std::string const &var, char type);
 
         arma::sp_mat Amat();
 

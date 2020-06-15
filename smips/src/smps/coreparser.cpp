@@ -79,8 +79,22 @@ bool CoreParser::parseRows(DataLine const &dataLine)
 
 bool CoreParser::parseCols(DataLine const &dataLine)
 {
-    auto [constr, coeff] = dataLine.firstDataEntry();
-    auto res = d_smps.addCoeff(constr, dataLine.name(), coeff);
+    auto const &[constr, coeff] = dataLine.firstDataEntry();
+    auto const &secondDataName = dataLine.secondDataName();
+
+    if (constr.find("MARKER") != std::string::npos)
+    {
+        if (secondDataName.find("INTORG") != std::string::npos)
+            d_parseInts = true;
+
+        if (secondDataName.find("INTEND") != std::string::npos)
+            d_parseInts = false;
+    }
+
+    auto res = d_smps.addCoeff(constr,
+                               dataLine.name(),
+                               coeff,
+                               d_parseInts ? GRB_INTEGER : GRB_CONTINUOUS);
 
     if (!dataLine.hasSecondDataEntry())
         return res;
@@ -101,11 +115,26 @@ bool CoreParser::parseBounds(DataLine const &dataLine)
     // TODO check if this works.
     auto [var, bound] = dataLine.firstDataEntry();
 
+    // This follows mostly from
+    // http://www-eio.upc.es/lceio/manuals/cplex-11/html/reffileformatscplex/reffileformatscplex11.html
     if (dataLine.indicator() == "LO")  // lower bound
         return d_smps.addLowerBound(var, bound);
 
     if (dataLine.indicator() == "UP")  // upper bound
         return d_smps.addUpperBound(var, bound);
+
+    if (dataLine.indicator() == "LI")  // integer lower bound
+        return d_smps.addVarType(var, GRB_INTEGER)
+               && d_smps.addLowerBound(var, bound);
+
+    if (dataLine.indicator() == "UI")  // integer upper bound
+        return d_smps.addVarType(var, GRB_INTEGER)
+               && d_smps.addUpperBound(var, bound);
+
+    if (dataLine.indicator() == "BV")  // binary variable
+        return d_smps.addVarType(var, GRB_BINARY)
+               && d_smps.addLowerBound(var, 0.0)
+               && d_smps.addUpperBound(var, 1.0);
 
     return false;
 }
