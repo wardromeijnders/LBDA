@@ -79,29 +79,31 @@ bool CoreParser::parseRows(DataLine const &dataLine)
 
 bool CoreParser::parseCols(DataLine const &dataLine)
 {
-    auto const &[constr, coeff] = dataLine.firstDataEntry();
+    auto const &firstDataName = dataLine.firstDataName();
     auto const &secondDataName = dataLine.secondDataName();
 
-    if (constr.find("MARKER") != std::string::npos)
+    if (firstDataName.find("MARKER") != std::string::npos)
     {
         if (secondDataName.find("INTORG") != std::string::npos)
             d_parseInts = true;
 
         if (secondDataName.find("INTEND") != std::string::npos)
             d_parseInts = false;
+
+        return true;  // this is a marker line, nothing to parse.
     }
 
-    auto res = d_smps.addCoeff(constr,
-                               dataLine.name(),
-                               coeff,
-                               d_parseInts ? GRB_INTEGER : GRB_CONTINUOUS);
+    auto const &var = dataLine.name();
+    auto const &[constr1, coeff1] = dataLine.firstDataEntry();
+    auto type = d_parseInts ? GRB_INTEGER : GRB_CONTINUOUS;
+
+    auto res = d_smps.addCoeff(constr1, var, coeff1, type);
 
     if (!dataLine.hasSecondDataEntry())
         return res;
 
-    // TODO second data entry?
-
-    return res;
+    auto const &[constr2, coeff2] = dataLine.secondDataEntry();
+    return res && d_smps.addCoeff(constr2, var, coeff2, type);
 }
 
 bool CoreParser::parseRhs(DataLine const &dataLine)

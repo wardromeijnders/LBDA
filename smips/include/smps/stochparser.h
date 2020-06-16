@@ -10,6 +10,8 @@ namespace smps
     {
         using FileParser::FileParser;
 
+        std::string d_scenarioName;  // used when parsing SCENARIOS.
+
         enum State
         {
             NONE,

@@ -1,24 +1,24 @@
 #include "smps/dataline.h"
-
+#include <iostream>
 using namespace smps;
 
 DataLine::DataLine(const std::string &line)
 {
     // TODO init section would be nice, but how?
     d_indicator = trim(line.substr(1, 2));
-    d_name = trim(line.substr(4, 7));
+    d_name = trim(line.substr(4, 8));
 
     if (line.length() >= 14)
-        d_dataName1 = trim(line.substr(14, 7));
+        d_dataName1 = trim(line.substr(14, 8));
 
     if (line.length() >= 24)
-        d_numeric1 = trim(line.substr(24, 11));
+        d_numeric1 = trim(line.substr(24, 12));
 
     if (line.length() >= 39)
-        d_dataName2 = trim(line.substr(39, 7));
+        d_dataName2 = trim(line.substr(39, 8));
 
     if (line.length() >= 49)
-        d_numeric2 = trim(line.substr(49, 11));
+        d_numeric2 = trim(line.substr(49, 12));
 }
 
 std::string const &DataLine::indicator() const

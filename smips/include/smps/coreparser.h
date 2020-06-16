@@ -10,7 +10,7 @@ namespace smps
     {
         using FileParser::FileParser;
 
-        bool d_parseInts = false;
+        bool d_parseInts = false;  // maybe used when parsing COLUMNS.
 
         enum State
         {

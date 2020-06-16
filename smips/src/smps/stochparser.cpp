@@ -72,10 +72,30 @@ bool StochParser::parseIndep(smps::DataLine const &dataLine)
 
 bool StochParser::parseBlocks(smps::DataLine const &dataLine)
 {
+    if (dataLine.name() != "RHS")
+    {
+        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        return false;
+    }
+
     return false;  // TODO
 }
 
 bool StochParser::parseScenarios(smps::DataLine const &dataLine)
 {
-    return false;  // TODO
+    if (dataLine.indicator() == "SC")  // new scenario
+    {
+        d_scenarioName = dataLine.name();
+        auto const &[parent, prob] = dataLine.firstDataEntry();
+
+        return d_smps.addScenario(d_scenarioName, parent, prob);
+    }
+    else if (dataLine.name() != "RHS")
+    {
+        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        return false;
+    }
+
+    auto const &[constr, value] = dataLine.firstDataEntry();
+    return d_smps.addScenarioRealisation(d_scenarioName, constr, value);
 }

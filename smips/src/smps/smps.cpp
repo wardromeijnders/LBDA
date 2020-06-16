@@ -160,6 +160,21 @@ bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
     return true;
 }
 
+bool Smps::addScenario(std::string const &scenario,
+                       std::string const &parent,
+                       double probability)
+{
+    return true;  // TODO
+}
+
+bool Smps::addScenarioRealisation(std::string const &scenario,
+                                  std::string const &constr,
+                                  double value)
+{
+    return true;  // TODO
+}
+
+
 arma::vec Smps::firstStageObjCoeffs()
 {
     return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);

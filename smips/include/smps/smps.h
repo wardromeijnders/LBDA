@@ -59,6 +59,14 @@ namespace smps
         bool addIndep(std::string const &constr,
                       std::pair<double, double> value);
 
+        bool addScenario(std::string const &scenario,
+                         std::string const &parent,
+                         double probability);
+
+        bool addScenarioRealisation(std::string const &scenario,
+                                    std::string const &constr,
+                                    double value);
+
         bool addVarType(std::string const &var, char type);
 
         arma::sp_mat Amat();
