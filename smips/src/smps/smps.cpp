@@ -332,6 +332,7 @@ arma::mat Smps::genScenarios()
                         d_scenarios.size());
 
     // TODO start from second stage default rhs (if available)
+    // TODO look to parent for rest of scenario
     for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
         for (auto const &[constr, value] : d_scenarios[scenIdx].rhs)
             scenarios(constr - d_stageOffsets(1, 0), scenIdx) = value;
