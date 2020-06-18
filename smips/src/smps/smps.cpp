@@ -20,17 +20,6 @@ void Smps::readSmps(std::string const &location)
     stochParser.parse(location + ".sto");
 }
 
-std::string const &Smps::name() const
-{
-    return d_name;
-}
-
-bool Smps::setName(std::string const &name)
-{
-    d_name = name;
-    return true;
-}
-
 bool Smps::addObjective(std::string const &name)
 {
     if (d_objName.empty())
@@ -164,13 +153,31 @@ bool Smps::addScenario(std::string const &scenario,
                        std::string const &parent,
                        double probability)
 {
-    return true;  // TODO
+    size_t const idx = d_scenarios.size();
+
+    ScenNode *par = nullptr;
+
+    if (d_scen2idx.contains(parent))
+        par = d_scenarios.data() + d_scen2idx[parent];
+
+    ScenNode scen{probability, {}, par};
+
+    d_scenarios.emplace_back(scen);
+    d_scen2idx[scenario] = idx;
+
+    return true;
 }
 
 bool Smps::addScenarioRealisation(std::string const &scenario,
                                   std::string const &constr,
                                   double value)
 {
+    size_t const idx = d_scen2idx[scenario];
+    ScenNode scen = d_scenarios[idx];
+
+    size_t const constrIdx = d_constr2idx[constr];
+    scen.rhs[constrIdx] = value;
+
     return true;  // TODO
 }
 
@@ -178,11 +185,6 @@ bool Smps::addScenarioRealisation(std::string const &scenario,
 arma::vec Smps::firstStageObjCoeffs()
 {
     return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);
-}
-
-bool Smps::addVarType(std::string const &var, char type)
-{
-    d_varTypes(d_var2idx[var]) = type;
 }
 
 arma::vec Smps::secondStageObjCoeffs()
@@ -250,16 +252,22 @@ arma::vec Smps::firstStageRhs()
 
 arma::mat Smps::generateScenarios()
 {
-    if (d_indep.size() > 0)
+    if (d_indep.empty())
         return genIndepScenarios();
+
+    if (d_scenarios.empty())
+        return genScenarios();
 
     return arma::mat();  // TODO
 }
 
 arma::vec Smps::scenarioProbabilities()
 {
-    if (d_indep.size() > 0)
+    if (d_indep.empty())
         return indepScenProbabilities();
+
+    if (d_scenarios.empty())
+        return scenProbabilities();
 
     return arma::vec();  // TODO
 }
@@ -267,6 +275,7 @@ arma::vec Smps::scenarioProbabilities()
 arma::mat Smps::genIndepScenarios()
 {
     // This is loosely based on https://stackoverflow.com/a/48271759/4316405.
+    // TODO start from second stage default rhs (if available)
     size_t nScenarios = 1;
 
     for (auto const &[idx, distr] : d_indep)
@@ -312,6 +321,30 @@ arma::vec Smps::indepScenProbabilities()
             probabilities(scenario) *= vec[index].second;
         }
     }
+
+    return probabilities;
+}
+
+arma::mat Smps::genScenarios()
+{
+    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
+                        d_scenarios.size());
+
+    // TODO start from second stage default rhs (if available)
+    for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
+    {
+        // TODO
+    }
+
+    return scenarios;
+}
+
+arma::vec Smps::scenProbabilities()
+{
+    arma::vec probabilities(d_scenarios.size());
+
+    for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
+        probabilities[scenIdx] = d_scenarios[scenIdx].probability;
 
     return probabilities;
 }

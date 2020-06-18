@@ -8,6 +8,13 @@ namespace smps
 {
     class Smps
     {
+        struct ScenNode  // scenario node - contains data
+        {                // and a pointer-to-parent.
+            double probability;
+            std::map<int, double> rhs;
+            struct ScenNode *parent;
+        };
+
         std::string d_name;
         std::string d_objName;
         arma::vec d_objCoeffs;
@@ -18,8 +25,12 @@ namespace smps
         arma::vec d_lowerBounds;
         arma::vec d_upperBounds;
 
-        // Constraint index to vector of (value, prob) pairs.
+        // Constraint index to vector of (value, prob) pairs. (INDEP)
         std::map<int, std::vector<std::pair<double, double>>> d_indep;
+
+        // Vector of scenarios. (SCENARIOS)
+        std::vector<ScenNode> d_scenarios;
+        std::map<std::string, int> d_scen2idx;
 
         arma::umat d_stageOffsets;
 
@@ -30,14 +41,25 @@ namespace smps
 
         arma::vec indepScenProbabilities();
 
+        arma::mat genScenarios();
+
+        arma::vec scenProbabilities();
+
     public:
         Smps() = default;
 
         void readSmps(std::string const &location);
 
-        std::string const &name() const;
+        std::string const &name() const
+        {
+            return d_name;
+        }
 
-        bool setName(std::string const &name);
+        bool setName(std::string const &name)
+        {
+            d_name = name;
+            return true;
+        }
 
         bool addObjective(std::string const &name);
 
@@ -67,7 +89,11 @@ namespace smps
                                     std::string const &constr,
                                     double value);
 
-        bool addVarType(std::string const &var, char type);
+        bool addVarType(std::string const &var, char type)
+        {
+            d_varTypes(d_var2idx[var]) = type;
+            return true;
+        }
 
         arma::sp_mat Amat();
 
