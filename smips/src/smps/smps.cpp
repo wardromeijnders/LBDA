@@ -155,10 +155,9 @@ bool Smps::addScenario(std::string const &scenario,
 {
     size_t const idx = d_scenarios.size();
 
-    ScenNode *par = nullptr;
-
-    if (d_scen2idx.contains(parent))
-        par = d_scenarios.data() + d_scen2idx[parent];
+    ScenNode *par = d_scen2idx.contains(parent)
+                        ? d_scenarios.data() + d_scen2idx[parent]
+                        : nullptr;
 
     ScenNode scen{probability, {}, par};
 
@@ -172,13 +171,15 @@ bool Smps::addScenarioRealisation(std::string const &scenario,
                                   std::string const &constr,
                                   double value)
 {
+    if (!d_scen2idx.contains(scenario) || !d_constr2idx.contains(constr))
+        return false;
+
     size_t const idx = d_scen2idx[scenario];
-    ScenNode scen = d_scenarios[idx];
-
     size_t const constrIdx = d_constr2idx[constr];
-    scen.rhs[constrIdx] = value;
 
-    return true;  // TODO
+    d_scenarios[idx].rhs[constrIdx] = value;
+
+    return true;
 }
 
 
@@ -252,10 +253,10 @@ arma::vec Smps::firstStageRhs()
 
 arma::mat Smps::generateScenarios()
 {
-    if (d_indep.empty())
+    if (!d_indep.empty())
         return genIndepScenarios();
 
-    if (d_scenarios.empty())
+    if (!d_scenarios.empty())
         return genScenarios();
 
     return arma::mat();  // TODO
@@ -263,10 +264,10 @@ arma::mat Smps::generateScenarios()
 
 arma::vec Smps::scenarioProbabilities()
 {
-    if (d_indep.empty())
+    if (!d_indep.empty())
         return indepScenProbabilities();
 
-    if (d_scenarios.empty())
+    if (!d_scenarios.empty())
         return scenProbabilities();
 
     return arma::vec();  // TODO
@@ -332,9 +333,8 @@ arma::mat Smps::genScenarios()
 
     // TODO start from second stage default rhs (if available)
     for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
-    {
-        // TODO
-    }
+        for (auto const &[constr, value] : d_scenarios[scenIdx].rhs)
+            scenarios(constr - d_stageOffsets(1, 0), scenIdx) = value;
 
     return scenarios;
 }
