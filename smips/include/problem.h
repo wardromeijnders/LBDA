@@ -6,6 +6,7 @@
 #include <iosfwd>
 
 
+// TODO this class is too big, and might need to be cut down a little
 class Problem
 {
     // TODO this is not the place - should move to the actual solver stuff?
@@ -17,113 +18,132 @@ class Problem
 
     bool d_isSubProblemInitialised = false;
 
-    size_t d_nFirstStageIntVars = 0;  // TODO make constant!
-    size_t d_nSecondStageIntVars = 0;
+    arma::Col<char> d_firstStageConstrSenses;
+    arma::Col<char> d_secondStageConstrSenses;
 
-    arma::mat d_Amat;
-    arma::mat d_Tmat;
-    arma::mat d_Wmat;
+    arma::Col<char> d_firstStageVarTypes;
+    arma::Col<char> d_secondStageVarTypes;
+
+    arma::sp_mat d_Amat;
+    arma::sp_mat d_Tmat;
+    arma::sp_mat d_Wmat;
+
+    arma::vec d_firstStageCoeffs;
+    arma::vec d_secondStageCoeffs;
+
+    arma::vec d_firstStageRhs;
 
     // Each column corresponds to a single scenario (omega).
-    arma::mat d_scenarios;
+    arma::mat d_scenarios;              // TODO map
+    arma::vec d_scenarioProbabilities;  // TODO map
 
     void initSub();  // initializes the subproblem, and sets rhs = 0. Called by
                      // evaluate() when evaluate is called for the first time.
 
-    void clearSub();  // should be called if problem data changes
-
 public:
     // TODO make these members private
-    double d_L = 0;  // lb of Q - TODO is this a sensible default?
-
-    // number of >= and <= constraints in the first and second stage
-    size_t d_nFirstStageLeqConstraints;
-    size_t d_nFirstStageGeqConstraints;
-
-    size_t d_nSecondStageLeqConstraints;
-    size_t d_nSecondStageGeqConstraints;
+    double d_L = 0;  // lb on Q - TODO is this a sensible default?
 
     arma::vec d_firstStageLowerBound;
     arma::vec d_firstStageUpperBound;
     arma::vec d_secondStageLowerBound;
     arma::vec d_secondStageUpperBound;
 
-    arma::vec d_firstStageCoeffs;
-    arma::vec d_secondStageCoeffs;
-
-    arma::vec d_scenarioProbabilities;
-    arma::vec d_firstStageRhs;
-
     Problem(GRBEnv &env);
 
-    Problem(const Problem &other) = delete;
+    /**
+     * Constructs a Problem instance from the passed-in SMPS file location.
+     *
+     * @param location SMPS file location (should not contain any extensions).
+     * @param env      Gurobi environment in which to operate.
+     * @return         Problem instance.
+     */
+    static Problem fromSmps(char const *location, GRBEnv &env);
 
     ~Problem();
-
-    void enforceCcr(double penalty);  // TODO: enforce CCR assumption
-
-    void ssv95(size_t S,
-               bool fs_continuous,
-               bool ss_binary,
-               bool standard_T = true);
 
     // evaluates cx + Q(x) (does not check feasibility)
     double evaluate(arma::vec const &x);
 
-    [[nodiscard]] size_t nFirstStageIntVars() const;
+    arma::Col<char> const &firstStageConstrSenses() const
+    {
+        return d_firstStageConstrSenses;
+    }
 
-    [[nodiscard]] size_t nSecondStageIntVars() const;
+    arma::Col<char> const &secondStageConstrSenses() const
+    {
+        return d_secondStageConstrSenses;
+    }
 
-    [[nodiscard]] size_t nScenarios() const;
+    arma::Col<char> &firstStageVarTypes()
+    {
+        return d_firstStageVarTypes;
+    }
 
-    [[nodiscard]] arma::mat const &Amat() const;
-    [[nodiscard]] arma::mat &Amat();
+    arma::Col<char> const &firstStageVarTypes() const
+    {
+        return d_firstStageVarTypes;
+    }
 
-    [[nodiscard]] arma::mat const &Wmat() const;
+    arma::Col<char> const &secondStageVarTypes() const
+    {
+        return d_secondStageVarTypes;
+    }
 
-    [[nodiscard]] arma::mat const &Tmat() const;
+    size_t nScenarios() const
+    {
+        return d_scenarios.n_cols;
+    }
 
-    [[nodiscard]] arma::mat const &scenarios() const;
+    arma::sp_mat const &Amat() const
+    {
+        return d_Amat;
+    }
+
+    arma::sp_mat &Amat()
+    {
+        return d_Amat;
+    }
+
+    arma::sp_mat const &Wmat() const
+    {
+        return d_Wmat;
+    }
+
+    arma::sp_mat const &Tmat() const
+    {
+        return d_Tmat;
+    }
+
+    arma::vec &firstStageCoeffs()
+    {
+        return d_firstStageCoeffs;
+    }
+
+    arma::vec const &firstStageCoeffs() const
+    {
+        return d_firstStageCoeffs;
+    }
+
+    arma::vec const &secondStageCoeffs() const
+    {
+        return d_secondStageCoeffs;
+    }
+
+    arma::vec const &firstStageRhs() const
+    {
+        return d_firstStageRhs;
+    }
+
+    arma::mat const &scenarios() const
+    {
+        return d_scenarios;
+    }
+
+    double probability(size_t scenario) const
+    {
+        return d_scenarioProbabilities[scenario];
+    }
 };
-
-inline size_t Problem::nFirstStageIntVars() const
-{
-    return d_nFirstStageIntVars;
-};
-
-inline size_t Problem::nSecondStageIntVars() const
-{
-    return d_nSecondStageIntVars;
-};
-
-inline size_t Problem::nScenarios() const
-{
-    return d_scenarios.n_cols;
-}
-
-inline arma::mat const &Problem::Amat() const
-{
-    return d_Amat;
-}
-
-inline arma::mat &Problem::Amat()
-{
-    return d_Amat;
-}
-
-inline arma::mat const &Problem::Wmat() const
-{
-    return d_Wmat;
-}
-
-inline arma::mat const &Problem::Tmat() const
-{
-    return d_Tmat;
-}
-
-inline arma::mat const &Problem::scenarios() const
-{
-    return d_scenarios;
-}
 
 #endif

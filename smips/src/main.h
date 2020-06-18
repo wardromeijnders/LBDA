@@ -8,5 +8,6 @@
 #include "masterproblem.h"
 
 #include <gurobi_c++.h>
+#include <iostream>
 
 #endif  // MAIN_H
