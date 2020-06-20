@@ -283,7 +283,9 @@ arma::mat Smps::genIndepScenarios()
         nScenarios *= distr.size();
 
     // Second-stage RHS (rows) for each scenario (cols).
-    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0), nScenarios);
+    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
+                        nScenarios,
+                        arma::fill::zeros);
 
     for (size_t scenario = 0; scenario != nScenarios; ++scenario)
     {
@@ -329,7 +331,8 @@ arma::vec Smps::indepScenProbabilities()
 arma::mat Smps::genScenarios()
 {
     arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
-                        d_scenarios.size());
+                        d_scenarios.size(),
+                        arma::fill::zeros);
 
     // TODO start from second stage default rhs (if available)
     // TODO look to parent for rest of scenario
