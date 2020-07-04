@@ -123,6 +123,13 @@ namespace smps
 
         arma::vec firstStageRhs();
 
+        /**
+         * Base RHS for the second stage. Note that this is not the scenario
+         * specific RHS, which should be obtained via
+         * <code>generateScenarios()</code>.
+         */
+        arma::vec secondStageRhs();
+
         arma::mat generateScenarios();
 
         arma::vec scenarioProbabilities();

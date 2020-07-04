@@ -18,13 +18,13 @@ public:
     MasterProblem(GRBEnv &env, Problem &problem);
 
     /**
-     * Adds decomposition <code>theta >= beta^T x + gamma</code>.
+     * Adds cut <code>theta >= beta^T x + gamma</code>.
      */
     void addCut(Decomposition::Cut &cut);
 
     /**
-     * Solves the master problem using the decomposition strategy. The master
-     * problem is solved s.t. the optimality gap is smaller than tol.
+     * Solves the master problem using the given decomposition strategy. The
+     * master problem is solved s.t. the optimality gap is smaller than tol.
      *
      * TODO STATISTICS - number of cuts, run-time?
      *

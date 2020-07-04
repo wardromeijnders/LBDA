@@ -251,6 +251,11 @@ arma::vec Smps::firstStageRhs()
     return d_rhs.subvec(0, d_stageOffsets(1, 0) - 1);
 }
 
+arma::vec Smps::secondStageRhs()
+{
+    return d_rhs.subvec(d_stageOffsets(1, 0), d_rhs.size() - 1);
+}
+
 arma::mat Smps::generateScenarios()
 {
     if (!d_indep.empty())
@@ -276,16 +281,14 @@ arma::vec Smps::scenarioProbabilities()
 arma::mat Smps::genIndepScenarios()
 {
     // This is loosely based on https://stackoverflow.com/a/48271759/4316405.
-    // TODO start from second stage default rhs (if available)
     size_t nScenarios = 1;
 
     for (auto const &[idx, distr] : d_indep)
         nScenarios *= distr.size();
 
-    // Second-stage RHS (rows) for each scenario (cols).
-    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
-                        nScenarios,
-                        arma::fill::zeros);
+    // Second-stage RHS (rows) for each scenario (cols). The base RHS is
+    // replicated and overwritten with the scenario-specific RHS, where required.
+    arma::mat scenarios = arma::repmat(secondStageRhs(), 1, nScenarios);
 
     for (size_t scenario = 0; scenario != nScenarios; ++scenario)
     {
@@ -330,12 +333,10 @@ arma::vec Smps::indepScenProbabilities()
 
 arma::mat Smps::genScenarios()
 {
-    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
-                        d_scenarios.size(),
-                        arma::fill::zeros);
+    // Second-stage RHS (rows) for each scenario (cols). The base RHS is
+    // replicated and overwritten with the scenario-specific RHS, where required.
+    arma::mat scenarios = arma::repmat(secondStageRhs(), 1, d_scenarios.size());
 
-    // TODO start from second stage default rhs (if available)
-    // TODO look to parent for rest of scenario
     for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
         for (auto const &[constr, value] : d_scenarios[scenIdx].rhs)
             scenarios(constr - d_stageOffsets(1, 0), scenIdx) = value;
