@@ -31,9 +31,9 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
         gamma += prob * arma::dot(info.lambda, omega);
 
         // TODO discuss with NvdL (what happens when unconstrained?)
-        if (d_problem.d_secondStageUpperBound.is_finite())
+        if (d_problem.secondStageUpperBound().is_finite())
         {
-            auto val = arma::dot(info.pi_u, d_problem.d_secondStageUpperBound);
+            auto val = arma::dot(info.pi_u, d_problem.secondStageUpperBound());
             gamma += prob * val;
         }
 

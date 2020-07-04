@@ -3,12 +3,12 @@
 MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
     d_problem(problem), d_model(env)
 {
-    // Theta
-    d_model.addVar(d_problem.d_L, arma::datum::inf, 1.0, GRB_CONTINUOUS);
+    // Theta - TODO allow different UB/LB?
+    d_model.addVar(0, arma::datum::inf, 1.0, GRB_CONTINUOUS);
 
     auto &Amat = d_problem.Amat();
-    auto *xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
-                                  d_problem.d_firstStageUpperBound.memptr(),
+    auto *xVars = d_model.addVars(d_problem.firstStageLowerBound().memptr(),
+                                  d_problem.firstStageUpperBound().memptr(),
                                   d_problem.firstStageCoeffs().memptr(),
                                   d_problem.firstStageVarTypes().memptr(),
                                   nullptr,

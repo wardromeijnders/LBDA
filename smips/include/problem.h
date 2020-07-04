@@ -34,22 +34,20 @@ class Problem
     arma::vec d_firstStageRhs;
 
     // Each column corresponds to a single scenario (omega).
-    arma::mat d_scenarios;              // TODO map
-    arma::vec d_scenarioProbabilities;  // TODO map
+    arma::mat d_scenarios;
+    arma::vec d_scenarioProbabilities;
+
+    arma::vec d_firstStageLowerBound;
+    arma::vec d_firstStageUpperBound;
+
+    arma::vec d_secondStageLowerBound;
+    arma::vec d_secondStageUpperBound;
 
     void initSub();  // initializes the subproblem, and sets rhs = 0. Called by
                      // evaluate() when evaluate is called for the first time.
 
 public:
-    // TODO make these members private
-    double d_L = 0;  // lb on Q - TODO is this a sensible default?
-
-    arma::vec d_firstStageLowerBound;
-    arma::vec d_firstStageUpperBound;
-    arma::vec d_secondStageLowerBound;
-    arma::vec d_secondStageUpperBound;
-
-    Problem(GRBEnv &env);
+    explicit Problem(GRBEnv &env);
 
     /**
      * Constructs a Problem instance from the passed-in SMPS file location.
@@ -133,6 +131,26 @@ public:
     arma::vec const &firstStageRhs() const
     {
         return d_firstStageRhs;
+    }
+
+    arma::vec const &firstStageLowerBound() const
+    {
+        return d_firstStageLowerBound;
+    }
+
+    arma::vec const &firstStageUpperBound() const
+    {
+        return d_firstStageUpperBound;
+    }
+
+    arma::vec const &secondStageLowerBound() const
+    {
+        return d_secondStageLowerBound;
+    }
+
+    arma::vec const &secondStageUpperBound() const
+    {
+        return d_secondStageUpperBound;
     }
 
     arma::mat const &scenarios() const

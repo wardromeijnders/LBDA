@@ -16,8 +16,8 @@ LooseBenders::LooseBenders(GRBEnv &env,
 {
     auto const &Wmat = d_problem.Wmat();
 
-    d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
-                             d_problem.d_secondStageUpperBound.memptr(),
+    d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
+                             d_problem.secondStageUpperBound().memptr(),
                              problem.secondStageCoeffs().memptr(),
                              problem.secondStageVarTypes().memptr(),
                              nullptr,
@@ -135,8 +135,8 @@ void LooseBenders::update(arma::vec &rhs,
 
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);
 
-    arma::vec lb = d_problem.d_secondStageLowerBound;
-    arma::vec ub = d_problem.d_secondStageUpperBound;
+    arma::vec lb = d_problem.secondStageLowerBound();
+    arma::vec ub = d_problem.secondStageUpperBound();
 
     // Relax appropriate variable bounds if the bound is not tight.
     lb.elem(arma::find(vBasis != GRB_NONBASIC_LOWER)).fill(-arma::datum::inf);

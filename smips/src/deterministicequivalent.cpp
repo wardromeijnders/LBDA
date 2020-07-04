@@ -18,8 +18,8 @@ void DeterministicEquivalent::initFirstStage()
 {
     auto const &Amat = d_problem.Amat();
 
-    d_xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
-                              d_problem.d_firstStageUpperBound.memptr(),
+    d_xVars = d_model.addVars(d_problem.firstStageLowerBound().memptr(),
+                              d_problem.firstStageUpperBound().memptr(),
                               d_problem.firstStageCoeffs().memptr(),
                               d_problem.firstStageVarTypes().memptr(),
                               nullptr,
@@ -55,8 +55,8 @@ void DeterministicEquivalent::initSecondStage()
 
         // add variables
         GRBVar *yVars = d_model
-                            .addVars(d_problem.d_secondStageLowerBound.memptr(),
-                                     d_problem.d_secondStageUpperBound.memptr(),
+                            .addVars(d_problem.secondStageLowerBound().memptr(),
+                                     d_problem.secondStageUpperBound().memptr(),
                                      costs.memptr(),
                                      d_problem.secondStageVarTypes().memptr(),
                                      nullptr,

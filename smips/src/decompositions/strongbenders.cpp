@@ -9,8 +9,8 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     auto const &Amat = problem.Amat();
 
     // adding first-stage variables (z)
-    d_z_vars = d_model.addVars(problem.d_firstStageLowerBound.memptr(),
-                               problem.d_firstStageUpperBound.memptr(),
+    d_z_vars = d_model.addVars(problem.firstStageLowerBound().memptr(),
+                               problem.firstStageUpperBound().memptr(),
                                nullptr,
                                problem.firstStageVarTypes().memptr(),
                                nullptr,
@@ -21,8 +21,8 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     auto const &Wmat = problem.Wmat();
 
     // adding second-stage variables (y)
-    GRBVar *y_vars = d_model.addVars(problem.d_secondStageLowerBound.memptr(),
-                                     problem.d_secondStageUpperBound.memptr(),
+    GRBVar *y_vars = d_model.addVars(problem.secondStageLowerBound().memptr(),
+                                     problem.secondStageUpperBound().memptr(),
                                      problem.secondStageCoeffs().memptr(),
                                      problem.secondStageVarTypes().memptr(),
                                      nullptr,

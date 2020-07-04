@@ -9,8 +9,8 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
     arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int?
     vTypes.fill(GRB_CONTINUOUS);
 
-    d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
-                             d_problem.d_secondStageUpperBound.memptr(),
+    d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
+                             d_problem.secondStageUpperBound().memptr(),
                              d_problem.secondStageCoeffs().memptr(),
                              vTypes.memptr(),
                              nullptr,
