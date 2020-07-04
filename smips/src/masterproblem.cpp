@@ -80,7 +80,7 @@ std::unique_ptr<arma::vec> MasterProblem::solveWith(Decomposition &decomposition
 
 double MasterProblem::firstStageObjective() const
 {
-    return d_model.get(GRB_DoubleAttr_ObjVal) - secondStageObjective();
+    return objective() - secondStageObjective();
 }
 
 double MasterProblem::secondStageObjective() const

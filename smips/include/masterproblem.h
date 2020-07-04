@@ -51,7 +51,7 @@ public:
      */
     double objective() const
     {
-        return firstStageObjective() + secondStageObjective();
+        return d_model.get(GRB_DoubleAttr_ObjVal);
     }
 };
 
