@@ -49,8 +49,8 @@ void MasterProblem::addCut(Decomposition::Cut &cut)
     d_model.addConstr(lhs, GRB_GREATER_EQUAL, cut.gamma);
 }
 
-std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
-                                                double tol)
+std::unique_ptr<arma::vec> MasterProblem::solveWith(Decomposition &decomposition,
+                                                    double tol)
 {
     while (true)
     {
@@ -77,3 +77,14 @@ std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
             return std::make_unique<arma::vec>(xVals);
     }
 }
+
+double MasterProblem::firstStageObjective() const
+{
+    return d_model.get(GRB_DoubleAttr_ObjVal) - secondStageObjective();
+}
+
+double MasterProblem::secondStageObjective() const
+{
+    // First variable is theta, and we need its value.
+    return d_model.getVar(0).get(GRB_DoubleAttr_X);
+};

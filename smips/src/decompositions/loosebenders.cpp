@@ -62,7 +62,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.update(omega - Tx);
+        sub.updateRhs(omega - Tx);
         sub.solve();
 
         auto const info = sub.gomInfo();

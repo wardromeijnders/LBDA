@@ -101,12 +101,12 @@ void SubProblem::solve()
     d_model.optimize();
 }
 
-void SubProblem::update(arma::vec &rhs)
+void SubProblem::updateRhs(arma::vec &rhs)
 {
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), rhs.size());
 }
 
-void SubProblem::update(arma::vec &&rhs)
+void SubProblem::updateRhs(arma::vec &&rhs)
 {
-    update(rhs);
+    updateRhs(rhs);
 }

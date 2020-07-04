@@ -11,15 +11,7 @@
 
 class MasterProblem
 {
-    /**
-     * Reference to the problem instance. Cannot be declared const, as
-     * Gurobi expects non-const pointers to some of the Problem data.
-     */
     Problem &d_problem;
-
-    /**
-     * Gurobi model for the master problem.
-     */
     GRBModel d_model;
 
 public:
@@ -38,8 +30,29 @@ public:
      *
      * @return The (near) optimal first-stage decisions.
      */
-    std::unique_ptr<arma::vec> solve(Decomposition &decomposition,
-                                     double tol = 1e-4);
+    std::unique_ptr<arma::vec> solveWith(Decomposition &decomposition,
+                                         double tol = 1e-4);
+
+    /**
+     * Returns the (exact) first stage objective value, that is, the value of
+     * <code>c^T x*</code>.
+     */
+    double firstStageObjective() const;
+
+    /**
+     * Returns the approximation of the expected costs of the second stage
+     * problems, that is, the value of <code>theta</code> in the master problem.
+     */
+    double secondStageObjective() const;
+
+    /**
+     * Returns the objective value of the master problem, that is, the sum
+     * of the first and second stage objectives.
+     */
+    double objective() const
+    {
+        return firstStageObjective() + secondStageObjective();
+    }
 };
 
 #endif

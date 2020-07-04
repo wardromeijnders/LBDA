@@ -22,21 +22,13 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.update(omega - Tx);
+        sub.updateRhs(omega - Tx);
         sub.solve();
 
         auto const info = sub.multipliers();
         double const prob = d_problem.probability(scenario);
 
         gamma += prob * arma::dot(info.lambda, omega);
-
-        // TODO discuss with NvdL (what happens when unconstrained?)
-        if (d_problem.secondStageUpperBound().is_finite())
-        {
-            auto val = arma::dot(info.pi_u, d_problem.secondStageUpperBound());
-            gamma += prob * val;
-        }
-
         dual -= prob * info.lambda;
     }
 

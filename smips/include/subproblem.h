@@ -39,9 +39,9 @@ public:
 
     Multipliers const multipliers();
 
-    void update(arma::vec &rhs);  // 1
+    void updateRhs(arma::vec &rhs);
 
-    void update(arma::vec &&rhs);  // 2
+    void updateRhs(arma::vec &&rhs);
 
     void solve();
 };
