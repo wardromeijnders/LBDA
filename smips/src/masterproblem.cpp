@@ -56,6 +56,9 @@ std::unique_ptr<arma::vec> MasterProblem::solveWith(Decomposition &decomposition
     {
         d_model.optimize();
 
+        if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
+            throw std::runtime_error("Master problem is infeasible.");
+
         size_t const numVars = d_problem.Amat().n_rows;
 
         auto *vars = d_model.getVars();

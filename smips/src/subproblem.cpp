@@ -99,6 +99,7 @@ SubProblem::Multipliers const SubProblem::multipliers()
 void SubProblem::solve()
 {
     d_model.optimize();
+    // TODO check feasibility, or generate feasibility cut somehow?
 }
 
 void SubProblem::updateRhs(arma::vec &rhs)
