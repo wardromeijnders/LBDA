@@ -1,9 +1,8 @@
-#include "decompositions/lpdual.h"
+#include "cutfamilies/lpdual.h"
 
 #include "subproblem.h"
 
-LpDual::LpDual(GRBEnv &env, Problem const &problem) :
-    Decomposition(env, problem)
+LpDual::LpDual(GRBEnv &env, Problem const &problem) : CutFamily(env, problem)
 {
 }
 
@@ -11,7 +10,7 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
-    arma::vec Tx = (x.t() * Tmat).t();          // TODO simplify
+    arma::vec Tx = Tmat.t() * x;
     arma::vec dual = arma::zeros(Tmat.n_cols);  // decomposition coeffs
 
     auto sub = SubProblem(d_env, d_problem);
@@ -22,16 +21,14 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.update(omega - Tx);
+        sub.updateRhs(omega - Tx);
         sub.solve();
 
-        auto const info = sub.multipliers();
+        auto const duals = sub.duals();
         double const prob = d_problem.probability(scenario);
 
-        gamma += prob * arma::dot(info.lambda, omega);
-        gamma += prob * arma::dot(info.pi_u, d_problem.d_secondStageUpperBound);
-
-        dual -= prob * info.lambda;
+        gamma += prob * arma::dot(duals.lambda, omega);
+        dual -= prob * duals.lambda;
     }
 
     return Cut{Tmat * dual, gamma};

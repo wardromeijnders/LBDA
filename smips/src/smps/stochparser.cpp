@@ -86,9 +86,9 @@ bool StochParser::parseScenarios(smps::DataLine const &dataLine)
     if (dataLine.indicator() == "SC")  // new scenario
     {
         d_scenarioName = dataLine.name();
-        auto const &[parent, prob] = dataLine.firstDataEntry();
+        auto const &[_, prob] = dataLine.firstDataEntry();
 
-        return d_smps.addScenario(d_scenarioName, parent, prob);
+        return d_smps.addScenario(d_scenarioName, prob);
     }
     else if (dataLine.name() != "RHS")
     {

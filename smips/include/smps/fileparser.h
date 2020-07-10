@@ -18,6 +18,6 @@ namespace smps
     public:
         explicit FileParser(Smps &smps);
     };
-}
+}  // namespace smps
 
 #endif  // SMIPS_FILEPARSER_H

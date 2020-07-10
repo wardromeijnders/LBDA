@@ -8,19 +8,14 @@
 #include <iosfwd>
 #include <memory>
 
+/**
+ * Deterministic equivalent formulation of the two-stage problem. This is also
+ * sometimes called the extensive form.
+ */
 class DeterministicEquivalent
 {
-    enum class status
-    {
-        SOLVED,
-        UNSOLVED,
-        INFEASIBLE
-    };
-
     Problem const &d_problem;
     GRBModel d_model;
-    status d_status;
-    GRBVar *d_xVars;
 
     void initFirstStage();
 
@@ -29,9 +24,21 @@ class DeterministicEquivalent
 public:
     DeterministicEquivalent(GRBEnv &env, Problem const &problem);
 
-    ~DeterministicEquivalent();
-
+    /**
+     * Solves the deterministic equivalent.
+     *
+     * @param timeLimit Time limit for the Gurobi solver, in seconds.
+     * @return Vector of optimal first-stage decisions.
+     */
     std::unique_ptr<arma::vec> solve(double timeLimit = 1e20);
+
+    /**
+     * @return Objective value.
+     */
+    double objective() const
+    {
+        return d_model.get(GRB_DoubleAttr_ObjVal);
+    }
 };
 
 #endif

@@ -1,16 +1,16 @@
-#include "decompositions/strongbenders.h"
+#include "cutfamilies/strongbenders.h"
 
 #include "subproblem.h"
 
 
 StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
-    Decomposition(env, problem)
+    CutFamily(env, problem)
 {
     auto const &Amat = problem.Amat();
 
     // adding first-stage variables (z)
-    d_z_vars = d_model.addVars(problem.d_firstStageLowerBound.memptr(),
-                               problem.d_firstStageUpperBound.memptr(),
+    d_z_vars = d_model.addVars(problem.firstStageLowerBound().memptr(),
+                               problem.firstStageUpperBound().memptr(),
                                nullptr,
                                problem.firstStageVarTypes().memptr(),
                                nullptr,
@@ -21,8 +21,8 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     auto const &Wmat = problem.Wmat();
 
     // adding second-stage variables (y)
-    GRBVar *y_vars = d_model.addVars(problem.d_secondStageLowerBound.memptr(),
-                                     problem.d_secondStageUpperBound.memptr(),
+    GRBVar *y_vars = d_model.addVars(problem.secondStageLowerBound().memptr(),
+                                     problem.secondStageUpperBound().memptr(),
                                      problem.secondStageCoeffs().memptr(),
                                      problem.secondStageVarTypes().memptr(),
                                      nullptr,
@@ -63,7 +63,7 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
-    arma::vec Tx = (x.t() * Tmat).t();  // TODO simplify
+    arma::vec Tx = Tmat.t() * x;
     arma::vec beta = arma::zeros(Tmat.n_rows);
 
     auto sub = SubProblem(d_env, d_problem);
@@ -74,13 +74,13 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.update(omega - Tx);
+        sub.updateRhs(omega - Tx);
         sub.solve();
 
-        auto const info = sub.multipliers();
+        auto const duals = sub.duals();
         double const prob = d_problem.probability(scenario);
 
-        arma::vec pi = Tmat * info.lambda;
+        arma::vec pi = Tmat * duals.lambda;
 
         update(omega, pi);
 

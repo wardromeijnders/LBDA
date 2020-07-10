@@ -7,14 +7,14 @@
 #include <gurobi_c++.h>
 
 
-class Decomposition
+class CutFamily
 {
 protected:
     GRBEnv &d_env;
     GRBModel d_model;
     Problem const &d_problem;
 
-    explicit Decomposition(GRBEnv &env, Problem const &problem);
+    explicit CutFamily(GRBEnv &env, Problem const &problem);
 
 public:
     struct Cut
@@ -23,7 +23,7 @@ public:
         double gamma;
     };
 
-    virtual Decomposition::Cut computeCut(arma::vec const &x) = 0;
+    virtual CutFamily::Cut computeCut(arma::vec const &x) = 0;
 
     virtual double solve();
 };

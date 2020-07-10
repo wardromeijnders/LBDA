@@ -4,19 +4,19 @@ find_package(Gurobi REQUIRED)
 
 include_directories(${GUROBI_INCLUDE_DIRS})
 
-add_subdirectory(decompositions)
+add_subdirectory(cutfamilies)
 add_subdirectory(smps)
 
 set(SOURCES
-		deterministicequivalent.cpp
+        deterministicequivalent.cpp
         masterproblem.cpp
-		subproblem.cpp
+        subproblem.cpp
         problem.cpp)
 
 add_executable(smips main.cpp ${SOURCES})
 
 target_link_libraries(smips
-        decompositions
+        cutfamilies
         smps
         ${GUROBI_LIBRARIES}
-		armadillo)
+        armadillo)

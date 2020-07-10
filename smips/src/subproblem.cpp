@@ -6,24 +6,24 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 {
     auto const &Wmat = d_problem.Wmat();
 
-    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int?
+    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int
     vTypes.fill(GRB_CONTINUOUS);
 
-    d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
-                             d_problem.d_secondStageUpperBound.memptr(),
+    d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
+                             d_problem.secondStageUpperBound().memptr(),
                              d_problem.secondStageCoeffs().memptr(),
                              vTypes.memptr(),
                              nullptr,
                              Wmat.n_rows);
 
-    GRBLinExpr Wy[Wmat.n_cols];  // constraint lhs
+    GRBLinExpr lhs[Wmat.n_cols];
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
-        Wy[iter.col()] += *iter * d_vars[iter.row()];
+        lhs[iter.col()] += *iter * d_vars[iter.row()];  // Wy
 
     auto const &senses = d_problem.secondStageConstrSenses();
     arma::vec rhs = arma::zeros(Wmat.n_cols);
 
-    d_constrs = d_model.addConstrs(Wy,
+    d_constrs = d_model.addConstrs(lhs,
                                    senses.memptr(),
                                    rhs.memptr(),
                                    nullptr,
@@ -64,7 +64,7 @@ SubProblem::GomInfo const SubProblem::gomInfo()
     return gomInfo;
 }
 
-SubProblem::Multipliers const SubProblem::multipliers()
+SubProblem::Duals const SubProblem::duals()
 {
     auto const &Wmat = d_problem.Wmat();
 
@@ -87,26 +87,27 @@ SubProblem::Multipliers const SubProblem::multipliers()
     piUb(arma::find(vBasis != GRB_NONBASIC_UPPER)).fill(0.);
 
     auto const *lambda = d_model.get(GRB_DoubleAttr_Pi, d_constrs, Wmat.n_cols);
-    auto multipliers = Multipliers{arma::vec{lambda, Wmat.n_cols}, piUb};
+    auto duals = Duals{arma::vec{lambda, Wmat.n_cols}, piUb};
 
     delete[] vBasisPtr;
     delete[] piUbPtr;
     delete[] lambda;
 
-    return multipliers;
+    return duals;
 }
 
 void SubProblem::solve()
 {
     d_model.optimize();
+    // TODO check feasibility of subproblem?
 }
 
-void SubProblem::update(arma::vec &rhs)
+void SubProblem::updateRhs(arma::vec &rhs)
 {
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), rhs.size());
 }
 
-void SubProblem::update(arma::vec &&rhs)
+void SubProblem::updateRhs(arma::vec &&rhs)
 {
-    update(rhs);
+    updateRhs(rhs);
 }

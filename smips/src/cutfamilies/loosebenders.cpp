@@ -1,4 +1,4 @@
-#include "decompositions/loosebenders.h"
+#include "cutfamilies/loosebenders.h"
 
 #include "subproblem.h"
 
@@ -9,20 +9,19 @@ LooseBenders::LooseBenders(GRBEnv &env,
                            Problem const &problem,
                            arma::vec const &alpha,
                            double timeLimit) :
-    Decomposition(env, problem),
+    CutFamily(env, problem),
     d_alpha(alpha),
     d_visited(problem.nScenarios()),
     d_objectives(problem.nScenarios())
 {
     auto const &Wmat = d_problem.Wmat();
 
-    d_vars = d_model.addVars(d_problem.d_secondStageLowerBound.memptr(),
-                             d_problem.d_secondStageUpperBound.memptr(),
+    d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
+                             d_problem.secondStageUpperBound().memptr(),
                              problem.secondStageCoeffs().memptr(),
                              problem.secondStageVarTypes().memptr(),
                              nullptr,
                              Wmat.n_rows);
-
 
     GRBLinExpr lhs[Wmat.n_cols];
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
@@ -51,7 +50,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
-    arma::vec Tx = (x.t() * Tmat).t();          // TODO simplify
+    arma::vec Tx = Tmat.t() * x;
     arma::vec dual = arma::zeros(Tmat.n_cols);  // decomposition coeffs
 
     auto sub = SubProblem(d_env, d_problem);
@@ -62,7 +61,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.update(omega - Tx);
+        sub.updateRhs(omega - Tx);
         sub.solve();
 
         auto const info = sub.gomInfo();
@@ -135,8 +134,8 @@ void LooseBenders::update(arma::vec &rhs,
 
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);
 
-    arma::vec lb = d_problem.d_secondStageLowerBound;
-    arma::vec ub = d_problem.d_secondStageUpperBound;
+    arma::vec lb = d_problem.secondStageLowerBound();
+    arma::vec ub = d_problem.secondStageUpperBound();
 
     // Relax appropriate variable bounds if the bound is not tight.
     lb.elem(arma::find(vBasis != GRB_NONBASIC_LOWER)).fill(-arma::datum::inf);

@@ -2,68 +2,45 @@
 #define PROBLEM_H
 
 #include <armadillo>
-#include <gurobi_c++.h>
 #include <iosfwd>
 
-
-// TODO this class is too big, and might need to be cut down a little
+/**
+ * Problem instance. Can be constructed from an SMPS file.
+ */
 class Problem
 {
-    // TODO this is not the place - should move to the actual solver stuff?
-    GRBModel d_sub;  // subproblem, used for evaluation of cx + Q(x) (more
-                     // precisely, of v(omega, x)).
-
-    // useful to quickly update rhs of d_sub (heap allocated)
-    GRBConstr *d_constrs;
-
-    bool d_isSubProblemInitialised = false;
-
     arma::Col<char> d_firstStageConstrSenses;
     arma::Col<char> d_secondStageConstrSenses;
 
     arma::Col<char> d_firstStageVarTypes;
     arma::Col<char> d_secondStageVarTypes;
 
-    arma::sp_mat d_Amat;
-    arma::sp_mat d_Tmat;
-    arma::sp_mat d_Wmat;
+    arma::sp_mat d_Amat;  // first-stage constraints
+    arma::sp_mat d_Tmat;  // linking constraints for the second-stage
+    arma::sp_mat d_Wmat;  // second-stage constraints
 
-    arma::vec d_firstStageCoeffs;
-    arma::vec d_secondStageCoeffs;
-
-    arma::vec d_firstStageRhs;
-
-    // Each column corresponds to a single scenario (omega).
-    arma::mat d_scenarios;              // TODO map
-    arma::vec d_scenarioProbabilities;  // TODO map
-
-    void initSub();  // initializes the subproblem, and sets rhs = 0. Called by
-                     // evaluate() when evaluate is called for the first time.
-
-public:
-    // TODO make these members private
-    double d_L = 0;  // lb on Q - TODO is this a sensible default?
+    arma::vec d_firstStageCoeffs;   // first-stage objective coefficients
+    arma::vec d_secondStageCoeffs;  // second-stage objective coefficients
 
     arma::vec d_firstStageLowerBound;
     arma::vec d_firstStageUpperBound;
+
     arma::vec d_secondStageLowerBound;
     arma::vec d_secondStageUpperBound;
 
-    Problem(GRBEnv &env);
+    arma::vec d_firstStageRhs;  // first-stage right-hand side
 
+    arma::mat d_scenarios;  // each column is a scenario (omega)
+    arma::vec d_scenarioProbabilities;
+
+public:
     /**
      * Constructs a Problem instance from the passed-in SMPS file location.
      *
      * @param location SMPS file location (should not contain any extensions).
-     * @param env      Gurobi environment in which to operate.
      * @return         Problem instance.
      */
-    static Problem fromSmps(char const *location, GRBEnv &env);
-
-    ~Problem();
-
-    // evaluates cx + Q(x) (does not check feasibility)
-    double evaluate(arma::vec const &x);
+    static Problem fromSmps(char const *location);
 
     arma::Col<char> const &firstStageConstrSenses() const
     {
@@ -133,6 +110,26 @@ public:
     arma::vec const &firstStageRhs() const
     {
         return d_firstStageRhs;
+    }
+
+    arma::vec const &firstStageLowerBound() const
+    {
+        return d_firstStageLowerBound;
+    }
+
+    arma::vec const &firstStageUpperBound() const
+    {
+        return d_firstStageUpperBound;
+    }
+
+    arma::vec const &secondStageLowerBound() const
+    {
+        return d_secondStageLowerBound;
+    }
+
+    arma::vec const &secondStageUpperBound() const
+    {
+        return d_secondStageUpperBound;
     }
 
     arma::mat const &scenarios() const

@@ -108,13 +108,18 @@ bool CoreParser::parseCols(DataLine const &dataLine)
 
 bool CoreParser::parseRhs(DataLine const &dataLine)
 {
-    auto [constr, coeff] = dataLine.firstDataEntry();
-    return d_smps.addRhs(constr, coeff);
+    auto [constr1, coeff1] = dataLine.firstDataEntry();
+    auto res = d_smps.addRhs(constr1, coeff1);
+
+    if (!dataLine.hasSecondDataEntry())
+        return res;
+
+    auto [constr2, coeff2] = dataLine.secondDataEntry();
+    return res && d_smps.addRhs(constr2, coeff2);
 }
 
 bool CoreParser::parseBounds(DataLine const &dataLine)
 {
-    // TODO check if this works.
     auto [var, bound] = dataLine.firstDataEntry();
 
     // This follows mostly from
@@ -143,5 +148,6 @@ bool CoreParser::parseBounds(DataLine const &dataLine)
 
 bool CoreParser::parseRanges(DataLine const &dataLine)
 {
-    return false;  // TODO
+    std::cerr << "SMIPS does not currently understand RANGES.\n";
+    return false;
 }

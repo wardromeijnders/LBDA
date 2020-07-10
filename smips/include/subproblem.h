@@ -7,6 +7,9 @@
 #include <gurobi_c++.h>
 #include <iosfwd>
 
+/**
+ * Second-stage (sub) problem of the two-stage decomposition.
+ */
 class SubProblem
 {
     GRBModel d_model;
@@ -23,7 +26,7 @@ public:
         arma::Col<int> cBasis;
     };
 
-    struct Multipliers
+    struct Duals
     {
         arma::vec lambda;
         arma::vec pi_u;
@@ -37,13 +40,21 @@ public:
 
     GomInfo const gomInfo();
 
-    Multipliers const multipliers();
+    Duals const duals();
 
-    void update(arma::vec &rhs);  // 1
+    void updateRhs(arma::vec &rhs);
 
-    void update(arma::vec &&rhs);  // 2
+    void updateRhs(arma::vec &&rhs);
 
     void solve();
+
+    /**
+     * Returns the objective value of the sub problem.
+     */
+    double objective() const
+    {
+        return d_model.get(GRB_DoubleAttr_ObjVal);
+    }
 };
 
 #endif

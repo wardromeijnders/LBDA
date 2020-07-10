@@ -3,12 +3,12 @@
 MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
     d_problem(problem), d_model(env)
 {
-    // Theta
-    d_model.addVar(d_problem.d_L, arma::datum::inf, 1.0, GRB_CONTINUOUS);
+    // Theta - TODO allow different UB/LB?
+    d_model.addVar(0, arma::datum::inf, 1.0, GRB_CONTINUOUS);
 
     auto &Amat = d_problem.Amat();
-    auto *xVars = d_model.addVars(d_problem.d_firstStageLowerBound.memptr(),
-                                  d_problem.d_firstStageUpperBound.memptr(),
+    auto *xVars = d_model.addVars(d_problem.firstStageLowerBound().memptr(),
+                                  d_problem.firstStageUpperBound().memptr(),
                                   d_problem.firstStageCoeffs().memptr(),
                                   d_problem.firstStageVarTypes().memptr(),
                                   nullptr,
@@ -32,29 +32,31 @@ MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
     d_model.update();
 }
 
-void MasterProblem::addCut(Decomposition::Cut &cut)
+void MasterProblem::addCut(CutFamily::Cut &cut)
 {
     size_t const n1 = d_problem.Amat().n_rows;
 
     GRBVar *vars = d_model.getVars();
-
-    arma::vec cval(n1 + 1);
-    cval[0] = 1;  // theta coefficient
-    cval.subvec(1, n1) = -cut.beta;
+    arma::vec const coeffs = -cut.beta;
 
     GRBLinExpr lhs;
-    lhs.addTerms(cval.memptr(), vars, n1 + 1);
+    lhs.addTerms(coeffs.memptr(), vars + 1, n1);
+    lhs += vars[0];
 
     delete[] vars;
+
     d_model.addConstr(lhs, GRB_GREATER_EQUAL, cut.gamma);
 }
 
-std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
-                                                double tol)
+std::unique_ptr<arma::vec> MasterProblem::solveWith(CutFamily &cutFamily,
+                                                    double tol)
 {
     while (true)
     {
         d_model.optimize();
+
+        if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
+            throw std::runtime_error("Master problem is infeasible.");
 
         size_t const numVars = d_problem.Amat().n_rows;
 
@@ -68,7 +70,7 @@ std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
         delete[] vars;
         delete[] xValsPtr;
 
-        auto cut = decomposition.computeCut(xVals);
+        auto cut = cutFamily.computeCut(xVals);
 
         // Is the proposed cut violated by the current solution?
         if (cut.gamma + arma::dot(xVals, cut.beta) >= theta + tol)
@@ -77,3 +79,14 @@ std::unique_ptr<arma::vec> MasterProblem::solve(Decomposition &decomposition,
             return std::make_unique<arma::vec>(xVals);
     }
 }
+
+double MasterProblem::firstStageObjective() const
+{
+    return objective() - secondStageObjective();
+}
+
+double MasterProblem::secondStageObjective() const
+{
+    // First variable is theta, and we need its value.
+    return d_model.getVar(0).get(GRB_DoubleAttr_X);
+};

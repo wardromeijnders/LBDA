@@ -23,11 +23,12 @@ void Smps::readSmps(std::string const &location)
 bool Smps::addObjective(std::string const &name)
 {
     if (d_objName.empty())
+    {
         d_objName = name;
-    else
-        return false;  // we already have an objective.
+        return true;
+    }
 
-    return true;
+    return false;  // we already have an objective.
 }
 
 bool Smps::addConstr(std::string const &name, char type)
@@ -149,19 +150,12 @@ bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
     return true;
 }
 
-bool Smps::addScenario(std::string const &scenario,
-                       std::string const &parent,
-                       double probability)
+bool Smps::addScenario(std::string const &scenario, double probability)
 {
     size_t const idx = d_scenarios.size();
+    ScenNode scen{probability, {}};
 
-    ScenNode *par = d_scen2idx.contains(parent)
-                        ? d_scenarios.data() + d_scen2idx[parent]
-                        : nullptr;
-
-    ScenNode scen{probability, {}, par};
-
-    d_scenarios.emplace_back(scen);
+    d_scenarios.push_back(scen);
     d_scen2idx[scenario] = idx;
 
     return true;
@@ -181,7 +175,6 @@ bool Smps::addScenarioRealisation(std::string const &scenario,
 
     return true;
 }
-
 
 arma::vec Smps::firstStageObjCoeffs()
 {
@@ -251,6 +244,11 @@ arma::vec Smps::firstStageRhs()
     return d_rhs.subvec(0, d_stageOffsets(1, 0) - 1);
 }
 
+arma::vec Smps::secondStageRhs()
+{
+    return d_rhs.subvec(d_stageOffsets(1, 0), d_rhs.size() - 1);
+}
+
 arma::mat Smps::generateScenarios()
 {
     if (!d_indep.empty())
@@ -259,7 +257,8 @@ arma::mat Smps::generateScenarios()
     if (!d_scenarios.empty())
         return genScenarios();
 
-    return arma::mat();  // TODO
+    throw std::runtime_error("SMIPS does not understand this type of "
+                             ".sto file yet.");
 }
 
 arma::vec Smps::scenarioProbabilities()
@@ -270,20 +269,21 @@ arma::vec Smps::scenarioProbabilities()
     if (!d_scenarios.empty())
         return scenProbabilities();
 
-    return arma::vec();  // TODO
+    throw std::runtime_error("SMIPS does not understand this type of "
+                             ".sto file yet.");
 }
 
 arma::mat Smps::genIndepScenarios()
 {
     // This is loosely based on https://stackoverflow.com/a/48271759/4316405.
-    // TODO start from second stage default rhs (if available)
     size_t nScenarios = 1;
 
     for (auto const &[idx, distr] : d_indep)
         nScenarios *= distr.size();
 
-    // Second-stage RHS (rows) for each scenario (cols).
-    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0), nScenarios);
+    // Second-stage RHS (rows) for each scenario (cols). The base RHS is
+    // replicated and overwritten with the scenario-specific RHS, where required.
+    arma::mat scenarios = arma::repmat(secondStageRhs(), 1, nScenarios);
 
     for (size_t scenario = 0; scenario != nScenarios; ++scenario)
     {
@@ -328,10 +328,10 @@ arma::vec Smps::indepScenProbabilities()
 
 arma::mat Smps::genScenarios()
 {
-    arma::mat scenarios(d_core.n_rows - d_stageOffsets(1, 0),
-                        d_scenarios.size());
+    // Second-stage RHS (rows) for each scenario (cols). The base RHS is
+    // replicated and overwritten with the scenario-specific RHS, where required.
+    arma::mat scenarios = arma::repmat(secondStageRhs(), 1, d_scenarios.size());
 
-    // TODO start from second stage default rhs (if available)
     for (size_t scenIdx = 0; scenIdx != d_scenarios.size(); ++scenIdx)
         for (auto const &[constr, value] : d_scenarios[scenIdx].rhs)
             scenarios(constr - d_stageOffsets(1, 0), scenIdx) = value;
