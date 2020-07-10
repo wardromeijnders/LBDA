@@ -37,15 +37,14 @@ void MasterProblem::addCut(Decomposition::Cut &cut)
     size_t const n1 = d_problem.Amat().n_rows;
 
     GRBVar *vars = d_model.getVars();
-
-    arma::vec cval(n1 + 1);
-    cval[0] = 1;  // theta coefficient
-    cval.subvec(1, n1) = -cut.beta;
+    arma::vec const coeffs = -cut.beta;
 
     GRBLinExpr lhs;
-    lhs.addTerms(cval.memptr(), vars, n1 + 1);
+    lhs.addTerms(coeffs.memptr(), vars + 1, n1);
+    lhs += vars[0];
 
     delete[] vars;
+
     d_model.addConstr(lhs, GRB_GREATER_EQUAL, cut.gamma);
 }
 

@@ -23,11 +23,12 @@ void Smps::readSmps(std::string const &location)
 bool Smps::addObjective(std::string const &name)
 {
     if (d_objName.empty())
+    {
         d_objName = name;
-    else
-        return false;  // we already have an objective.
+        return true;
+    }
 
-    return true;
+    return false;  // we already have an objective.
 }
 
 bool Smps::addConstr(std::string const &name, char type)
