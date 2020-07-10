@@ -3,7 +3,7 @@
 int main(int argc, char **argv)
 try
 {
-    // TODO Make most of these parameters/choices/etc. CLI settings.
+    // TODO Make most of these CLI settings.
     GRBEnv env;
     env.set(GRB_IntParam_OutputFlag, 0);
     env.set(GRB_IntParam_Threads, 1);

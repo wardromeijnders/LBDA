@@ -8,41 +8,38 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 {
     auto const &Amat = problem.Amat();
 
-    // adding first-stage variables (z)
-    d_z_vars = d_model.addVars(problem.firstStageLowerBound().memptr(),
-                               problem.firstStageUpperBound().memptr(),
-                               nullptr,
-                               problem.firstStageVarTypes().memptr(),
-                               nullptr,
-                               Amat.n_rows);
+    d_xVars = d_model.addVars(problem.firstStageLowerBound().memptr(),
+                              problem.firstStageUpperBound().memptr(),
+                              nullptr,
+                              problem.firstStageVarTypes().memptr(),
+                              nullptr,
+                              Amat.n_rows);
 
     // TODO: include first-stage constraints
 
     auto const &Wmat = problem.Wmat();
 
-    // adding second-stage variables (y)
-    GRBVar *y_vars = d_model.addVars(problem.secondStageLowerBound().memptr(),
-                                     problem.secondStageUpperBound().memptr(),
-                                     problem.secondStageCoeffs().memptr(),
-                                     problem.secondStageVarTypes().memptr(),
-                                     nullptr,
-                                     Wmat.n_rows);
+    GRBVar *yVars = d_model.addVars(problem.secondStageLowerBound().memptr(),
+                                    problem.secondStageUpperBound().memptr(),
+                                    problem.secondStageCoeffs().memptr(),
+                                    problem.secondStageVarTypes().memptr(),
+                                    nullptr,
+                                    Wmat.n_rows);
 
     auto const &Tmat = d_problem.Tmat();
 
-    // constraint lhs
-    GRBLinExpr TxWy[Tmat.n_cols];
-
-    for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
-        TxWy[iter.col()] += *iter * y_vars[iter.row()];
+    GRBLinExpr lhs[Tmat.n_cols];  // constraint lhs
 
     for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
-        TxWy[iter.col()] += *iter * d_z_vars[iter.row()];
+        lhs[iter.col()] += *iter * d_xVars[iter.row()];  // Tx
+
+    for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
+        lhs[iter.col()] += *iter * yVars[iter.row()];  // Wy
 
     auto const &senses = d_problem.secondStageConstrSenses();
     arma::vec rhs = arma::zeros(Tmat.n_cols);
 
-    d_constrs = d_model.addConstrs(TxWy,
+    d_constrs = d_model.addConstrs(lhs,
                                    senses.memptr(),
                                    rhs.memptr(),
                                    nullptr,
@@ -50,12 +47,12 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 
     d_model.update();
 
-    delete[] y_vars;
+    delete[] yVars;
 }
 
 StrongBenders::~StrongBenders()
 {
-    delete[] d_z_vars;
+    delete[] d_xVars;
     delete[] d_constrs;
 }
 
@@ -94,7 +91,7 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 void StrongBenders::update(arma::vec &rhs, arma::vec &pi)
 {
     auto const &Amat = d_problem.Amat();
-    d_model.set(GRB_DoubleAttr_Obj, d_z_vars, pi.memptr(), Amat.n_rows);
+    d_model.set(GRB_DoubleAttr_Obj, d_xVars, pi.memptr(), Amat.n_rows);
 
     auto const &Wmat = d_problem.Wmat();
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);

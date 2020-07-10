@@ -24,8 +24,9 @@ LooseBenders::LooseBenders(GRBEnv &env,
                              Wmat.n_rows);
 
     GRBLinExpr lhs[Wmat.n_cols];
+
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
-        lhs[iter.col()] += *iter * d_vars[iter.row()];
+        lhs[iter.col()] += *iter * d_vars[iter.row()];  // Wy
 
     auto const &senses = d_problem.secondStageConstrSenses();
     arma::vec rhs = arma::zeros(Wmat.n_cols);
@@ -67,9 +68,10 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
         auto const info = sub.gomInfo();
         double const prob = d_problem.probability(scenario);
 
+        arma::vec rhs = omega - d_alpha;
+
         // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
         // lambda^T alpha.
-        arma::vec rhs = omega - d_alpha;
         gamma += prob * computeGomory(scenario, rhs, info.vBasis, info.cBasis);
         gamma += prob * arma::dot(info.lambda, d_alpha);
 

@@ -10,7 +10,7 @@
 class StrongBenders : public CutFamily
 {
     GRBConstr *d_constrs;
-    GRBVar *d_z_vars;
+    GRBVar *d_xVars;
 
     void update(arma::vec &rhs, arma::vec &pi);
 
