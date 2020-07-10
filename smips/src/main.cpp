@@ -12,15 +12,18 @@ try
     MasterProblem master{env, problem};
 
     DeterministicEquivalent deq{env, problem};
-    auto ptr = deq.solve();
-    std::cout << *ptr;
+    auto ptr = deq.solve(120);
+    auto res = *ptr;
+
+    std::cout << "x = \n" << res << '\n';
+    std::cout << "cx + Q(x) = " << deq.objective() << '\n';
 
     LpDual decomposition{env, problem};
     ptr = master.solveWith(decomposition);
-    auto res = *ptr;
+    res = *ptr;
 
-    std::cout << res;
-    std::cout << "\ncx + Q(x) = " << master.objective() << '\n';
+    std::cout << "x = \n" << res << '\n';
+    std::cout << "cx + Q(x) = " << master.objective() << '\n';
 }
 catch (GRBException const &e)
 {

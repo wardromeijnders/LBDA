@@ -24,12 +24,12 @@ void DeterministicEquivalent::initFirstStage()
     for (auto iter = Amat.begin(); iter != Amat.end(); ++iter)
         lhs[iter.col()] += *iter * xVars[iter.row()];
 
-    auto const &senses = d_problem.firstStageConstrSenses();
-    auto *constrs = d_model.addConstrs(lhs,
-                                       senses.memptr(),
-                                       d_problem.firstStageRhs().memptr(),
-                                       nullptr,
-                                       Amat.n_cols);
+    auto *constrs = d_model
+                        .addConstrs(lhs,
+                                    d_problem.firstStageConstrSenses().memptr(),
+                                    d_problem.firstStageRhs().memptr(),
+                                    nullptr,
+                                    Amat.n_cols);
 
     delete[] xVars;
     delete[] constrs;
@@ -44,16 +44,15 @@ void DeterministicEquivalent::initSecondStage()
 
     auto *xVars = d_model.getVars();
 
-    GRBLinExpr lhs[Tmat.n_cols];
-    for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
-        lhs[iter.col()] += *iter * xVars[iter.row()];  // Tx
-
-    delete[] xVars;
-
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
         double const prob = d_problem.probability(scenario);
         arma::vec const costs = prob * d_problem.secondStageCoeffs();
+
+        GRBLinExpr lhs[Tmat.n_cols];
+
+        for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
+            lhs[iter.col()] += *iter * xVars[iter.row()];  // Tx
 
         // scenario-specific variables
         auto *yVars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
@@ -69,16 +68,17 @@ void DeterministicEquivalent::initSecondStage()
         auto const &senses = d_problem.secondStageConstrSenses();
         auto const rhs = d_problem.scenarios().colptr(scenario);
 
-        GRBConstr *constrs = d_model.addConstrs(lhs,
-                                                senses.memptr(),
-                                                rhs,
-                                                nullptr,
-                                                Wmat.n_cols);
+        auto *constrs = d_model.addConstrs(lhs,
+                                           senses.memptr(),
+                                           rhs,
+                                           nullptr,
+                                           Wmat.n_cols);
 
         delete[] yVars;
         delete[] constrs;
     }
 
+    delete[] xVars;
     d_model.update();
 }
 

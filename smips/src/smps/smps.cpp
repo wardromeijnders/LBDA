@@ -256,26 +256,6 @@ arma::vec Smps::secondStageRhs()
     return d_rhs.subvec(d_stageOffsets(1, 0), d_rhs.size() - 1);
 }
 
-std::vector<std::string> Smps::firstStageVarNames()
-{
-    // TODO
-}
-
-std::vector<std::string> Smps::secondStageVarNames()
-{
-    // TODO
-}
-
-std::vector<std::string> Smps::firstStageConstrNames()
-{
-    // TODO
-}
-
-std::vector<std::string> Smps::secondStageConstrNames()
-{
-    // TODO
-}
-
 arma::mat Smps::generateScenarios()
 {
     if (!d_indep.empty())

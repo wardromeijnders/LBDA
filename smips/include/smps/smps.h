@@ -130,14 +130,6 @@ namespace smps
          */
         arma::vec secondStageRhs();
 
-        std::vector<std::string> firstStageVarNames();
-
-        std::vector<std::string> secondStageVarNames();
-
-        std::vector<std::string> firstStageConstrNames();
-
-        std::vector<std::string> secondStageConstrNames();
-
         arma::mat generateScenarios();
 
         arma::vec scenarioProbabilities();

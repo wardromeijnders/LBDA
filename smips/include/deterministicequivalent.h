@@ -21,6 +21,11 @@ public:
     DeterministicEquivalent(GRBEnv &env, Problem const &problem);
 
     std::unique_ptr<arma::vec> solve(double timeLimit = 1e20);
+
+    double objective() const
+    {
+        return d_model.get(GRB_DoubleAttr_ObjVal);
+    }
 };
 
 #endif
