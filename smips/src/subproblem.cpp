@@ -6,10 +6,13 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 {
     auto const &Wmat = d_problem.Wmat();
 
+    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int
+    vTypes.fill(GRB_CONTINUOUS);
+
     d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
                              d_problem.secondStageUpperBound().memptr(),
                              d_problem.secondStageCoeffs().memptr(),
-                             d_problem.secondStageVarTypes().memptr(),
+                             vTypes.memptr(),
                              nullptr,
                              Wmat.n_rows);
 
