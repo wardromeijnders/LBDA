@@ -7,6 +7,9 @@
 #include <gurobi_c++.h>
 #include <iosfwd>
 
+/**
+ * Second-stage (sub) problem of the two-stage decomposition.
+ */
 class SubProblem
 {
     GRBModel d_model;

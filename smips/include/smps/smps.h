@@ -8,11 +8,10 @@ namespace smps
 {
     class Smps
     {
-        struct ScenNode  // scenario node - contains data
-        {                // and a pointer-to-parent.
+        struct ScenNode  // scenario node - data and a pointer-to-parent.
+        {
             double probability;
             std::map<int, double> rhs;
-            struct ScenNode *parent;
         };
 
         std::string d_name;
@@ -81,9 +80,7 @@ namespace smps
         bool addIndep(std::string const &constr,
                       std::pair<double, double> value);
 
-        bool addScenario(std::string const &scenario,
-                         std::string const &parent,
-                         double probability);
+        bool addScenario(std::string const &scenario, double probability);
 
         bool addScenarioRealisation(std::string const &scenario,
                                     std::string const &constr,

@@ -1,13 +1,13 @@
 #ifndef STRONGBENDERS_H
 #define STRONGBENDERS_H
 
-#include "decomposition.h"
+#include "cutfamily.h"
 #include "problem.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
 
-class StrongBenders : public Decomposition
+class StrongBenders : public CutFamily
 {
     GRBConstr *d_constrs;
     GRBVar *d_z_vars;
@@ -19,7 +19,7 @@ public:
 
     ~StrongBenders();
 
-    Decomposition::Cut computeCut(arma::vec const &x) override;
+    CutFamily::Cut computeCut(arma::vec const &x) override;
 };
 
 #endif  // STRONGBENDERS_H

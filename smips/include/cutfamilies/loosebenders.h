@@ -1,10 +1,10 @@
 #ifndef LOOSEBENDERS_H
 #define LOOSEBENDERS_H
 
-#include "decomposition.h"
+#include "cutfamily.h"
 
 
-class LooseBenders : public Decomposition
+class LooseBenders : public CutFamily
 {
     arma::vec const &d_alpha;
 
@@ -36,7 +36,7 @@ public:
 
     ~LooseBenders();
 
-    Decomposition::Cut computeCut(arma::vec const &x) override;
+    CutFamily::Cut computeCut(arma::vec const &x) override;
 };
 
 #endif  // LOOSEBENDERS_H

@@ -32,7 +32,7 @@ MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
     d_model.update();
 }
 
-void MasterProblem::addCut(Decomposition::Cut &cut)
+void MasterProblem::addCut(CutFamily::Cut &cut)
 {
     size_t const n1 = d_problem.Amat().n_rows;
 
@@ -48,7 +48,7 @@ void MasterProblem::addCut(Decomposition::Cut &cut)
     d_model.addConstr(lhs, GRB_GREATER_EQUAL, cut.gamma);
 }
 
-std::unique_ptr<arma::vec> MasterProblem::solveWith(Decomposition &decomposition,
+std::unique_ptr<arma::vec> MasterProblem::solveWith(CutFamily &cutFamily,
                                                     double tol)
 {
     while (true)
@@ -70,7 +70,7 @@ std::unique_ptr<arma::vec> MasterProblem::solveWith(Decomposition &decomposition
         delete[] vars;
         delete[] xValsPtr;
 
-        auto cut = decomposition.computeCut(xVals);
+        auto cut = cutFamily.computeCut(xVals);
 
         // Is the proposed cut violated by the current solution?
         if (cut.gamma + arma::dot(xVals, cut.beta) >= theta + tol)

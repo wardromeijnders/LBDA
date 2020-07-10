@@ -1,9 +1,9 @@
-#include "decompositions/lpdual.h"
+#include "cutfamilies/lpdual.h"
 
 #include "subproblem.h"
 
 LpDual::LpDual(GRBEnv &env, Problem const &problem) :
-    Decomposition(env, problem)
+    CutFamily(env, problem)
 {
 }
 

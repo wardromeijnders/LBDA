@@ -18,8 +18,8 @@ try
     std::cout << "x = \n" << res << '\n';
     std::cout << "cx + Q(x) = " << deq.objective() << '\n';
 
-    LpDual decomposition{env, problem};
-    ptr = master.solveWith(decomposition);
+    LpDual cutFamily{env, problem};
+    ptr = master.solveWith(cutFamily);
     res = *ptr;
 
     std::cout << "x = \n" << res << '\n';

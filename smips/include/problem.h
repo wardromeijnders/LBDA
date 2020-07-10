@@ -4,6 +4,9 @@
 #include <armadillo>
 #include <iosfwd>
 
+/**
+ * Problem instance. Can be constructed from an SMPS file.
+ */
 class Problem
 {
     arma::Col<char> d_firstStageConstrSenses;
@@ -12,12 +15,12 @@ class Problem
     arma::Col<char> d_firstStageVarTypes;
     arma::Col<char> d_secondStageVarTypes;
 
-    arma::sp_mat d_Amat;
-    arma::sp_mat d_Tmat;
-    arma::sp_mat d_Wmat;
+    arma::sp_mat d_Amat;  // first-stage constraints
+    arma::sp_mat d_Tmat;  // linking constraints for the second-stage
+    arma::sp_mat d_Wmat;  // second-stage constraints
 
-    arma::vec d_firstStageCoeffs;
-    arma::vec d_secondStageCoeffs;
+    arma::vec d_firstStageCoeffs;   // first-stage objective coefficients
+    arma::vec d_secondStageCoeffs;  // second-stage objective coefficients
 
     arma::vec d_firstStageLowerBound;
     arma::vec d_firstStageUpperBound;
@@ -25,10 +28,9 @@ class Problem
     arma::vec d_secondStageLowerBound;
     arma::vec d_secondStageUpperBound;
 
-    arma::vec d_firstStageRhs;
+    arma::vec d_firstStageRhs;  // first-stage right-hand side
 
-    // Each column corresponds to a single scenario (omega).
-    arma::mat d_scenarios;
+    arma::mat d_scenarios;  // each column is a scenario (omega)
     arma::vec d_scenarioProbabilities;
 
 public:

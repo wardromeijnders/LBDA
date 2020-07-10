@@ -1,4 +1,4 @@
-#include "decompositions/loosebenders.h"
+#include "cutfamilies/loosebenders.h"
 
 #include "subproblem.h"
 
@@ -9,7 +9,7 @@ LooseBenders::LooseBenders(GRBEnv &env,
                            Problem const &problem,
                            arma::vec const &alpha,
                            double timeLimit) :
-    Decomposition(env, problem),
+    CutFamily(env, problem),
     d_alpha(alpha),
     d_visited(problem.nScenarios()),
     d_objectives(problem.nScenarios())

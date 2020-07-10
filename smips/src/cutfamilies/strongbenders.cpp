@@ -1,10 +1,10 @@
-#include "decompositions/strongbenders.h"
+#include "cutfamilies/strongbenders.h"
 
 #include "subproblem.h"
 
 
 StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
-    Decomposition(env, problem)
+    CutFamily(env, problem)
 {
     auto const &Amat = problem.Amat();
 

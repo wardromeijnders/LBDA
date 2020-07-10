@@ -150,19 +150,12 @@ bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
     return true;
 }
 
-bool Smps::addScenario(std::string const &scenario,
-                       std::string const &parent,
-                       double probability)
+bool Smps::addScenario(std::string const &scenario, double probability)
 {
     size_t const idx = d_scenarios.size();
+    ScenNode scen{probability, {}};
 
-    ScenNode *par = d_scen2idx.contains(parent)
-                        ? d_scenarios.data() + d_scen2idx[parent]
-                        : nullptr;
-
-    ScenNode scen{probability, {}, par};
-
-    d_scenarios.emplace_back(scen);
+    d_scenarios.push_back(scen);
     d_scen2idx[scenario] = idx;
 
     return true;

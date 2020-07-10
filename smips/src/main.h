@@ -1,9 +1,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "decompositions/loosebenders.h"
-#include "decompositions/lpdual.h"
-#include "decompositions/strongbenders.h"
+#include "cutfamilies/loosebenders.h"
+#include "cutfamilies/lpdual.h"
+#include "cutfamilies/strongbenders.h"
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
 
