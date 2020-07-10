@@ -77,10 +77,10 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
         sub.updateRhs(omega - Tx);
         sub.solve();
 
-        auto const info = sub.multipliers();
+        auto const duals = sub.duals();
         double const prob = d_problem.probability(scenario);
 
-        arma::vec pi = Tmat * info.lambda;
+        arma::vec pi = Tmat * duals.lambda;
 
         update(omega, pi);
 

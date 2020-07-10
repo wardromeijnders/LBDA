@@ -64,7 +64,7 @@ SubProblem::GomInfo const SubProblem::gomInfo()
     return gomInfo;
 }
 
-SubProblem::Multipliers const SubProblem::multipliers()
+SubProblem::Duals const SubProblem::duals()
 {
     auto const &Wmat = d_problem.Wmat();
 
@@ -87,19 +87,19 @@ SubProblem::Multipliers const SubProblem::multipliers()
     piUb(arma::find(vBasis != GRB_NONBASIC_UPPER)).fill(0.);
 
     auto const *lambda = d_model.get(GRB_DoubleAttr_Pi, d_constrs, Wmat.n_cols);
-    auto multipliers = Multipliers{arma::vec{lambda, Wmat.n_cols}, piUb};
+    auto duals = Duals{arma::vec{lambda, Wmat.n_cols}, piUb};
 
     delete[] vBasisPtr;
     delete[] piUbPtr;
     delete[] lambda;
 
-    return multipliers;
+    return duals;
 }
 
 void SubProblem::solve()
 {
     d_model.optimize();
-    // TODO check feasibility, or generate feasibility cut somehow?
+    // TODO check feasibility of subproblem?
 }
 
 void SubProblem::updateRhs(arma::vec &rhs)

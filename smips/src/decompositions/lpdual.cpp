@@ -25,11 +25,11 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
         sub.updateRhs(omega - Tx);
         sub.solve();
 
-        auto const info = sub.multipliers();
+        auto const duals = sub.duals();
         double const prob = d_problem.probability(scenario);
 
-        gamma += prob * arma::dot(info.lambda, omega);
-        dual -= prob * info.lambda;
+        gamma += prob * arma::dot(duals.lambda, omega);
+        dual -= prob * duals.lambda;
     }
 
     return Cut{Tmat * dual, gamma};

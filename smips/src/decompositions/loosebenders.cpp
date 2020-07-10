@@ -23,7 +23,6 @@ LooseBenders::LooseBenders(GRBEnv &env,
                              nullptr,
                              Wmat.n_rows);
 
-
     GRBLinExpr lhs[Wmat.n_cols];
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
         lhs[iter.col()] += *iter * d_vars[iter.row()];

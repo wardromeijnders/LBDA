@@ -183,7 +183,6 @@ bool Smps::addScenarioRealisation(std::string const &scenario,
     return true;
 }
 
-
 arma::vec Smps::firstStageObjCoeffs()
 {
     return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);

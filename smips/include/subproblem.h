@@ -23,7 +23,7 @@ public:
         arma::Col<int> cBasis;
     };
 
-    struct Multipliers
+    struct Duals
     {
         arma::vec lambda;
         arma::vec pi_u;
@@ -37,13 +37,21 @@ public:
 
     GomInfo const gomInfo();
 
-    Multipliers const multipliers();
+    Duals const duals();
 
     void updateRhs(arma::vec &rhs);
 
     void updateRhs(arma::vec &&rhs);
 
     void solve();
+
+    /**
+     * Returns the objective value of the sub problem.
+     */
+    double objective() const
+    {
+        return d_model.get(GRB_DoubleAttr_ObjVal);
+    }
 };
 
 #endif
