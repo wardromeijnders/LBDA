@@ -1,5 +1,5 @@
 #include "smps/dataline.h"
-#include <iostream>
+
 using namespace smps;
 
 DataLine::DataLine(const std::string &line)
