@@ -6,24 +6,21 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 {
     auto const &Wmat = d_problem.Wmat();
 
-    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int?
-    vTypes.fill(GRB_CONTINUOUS);
-
     d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
                              d_problem.secondStageUpperBound().memptr(),
                              d_problem.secondStageCoeffs().memptr(),
-                             vTypes.memptr(),
+                             d_problem.secondStageVarTypes().memptr(),
                              nullptr,
                              Wmat.n_rows);
 
-    GRBLinExpr Wy[Wmat.n_cols];  // constraint lhs
+    GRBLinExpr lhs[Wmat.n_cols];
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
-        Wy[iter.col()] += *iter * d_vars[iter.row()];
+        lhs[iter.col()] += *iter * d_vars[iter.row()];  // Wy
 
     auto const &senses = d_problem.secondStageConstrSenses();
     arma::vec rhs = arma::zeros(Wmat.n_cols);
 
-    d_constrs = d_model.addConstrs(Wy,
+    d_constrs = d_model.addConstrs(lhs,
                                    senses.memptr(),
                                    rhs.memptr(),
                                    nullptr,

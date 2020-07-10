@@ -120,7 +120,6 @@ bool CoreParser::parseRhs(DataLine const &dataLine)
 
 bool CoreParser::parseBounds(DataLine const &dataLine)
 {
-    // TODO check if this works.
     auto [var, bound] = dataLine.firstDataEntry();
 
     // This follows mostly from
@@ -149,5 +148,6 @@ bool CoreParser::parseBounds(DataLine const &dataLine)
 
 bool CoreParser::parseRanges(DataLine const &dataLine)
 {
-    return false;  // TODO
+    std::cerr << "SMIPS does not currently understand RANGES.\n";
+    return false;
 }

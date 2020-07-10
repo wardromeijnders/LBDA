@@ -10,7 +10,7 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
-    arma::vec Tx = (x.t() * Tmat).t();          // TODO simplify
+    arma::vec Tx = Tmat.t() * x;
     arma::vec dual = arma::zeros(Tmat.n_cols);  // decomposition coeffs
 
     auto sub = SubProblem(d_env, d_problem);

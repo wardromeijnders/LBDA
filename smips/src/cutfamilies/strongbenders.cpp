@@ -63,7 +63,7 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 {
     auto const &Tmat = d_problem.Tmat();
 
-    arma::vec Tx = (x.t() * Tmat).t();  // TODO simplify
+    arma::vec Tx = Tmat.t() * x;
     arma::vec beta = arma::zeros(Tmat.n_rows);
 
     auto sub = SubProblem(d_env, d_problem);

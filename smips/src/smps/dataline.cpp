@@ -4,7 +4,6 @@ using namespace smps;
 
 DataLine::DataLine(const std::string &line)
 {
-    // TODO init section would be nice, but how?
     d_indicator = trim(line.substr(1, 2));
     d_name = trim(line.substr(4, 8));
 

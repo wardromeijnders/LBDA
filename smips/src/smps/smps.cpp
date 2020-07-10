@@ -257,7 +257,8 @@ arma::mat Smps::generateScenarios()
     if (!d_scenarios.empty())
         return genScenarios();
 
-    return arma::mat();  // TODO
+    throw std::runtime_error("SMIPS does not understand this type of "
+                             ".sto file yet.");
 }
 
 arma::vec Smps::scenarioProbabilities()
@@ -268,7 +269,8 @@ arma::vec Smps::scenarioProbabilities()
     if (!d_scenarios.empty())
         return scenProbabilities();
 
-    return arma::vec();  // TODO
+    throw std::runtime_error("SMIPS does not understand this type of "
+                             ".sto file yet.");
 }
 
 arma::mat Smps::genIndepScenarios()
