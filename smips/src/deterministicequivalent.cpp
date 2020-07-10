@@ -79,6 +79,7 @@ void DeterministicEquivalent::initSecondStage()
     }
 
     delete[] xVars;
+
     d_model.update();
 }
 
