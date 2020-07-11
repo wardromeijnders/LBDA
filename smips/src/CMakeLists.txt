@@ -10,8 +10,9 @@ add_subdirectory(smps)
 set(SOURCES
         deterministicequivalent.cpp
         masterproblem.cpp
-        subproblem.cpp
-        problem.cpp)
+        problem.cpp
+        sarge.cpp
+        subproblem.cpp)
 
 add_executable(smips main.cpp ${SOURCES})
 

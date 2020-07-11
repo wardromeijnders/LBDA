@@ -40,7 +40,7 @@ public:
      * @param location SMPS file location (should not contain any extensions).
      * @return         Problem instance.
      */
-    static Problem fromSmps(char const *location);
+    static Problem fromSmps(std::string const &location);
 
     arma::Col<char> const &firstStageConstrSenses() const
     {

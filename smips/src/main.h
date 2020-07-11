@@ -6,6 +6,7 @@
 #include "cutfamilies/strongbenders.h"
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
+#include "sarge.h"
 
 #include <gurobi_c++.h>
 #include <iostream>

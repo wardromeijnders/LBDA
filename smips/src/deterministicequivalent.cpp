@@ -103,3 +103,23 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
 
     return result;
 }
+
+double DeterministicEquivalent::firstStageObjective()
+{
+    auto const &Amat = d_problem.Amat();
+
+    auto const *vars = d_model.getVars();
+    auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
+
+    arma::vec x(xPtr, Amat.n_rows);
+
+    delete[] vars;
+    delete[] xPtr;
+
+    return arma::dot(d_problem.firstStageCoeffs(), x);
+}
+
+double DeterministicEquivalent::secondStageObjective()
+{
+    return objective() - firstStageObjective();
+}

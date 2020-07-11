@@ -2,7 +2,7 @@
 
 #include "smps/smps.h"
 
-Problem Problem::fromSmps(char const *location)
+Problem Problem::fromSmps(std::string const &location)
 {
     smps::Smps smps;
     smps.readSmps(location);

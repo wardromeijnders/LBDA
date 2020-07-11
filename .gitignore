@@ -39,3 +39,6 @@ build/
 
 # Papers
 *.pdf
+
+# Gurobi environment settings
+gurobi.env

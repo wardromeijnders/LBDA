@@ -10,6 +10,8 @@ using namespace smps;
 
 void Smps::readSmps(std::string const &location)
 {
+    std::cout << "Reading " << location << '\n';
+
     CoreParser coreParser(*this);
     coreParser.parse(location + ".cor");
 
