@@ -13,7 +13,7 @@ try
     sarge.setArgument("t", "time", "Time limit if method=deq.", false);
 
     sarge.setDescription("SMIPS. A program for solving two-stage mixed-integer stochastic programs.");
-    sarge.setUsage("smips [-h] [-m] [-c | -t] <file> <method>");
+    sarge.setUsage("smips [-h] [-c | -t] <file> <method>");
     // clang-format on
 
     if (!sarge.parseArguments(argc, argv))
@@ -36,18 +36,18 @@ try
         return EXIT_FAILURE;
     }
 
+    std::string method;
+
+    if (!sarge.getTextArgument(1, method))
+    {
+        std::cerr << "Did not receive a solution method.\n";
+        return EXIT_FAILURE;
+    }
+
     GRBEnv env;
     auto problem = Problem::fromSmps(file);
 
-    if (sarge.exists("method") &&)
-
-        if (sarge.exists("deq") && sarge.exists("cut"))
-        {
-            std::cerr << "Select one solution method: \"deq\", or \"cut\".\n";
-            return EXIT_FAILURE;
-        }
-
-    if (sarge.exists("deq"))
+    if (method == "deq")
     {
         std::cout << "Deterministic equivalent:\n";
         DeterministicEquivalent deq{env, problem};
@@ -62,7 +62,7 @@ try
     }
 
     // TODO use selection mechanism, what about the alpha's for LBDA?
-    if (sarge.exists("cut"))
+    if (method == "cut")
     {
         std::cout << "Decomposition with cut family:\n";
         MasterProblem master{env, problem};
