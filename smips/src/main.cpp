@@ -61,14 +61,17 @@ try
 catch (GRBException const &e)
 {
     std::cerr << e.getMessage() << '\n';
+    return EXIT_FAILURE;
 }
 catch (std::exception const &e)
 {
     std::cerr << e.what() << '\n';
+    return EXIT_FAILURE;
 }
 catch (...)
 {
     std::cerr << "Something went wrong.\n";
+    return EXIT_FAILURE;
 }
 
 argument_t parseArguments(int argc, char **argv)

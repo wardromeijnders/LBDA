@@ -15,6 +15,10 @@ bool (StochParser::*(StochParser::d_actions)[])(smps::DataLine const &)
 void StochParser::parse(std::string const &location)
 {
     std::ifstream file(location);
+
+    if (file.fail())
+        throw std::runtime_error("Could not open .sto file.");
+
     std::string line;
 
     while (std::getline(file, line))

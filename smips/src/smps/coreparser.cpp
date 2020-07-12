@@ -18,6 +18,10 @@ bool (CoreParser::*(CoreParser::d_actions)[])(smps::DataLine const &)
 void CoreParser::parse(std::string const &location)
 {
     std::ifstream file(location);
+
+    if (file.fail())
+        throw std::runtime_error("Could not open .cor file.");
+
     std::string line;
 
     while (std::getline(file, line))
