@@ -17,7 +17,7 @@ class StrongBenders : public CutFamily
 public:
     StrongBenders(GRBEnv &env, Problem const &problem);
 
-    ~StrongBenders();
+    ~StrongBenders() override;
 
     CutFamily::Cut computeCut(arma::vec const &x) override;
 };

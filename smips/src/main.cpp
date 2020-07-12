@@ -18,22 +18,23 @@ try
     {
         case Arguments::DECOMPOSITION:
         {
-            MasterProblem master{env, problem};
+            MasterProblem master(env, problem);
             CutFamily *cutFamily;
+
+            // TODO how to set alpha?
+            arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
 
             switch (arguments.cutType)
             {
                 case Arguments::LP_DUAL:
-                    cutFamily = new LpDual{env, problem};
+                    cutFamily = new LpDual(env, problem);
                     break;
                 case Arguments::STRONG_BENDERS:
-                    cutFamily = new StrongBenders{env, problem};
+                    cutFamily = new StrongBenders(env, problem);
                     break;
                 case Arguments::LOOSE_BENDERS:
                 default:
-                    // TODO how to set alpha?
-                    arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
-                    cutFamily = new LooseBenders{env, problem, alpha};
+                    cutFamily = new LooseBenders(env, problem, alpha);
                     break;
             }
 
@@ -47,7 +48,7 @@ try
         }
         case Arguments::DETERMINISTIC_EQUIVALENT:
         {
-            DeterministicEquivalent deq{env, problem};
+            DeterministicEquivalent deq(env, problem);
 
             auto solution = deq.solve(arguments.timeLimit);
             auto decisions = *solution;
