@@ -88,6 +88,9 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
     d_model.set(GRB_DoubleParam_TimeLimit, timeLimit);
     d_model.optimize();
 
+    if (d_model.get(GRB_IntAttr_Status) == GRB_TIME_LIMIT)
+        throw std::runtime_error("Time limit exceeded.");
+
     if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
         throw std::runtime_error("Deterministic equivalent is infeasible.");
 

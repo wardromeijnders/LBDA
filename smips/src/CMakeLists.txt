@@ -11,7 +11,6 @@ set(SOURCES
         deterministicequivalent.cpp
         masterproblem.cpp
         problem.cpp
-        sarge.cpp
         subproblem.cpp)
 
 add_executable(smips main.cpp ${SOURCES})

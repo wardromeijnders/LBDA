@@ -26,6 +26,8 @@ public:
     virtual CutFamily::Cut computeCut(arma::vec const &x) = 0;
 
     virtual double solve();
+
+    virtual ~CutFamily() = default;
 };
 
 #endif  // CUT_H

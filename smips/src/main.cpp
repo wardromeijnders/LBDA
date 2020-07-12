@@ -3,78 +3,58 @@
 int main(int argc, char **argv)
 try
 {
-    // TODO clean this up into several methods, document CLI better.
+    auto arguments = parseArguments(argc, argv);
 
-    Sarge sarge;
-
-    // clang-format off
-    sarge.setArgument("h", "help", "Prints this help text.", false);
-    sarge.setArgument("c", "cut", "Cut family to use if method=cut. One of {lp, sb, lbda}.", true);
-    sarge.setArgument("t", "time", "Time limit if method=deq.", false);
-
-    sarge.setDescription("SMIPS. A program for solving two-stage mixed-integer stochastic programs.");
-    sarge.setUsage("smips [-h] [-c | -t] <file> <method>");
-    // clang-format on
-
-    if (!sarge.parseArguments(argc, argv))
+    if (arguments.printUsage)
     {
-        std::cerr << "Could not parse arguments.\n";
-        return EXIT_FAILURE;
-    }
-
-    if (sarge.exists("help"))
-    {
-        sarge.printHelp();
+        std::cout << USAGE << '\n';
         return EXIT_SUCCESS;
     }
 
-    std::string file;
-
-    if (!sarge.getTextArgument(0, file))
-    {
-        std::cerr << "Did not receive an SMPS file location.\n";
-        return EXIT_FAILURE;
-    }
-
-    std::string method;
-
-    if (!sarge.getTextArgument(1, method))
-    {
-        std::cerr << "Did not receive a solution method.\n";
-        return EXIT_FAILURE;
-    }
-
     GRBEnv env;
-    auto problem = Problem::fromSmps(file);
+    auto problem = Problem::fromSmps(arguments.file);
 
-    if (method == "deq")
+    switch (arguments.methodType)
     {
-        std::cout << "Deterministic equivalent:\n";
-        DeterministicEquivalent deq{env, problem};
+        case Arguments::DECOMPOSITION:
+        {
+            MasterProblem master{env, problem};
+            CutFamily *cutFamily;
 
-        auto ptr = deq.solve(120);  // TODO make time limit CLI argument
-        auto res = *ptr;
+            switch (arguments.cutType)
+            {
+                case Arguments::LP_DUAL:
+                    cutFamily = new LpDual{env, problem};
+                    break;
+                case Arguments::STRONG_BENDERS:
+                    cutFamily = new StrongBenders{env, problem};
+                    break;
+                case Arguments::LOOSE_BENDERS:
+                default:
+                    // TODO how to set alpha?
+                    arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
+                    cutFamily = new LooseBenders{env, problem, alpha};
+                    break;
+            }
 
-        std::cout << "x = \n" << res << '\n';
-        std::cout << "Objective = " << deq.objective() << '\n';
-        std::cout << "    c^T x = " << deq.firstStageObjective() << '\n';
-        std::cout << "     Q(x) = " << deq.secondStageObjective() << '\n';
-    }
+            auto solution = master.solveWith(*cutFamily);
+            auto decisions = *solution;
 
-    // TODO use selection mechanism, what about the alpha's for LBDA?
-    if (method == "cut")
-    {
-        std::cout << "Decomposition with cut family:\n";
-        MasterProblem master{env, problem};
-        StrongBenders cutFamily{env, problem};
+            delete cutFamily;
 
-        auto ptr = master.solveWith(cutFamily);
-        auto res = *ptr;
+            printSolution(decisions, master);
+            break;
+        }
+        case Arguments::DETERMINISTIC_EQUIVALENT:
+        {
+            DeterministicEquivalent deq{env, problem};
 
-        std::cout << "x = \n" << res << '\n';
-        std::cout << "Objective = " << master.objective() << '\n';
-        std::cout << "    c^T x = " << master.firstStageObjective() << '\n';
-        std::cout << "     Q(x) = " << master.secondStageObjective() << '\n';
+            auto solution = deq.solve(arguments.timeLimit);
+            auto decisions = *solution;
+
+            printSolution(decisions, deq);
+            break;
+        }
     }
 }
 catch (GRBException const &e)
@@ -88,4 +68,53 @@ catch (std::exception const &e)
 catch (...)
 {
     std::cerr << "Something went wrong.\n";
+}
+
+argument_t parseArguments(int argc, char **argv)
+{
+    argument_t arguments;
+    int option;
+
+    while ((option = getopt(argc, argv, "hm:c:t:")) != -1)
+    {
+        switch (option)
+        {
+            case 'h':
+                arguments.printUsage = true;
+                break;
+            case 'm':
+                if (std::strcmp(optarg, "deq") == 0)
+                    arguments.methodType = arguments.DETERMINISTIC_EQUIVALENT;
+
+                break;
+            case 'c':
+                if (std::strcmp(optarg, "lp") == 0)
+                    arguments.cutType = arguments.LP_DUAL;
+
+                if (std::strcmp(optarg, "sb") == 0)
+                    arguments.cutType = arguments.STRONG_BENDERS;
+
+                break;
+            case 't':
+                arguments.timeLimit = std::stod(optarg);
+                break;
+            default:
+                break;  // unexpected option, but not the end of the world.
+        }
+    }
+
+    if (argc == optind)
+        throw std::runtime_error("Did not receive an SMPS file location.");
+
+    arguments.file = argv[optind];
+    return arguments;
+}
+
+
+template<class T> void printSolution(arma::vec const &decisions, T &method)
+{
+    std::cout << "x = \n" << decisions << '\n';
+    std::cout << "Obj.  = " << method.objective() << '\n';
+    std::cout << "c^T x = " << method.firstStageObjective() << '\n';
+    std::cout << " Q(x) = " << method.secondStageObjective() << '\n';
 }

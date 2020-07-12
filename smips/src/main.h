@@ -6,9 +6,85 @@
 #include "cutfamilies/strongbenders.h"
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
-#include "sarge.h"
 
+#include <cstring>
 #include <gurobi_c++.h>
 #include <iostream>
+#include <stdexcept>
+#include <unistd.h>
+
+auto const USAGE = R"(
+SMIPS. A program for solving two-stage mixed-integer stochastic programs.
+
+Usage:
+    smips [-h] [-m method] [-c cut | -t time] <file>
+
+Options:
+    -h  Prints this help text.
+    -m  Selects solution method. One of {deq, decomp}:
+        * "deq". Solves the deterministic equivalent (extensive form).
+        * "decomp". Solves a decomposition of the problem into a first- and
+          second-stage problem. Default.
+    -c  Cut family to use when solving the decomposition. One of {lbda, lp, sb}:
+        * "lbda". Loose Benders approximation cuts. Default.
+        * "lp". Uses cuts based on the LP dual of the second-stage problem.
+        * "sb". Uses strengthened Benders' cuts, derived from the Lagrangian
+          relaxation of the second-stage problem.
+    -t  Time limit (in seconds) to set when solving the deterministic equivalent.
+        No time limit is set by default.
+
+Arguments:
+    <file>  Location of the SMPS file triplet to solve. Should not contain any
+            extensions.
+)";
+
+/**
+ * Simple struct that gathers the command-line arguments.
+ */
+struct Arguments
+{
+    enum CutType
+    {
+        LP_DUAL,
+        LOOSE_BENDERS,
+        STRONG_BENDERS
+    };
+
+    enum MethodType
+    {
+        DETERMINISTIC_EQUIVALENT,
+        DECOMPOSITION
+    };
+
+    MethodType methodType = DECOMPOSITION;
+    CutType cutType = LOOSE_BENDERS;
+    double timeLimit = arma::datum::inf;  // in seconds
+    bool printUsage = false;
+    std::string file;
+};
+
+using argument_t = struct Arguments;
+
+/**
+ * Parses command-line arguments. Heavily tied into the Posix/Unix way of doing
+ * this, using <code>getopt</code>.
+ *
+ * @throws std::runtime_error when the arguments could not correctly be parsed.
+ *
+ * @param argc  Number of command-line arguments.
+ * @param argv  Command-line arguments.
+ * @return      Struct with all parsed arguments.
+ */
+argument_t parseArguments(int argc, char **argv);
+
+/**
+ * Prints the (near) optimal first-stage decisions passed in, and some objective
+ * information derived from the method.
+ *
+ * @param decisions Near optimal first-stage decisions, as a vector.
+ * @param method    Solution method used - the deterministic equivalent, or the
+ *                  first-stage master problem.
+ */
+template<class T> void printSolution(arma::vec const &decisions, T &method);
 
 #endif  // MAIN_H
