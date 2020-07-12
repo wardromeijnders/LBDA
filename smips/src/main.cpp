@@ -81,8 +81,10 @@ argument_t parseArguments(int argc, char **argv)
         switch (option)
         {
             case 'h':
+                // If this flag is set, it is all we will process - immediately
+                // after, the program ends. No need to continue processing.
                 arguments.printUsage = true;
-                break;
+                return arguments;
             case 'm':
                 if (std::strcmp(optarg, "deq") == 0)
                     arguments.methodType = arguments.DETERMINISTIC_EQUIVALENT;
