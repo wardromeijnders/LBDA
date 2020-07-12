@@ -30,7 +30,7 @@ class Problem
 
     arma::vec d_firstStageRhs;  // first-stage right-hand side
 
-    arma::mat d_scenarios;  // each column is a scenario (omega)
+    arma::mat d_scenarios;  // each column is a scenario right-hand side (omega)
     arma::vec d_scenarioProbabilities;
 
 public:

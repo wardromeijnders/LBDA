@@ -9,7 +9,7 @@ namespace smps
     class FileParser
     {
     protected:
-        Smps &d_smps;
+        Smps &d_smps;  // reference to the SMPS object to be populated
 
         bool parseNone(smps::DataLine const &dataLine);
 

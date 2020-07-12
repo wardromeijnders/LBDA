@@ -56,11 +56,11 @@ struct Arguments
         DECOMPOSITION
     };
 
-    MethodType methodType = DECOMPOSITION;
-    CutType cutType = LOOSE_BENDERS;
-    double timeLimit = arma::datum::inf;  // in seconds
-    bool printUsage = false;
-    std::string file;
+    MethodType methodType = DECOMPOSITION;  // solution method to use
+    CutType cutType = LOOSE_BENDERS;        // cut family to use
+    double timeLimit = arma::datum::inf;    // max. solve time in seconds
+    bool printUsage = false;                // print help text?
+    std::string file;                       // smps file location
 };
 
 using argument_t = struct Arguments;

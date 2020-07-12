@@ -6,6 +6,9 @@
 
 namespace smps
 {
+    /**
+     * SMPS class, to be populated with data read from the file system.
+     */
     class Smps
     {
         struct ScenNode  // scenario node - data and a pointer-to-parent.
@@ -47,7 +50,16 @@ namespace smps
     public:
         Smps() = default;
 
-        void readSmps(std::string const &location);
+        /**
+         * Reads (smps) data from the given file location, by parsing the three
+         * files (.cor, .tim, and .sto) expected to be there. Once this function
+         * returns, this object may be queried for the data.
+         *
+         * @throws std::runtime_error when one of the three files does not exist.
+         *
+         * @param location Location of the smps files.
+         */
+        void read(std::string const &location);
 
         std::string const &name() const
         {

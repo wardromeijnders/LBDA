@@ -5,7 +5,7 @@
 Problem Problem::fromSmps(std::string const &location)
 {
     smps::Smps smps;
-    smps.readSmps(location);
+    smps.read(location);
 
     Problem problem;
 
