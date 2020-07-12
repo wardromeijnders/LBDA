@@ -6,14 +6,14 @@ TODO intro.
 
 (Assumes a Unix environment)
 
-- Get CMake. This might already be available on your system. If not, and you
-  also need to install Armadillo (see below), the `scripts/install_arma.sh`
-  script covers this step as a side-effect.
+- Get CMake. This might already be available on your system. Since you
+  also need to install Armadillo (see below), this step can be postponed until
+  later: the `scripts/install_arma.sh` script covers this step as a side-effect.
 
-- Make sure you have Gurobi installed. Any version should do, but the code was
-  written and tested with Gurobi 9. The headers should be available in some 
-  standard location (e.g., where the linker can find them). Since this is 
-  commercial software, you need to perform this step yourself.
+- Make sure you have Gurobi installed. Any recent version should do, but the code
+  was written and tested with Gurobi 9. The headers should be available in some 
+  standard location (up to you, as long as the linker can find them). Since this
+  is commercial software, you need to perform this step yourself.
 
 - For linear algebra, we use [Armadillo](http://arma.sourceforge.net/), which is
   generally available for most distributions. The code was written and tested with
