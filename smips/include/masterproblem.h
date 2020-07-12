@@ -32,7 +32,7 @@ public:
      * @param cutFamily The cutting strategy (family) to use.
      * @param tol       Maximum acceptable optimality gap.
      *
-     * @return The (near) optimal first-stage decisions.
+     * @return Vector of (near) optimal first-stage decisions.
      */
     std::unique_ptr<arma::vec> solveWith(CutFamily &cutFamily,
                                          double tol = 1e-4);
