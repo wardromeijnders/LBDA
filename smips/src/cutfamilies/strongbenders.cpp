@@ -8,6 +8,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 {
     auto const &Amat = problem.Amat();
 
+    // Free first-stage variables for Lagrangian relaxation.
     d_xVars = d_model.addVars(problem.firstStageLowerBound().memptr(),
                               problem.firstStageUpperBound().memptr(),
                               nullptr,
@@ -15,7 +16,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
                               nullptr,
                               Amat.n_rows);
 
-    // TODO: include first-stage constraints
+    // TODO: include first-stage constraints?
 
     auto const &Wmat = problem.Wmat();
 

@@ -33,6 +33,16 @@ public:
     std::unique_ptr<arma::vec> solve(double timeLimit = 1e20);
 
     /**
+     * @return First-stage objective value.
+     */
+    double firstStageObjective();
+
+    /*
+     * @return expected cost-to-go of the second-stage.
+     */
+    double secondStageObjective();
+
+    /**
      * @return Objective value.
      */
     double objective() const

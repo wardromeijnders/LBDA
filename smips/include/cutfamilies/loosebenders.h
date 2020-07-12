@@ -34,7 +34,7 @@ public:
                  arma::vec const &alpha,
                  double timeLimit = 1e6);
 
-    ~LooseBenders();
+    ~LooseBenders() override;
 
     CutFamily::Cut computeCut(arma::vec const &x) override;
 };

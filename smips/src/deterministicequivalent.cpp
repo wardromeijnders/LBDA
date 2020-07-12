@@ -79,6 +79,7 @@ void DeterministicEquivalent::initSecondStage()
     }
 
     delete[] xVars;
+
     d_model.update();
 }
 
@@ -86,6 +87,9 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
 {
     d_model.set(GRB_DoubleParam_TimeLimit, timeLimit);
     d_model.optimize();
+
+    if (d_model.get(GRB_IntAttr_Status) == GRB_TIME_LIMIT)
+        throw std::runtime_error("Time limit exceeded.");
 
     if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
         throw std::runtime_error("Deterministic equivalent is infeasible.");
@@ -101,4 +105,24 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
     delete[] xPtr;
 
     return result;
+}
+
+double DeterministicEquivalent::firstStageObjective()
+{
+    auto const &Amat = d_problem.Amat();
+
+    auto const *vars = d_model.getVars();
+    auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
+
+    arma::vec x(xPtr, Amat.n_rows);
+
+    delete[] vars;
+    delete[] xPtr;
+
+    return arma::dot(d_problem.firstStageCoeffs(), x);
+}
+
+double DeterministicEquivalent::secondStageObjective()
+{
+    return objective() - firstStageObjective();
 }

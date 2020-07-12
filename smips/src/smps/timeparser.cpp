@@ -13,6 +13,10 @@ bool (TimeParser::*(TimeParser::d_actions)[])(smps::DataLine const &)
 void TimeParser::parse(std::string const &location)
 {
     std::ifstream file(location);
+
+    if (file.fail())
+        throw std::runtime_error("Could not open .tim file.");
+
     std::string line;
 
     while (std::getline(file, line))

@@ -2,12 +2,12 @@
 
 #include "smps/smps.h"
 
-Problem Problem::fromSmps(char const *location)
+Problem Problem::fromSmps(std::string const &location)
 {
     smps::Smps smps;
-    smps.readSmps(location);
+    smps.read(location);
 
-    Problem problem{};
+    Problem problem;
 
     problem.d_Amat = smps.Amat();
     problem.d_Wmat = smps.Wmat();
