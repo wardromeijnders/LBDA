@@ -18,6 +18,7 @@ try
     {
         case Arguments::DECOMPOSITION:
         {
+            // TODO pass bounds for theta from CLI.
             MasterProblem master(env, problem);
             CutFamily *cutFamily;
 
