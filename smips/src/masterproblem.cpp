@@ -1,10 +1,12 @@
 #include "masterproblem.h"
 
-MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
+MasterProblem::MasterProblem(GRBEnv &env,
+                             Problem &problem,
+                             double lowerBound,
+                             double upperBound) :
     d_problem(problem), d_model(env)
 {
-    // Theta - TODO allow different UB/LB?
-    d_model.addVar(0, arma::datum::inf, 1.0, GRB_CONTINUOUS);
+    d_model.addVar(lowerBound, upperBound, 1.0, GRB_CONTINUOUS, "theta");
 
     auto &Amat = d_problem.Amat();
     auto *xVars = d_model.addVars(d_problem.firstStageLowerBound().memptr(),
@@ -34,13 +36,11 @@ MasterProblem::MasterProblem(GRBEnv &env, Problem &problem) :
 
 void MasterProblem::addCut(CutFamily::Cut &cut)
 {
-    size_t const n1 = d_problem.Amat().n_rows;
-
-    GRBVar *vars = d_model.getVars();
+    GRBVar const *vars = d_model.getVars();
     arma::vec const coeffs = -cut.beta;
 
-    GRBLinExpr lhs;
-    lhs.addTerms(coeffs.memptr(), vars + 1, n1);
+    GRBLinExpr lhs;  // first variable is theta, and then all the x's.
+    lhs.addTerms(coeffs.memptr(), vars + 1, d_problem.Amat().n_rows);
     lhs += vars[0];
 
     delete[] vars;

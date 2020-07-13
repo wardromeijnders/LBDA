@@ -18,7 +18,20 @@ class MasterProblem
     GRBModel d_model;
 
 public:
-    MasterProblem(GRBEnv &env, Problem &problem);
+    /**
+     * Constructs the master problem from the data in the passed-in problem
+     * instance.
+     *
+     * @param env           Gurobi environment.
+     * @param problem       Problem instance.
+     * @param lowerBound    Lower bound for theta, the approximation of the
+     *                      expected cost-to-go. Default 0.
+     * @param upperBound    Upper bound for theta. Default +inf.
+     */
+    MasterProblem(GRBEnv &env,
+                  Problem &problem,
+                  double lowerBound = 0.,
+                  double upperBound = arma::datum::inf);
 
     /**
      * Adds cut <code>theta >= beta^T x + gamma</code>.
