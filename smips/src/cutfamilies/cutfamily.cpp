@@ -2,7 +2,7 @@
 
 
 CutFamily::CutFamily(GRBEnv &env, const Problem &problem) :
-    d_env(env), d_model(env), d_problem(problem)
+    d_env(env), d_model(env), d_problem(problem), d_sub(env, problem)
 {
 }
 

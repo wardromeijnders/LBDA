@@ -2,10 +2,10 @@
 #define CUT_H
 
 #include "problem.h"
+#include "subproblem.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
-
 
 class CutFamily
 {
@@ -13,6 +13,7 @@ protected:
     GRBEnv &d_env;
     GRBModel d_model;
     Problem const &d_problem;
+    SubProblem d_sub;
 
     explicit CutFamily(GRBEnv &env, Problem const &problem);
 

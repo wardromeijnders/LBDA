@@ -54,28 +54,28 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
     arma::vec Tx = Tmat.t() * x;
     arma::vec dual = arma::zeros(Tmat.n_cols);  // decomposition coeffs
 
-    auto sub = SubProblem(d_env, d_problem);
-
     double gamma = 0;
 
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.updateRhs(omega - Tx);
-        sub.solve();
+        d_sub.updateRhs(omega - Tx);
+        d_sub.solve();
 
-        auto const info = sub.gomInfo();
+        auto const basis = d_sub.basisInfo();
+        auto const duals = d_sub.duals();
+
         double const prob = d_problem.probability(scenario);
 
         arma::vec rhs = omega - d_alpha;
 
         // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
         // lambda^T alpha.
-        gamma += prob * computeGomory(scenario, rhs, info.vBasis, info.cBasis);
-        gamma += prob * arma::dot(info.lambda, d_alpha);
+        gamma += prob * computeGomory(scenario, rhs, basis.vBasis, basis.cBasis);
+        gamma += prob * arma::dot(duals.lambda, d_alpha);
 
-        dual -= prob * info.lambda;
+        dual -= prob * duals.lambda;
     }
 
     return Cut{Tmat * dual, gamma};

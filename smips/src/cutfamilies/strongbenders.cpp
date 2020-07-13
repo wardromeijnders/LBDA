@@ -9,7 +9,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     auto const &Amat = problem.Amat();
 
     // Free first-stage variables for Lagrangian relaxation.
-    d_xVars = d_model.addVars(problem.firstStageLowerBound().memptr(),
+    d_zVars = d_model.addVars(problem.firstStageLowerBound().memptr(),
                               problem.firstStageUpperBound().memptr(),
                               nullptr,
                               problem.firstStageVarTypes().memptr(),
@@ -32,7 +32,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
     GRBLinExpr lhs[Tmat.n_cols];  // constraint lhs
 
     for (auto iter = Tmat.begin(); iter != Tmat.end(); ++iter)
-        lhs[iter.col()] += *iter * d_xVars[iter.row()];  // Tx
+        lhs[iter.col()] += *iter * d_zVars[iter.row()];  // Tz
 
     for (auto iter = Wmat.begin(); iter != Wmat.end(); ++iter)
         lhs[iter.col()] += *iter * yVars[iter.row()];  // Wy
@@ -53,7 +53,7 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
 
 StrongBenders::~StrongBenders()
 {
-    delete[] d_xVars;
+    delete[] d_zVars;
     delete[] d_constrs;
 }
 
@@ -64,18 +64,16 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
     arma::vec Tx = Tmat.t() * x;
     arma::vec beta = arma::zeros(Tmat.n_rows);
 
-    auto sub = SubProblem(d_env, d_problem);
-
     double gamma = 0;
 
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
         arma::vec omega = d_problem.scenarios().col(scenario);
 
-        sub.updateRhs(omega - Tx);
-        sub.solve();
+        d_sub.updateRhs(omega - Tx);
+        d_sub.solve();
 
-        auto const duals = sub.duals();
+        auto const duals = d_sub.duals();
         double const prob = d_problem.probability(scenario);
 
         arma::vec pi = Tmat * duals.lambda;
@@ -92,7 +90,7 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 void StrongBenders::update(arma::vec &rhs, arma::vec &pi)
 {
     auto const &Amat = d_problem.Amat();
-    d_model.set(GRB_DoubleAttr_Obj, d_xVars, pi.memptr(), Amat.n_rows);
+    d_model.set(GRB_DoubleAttr_Obj, d_zVars, pi.memptr(), Amat.n_rows);
 
     auto const &Wmat = d_problem.Wmat();
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);

@@ -19,9 +19,8 @@ class SubProblem
     Problem const &d_problem;
 
 public:
-    struct GomInfo
+    struct BasisInfo
     {
-        arma::vec lambda;
         arma::Col<int> vBasis;
         arma::Col<int> cBasis;
     };
@@ -38,7 +37,7 @@ public:
 
     ~SubProblem();
 
-    GomInfo const gomInfo();
+    BasisInfo const basisInfo();
 
     Duals const duals();
 

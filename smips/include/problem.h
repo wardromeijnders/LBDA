@@ -72,21 +72,37 @@ public:
         return d_scenarios.n_cols;
     }
 
+    /**
+     * Sparse, first-stage constraint matrix. Each column specifies a
+     * constraint, each row a variable.
+     */
     arma::sp_mat const &Amat() const
     {
         return d_Amat;
     }
 
+    /**
+     * Sparse, first-stage constraint matrix. Each column specifies a
+     * constraint, each row a variable.
+     */
     arma::sp_mat &Amat()
     {
         return d_Amat;
     }
 
+    /**
+     * Sparse, second-stage constraint matrix. Each column specifies a
+     * constraint, each row a variable.
+     */
     arma::sp_mat const &Wmat() const
     {
         return d_Wmat;
     }
 
+    /**
+     * Sparse, second-stage linking matrix for the first-stage variables. Each
+     * column specifies coefficients for a constraint, each row a variable.
+     */
     arma::sp_mat const &Tmat() const
     {
         return d_Tmat;
@@ -132,11 +148,17 @@ public:
         return d_secondStageUpperBound;
     }
 
+    /**
+     * Scenarios. Each column specifies a right-hand side (scenario).
+     */
     arma::mat const &scenarios() const
     {
         return d_scenarios;
     }
 
+    /**
+     * Probability of a given scenario (index).
+     */
     double probability(size_t scenario) const
     {
         return d_scenarioProbabilities[scenario];
