@@ -21,7 +21,7 @@ void TimeParser::parse(std::string const &location)
 
     while (std::getline(file, line))
     {
-        if (line.starts_with('*'))  // comment
+        if (line.rfind('*', 0) == 0)  // comment
             continue;
 
         if (transition(line))  // header row
@@ -39,7 +39,7 @@ bool TimeParser::transition(std::string const &line)
     std::string names[] = {"NONE", "TIME", "PERIODS", "ENDATA"};
 
     for (size_t idx = 0; idx != std::size(names); ++idx)
-        if (line.starts_with(names[idx]))
+        if (line.rfind(names[idx], 0) == 0)
         {
             d_state = static_cast<State>(idx);
             return true;

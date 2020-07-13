@@ -15,7 +15,7 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
 
     auto sub = SubProblem(d_env, d_problem);
 
-    double gamma = 0;
+    double obj = 0.;
 
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
@@ -27,9 +27,12 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
         auto const duals = sub.duals();
         double const prob = d_problem.probability(scenario);
 
-        gamma += prob * arma::dot(duals.lambda, omega);
-        dual -= prob * duals.lambda;
+        dual += prob * duals.lambda;
+        obj += prob * sub.objective();
     }
 
-    return Cut{Tmat * dual, gamma};
+    arma::vec beta = Tmat * dual;
+    double gamma = obj + arma::dot(beta, x);
+
+    return Cut{-beta, gamma};
 }

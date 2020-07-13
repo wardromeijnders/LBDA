@@ -53,7 +53,7 @@ bool Smps::addCoeff(std::string const &constr,
                     double coeff,
                     char varType)
 {
-    if (!d_var2idx.contains(var))  // a new variable.
+    if (!d_var2idx.count(var))  // a new variable.
     {
         d_core.resize(d_core.n_rows, d_core.n_cols + 1);
         d_var2idx[var] = d_core.n_cols - 1;
@@ -67,7 +67,7 @@ bool Smps::addCoeff(std::string const &constr,
 
     if (constr == d_objName)  // is an objective coefficient.
         d_objCoeffs(d_var2idx[var]) = coeff;
-    else if (d_constr2idx.contains(constr))  // is an existing constraint.
+    else if (d_constr2idx.count(constr))  // is an existing constraint.
         d_core(d_constr2idx[constr], d_var2idx[var]) = coeff;
     else
         return false;  // is another free row (but we already have an objective)
@@ -77,7 +77,7 @@ bool Smps::addCoeff(std::string const &constr,
 
 bool Smps::addRhs(std::string const &constr, double coeff)
 {
-    if (!d_constr2idx.contains(constr))
+    if (!d_constr2idx.count(constr))
         return false;
 
     d_rhs[d_constr2idx[constr]] = coeff;
@@ -87,7 +87,7 @@ bool Smps::addRhs(std::string const &constr, double coeff)
 
 bool Smps::addStage(std::string const &constr, std::string const &var)
 {
-    if (!d_constr2idx.contains(constr) || !d_var2idx.contains(var))
+    if (!d_constr2idx.count(constr) || !d_var2idx.count(var))
         return false;
 
     d_stageOffsets.resize(d_stageOffsets.n_rows + 1, 2);
@@ -167,7 +167,7 @@ bool Smps::addScenarioRealisation(std::string const &scenario,
                                   std::string const &constr,
                                   double value)
 {
-    if (!d_scen2idx.contains(scenario) || !d_constr2idx.contains(constr))
+    if (!d_scen2idx.count(scenario) || !d_constr2idx.count(constr))
         return false;
 
     size_t const idx = d_scen2idx[scenario];

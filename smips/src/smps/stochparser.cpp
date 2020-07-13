@@ -23,7 +23,7 @@ void StochParser::parse(std::string const &location)
 
     while (std::getline(file, line))
     {
-        if (line.starts_with('*'))  // comment
+        if (line.rfind('*', 0) == 0)  // comment
             continue;
 
         if (transition(line))  // header row
@@ -42,7 +42,7 @@ bool StochParser::transition(std::string const &line)
         = {"NONE", "STOCH", "INDEP", "BLOCKS", "SCENARIOS", "ENDATA"};
 
     for (size_t idx = 0; idx != std::size(names); ++idx)
-        if (line.starts_with(names[idx]))
+        if (line.rfind(names[idx], 0) == 0)
         {
             if (idx > 1 && idx < 5 && line.find("DISCRETE") == std::string::npos)
                 std::cerr << "Stoch file: DISCRETE was not specified, but is"
