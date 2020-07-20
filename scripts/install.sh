@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
-# Dependencies for Armadillo (including cmake, which we also need!).
+# Dependencies for Armadillo and GTest (including cmake, which we also need!).
 apt-get install cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev
 
-# Armadillo itself.
+# Armadillo
 apt-get install libarmadillo-dev
+
+# GTest
+apt-get install libgtest-dev
+
