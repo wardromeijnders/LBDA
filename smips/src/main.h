@@ -17,7 +17,7 @@ auto const USAGE = R"(
 SMIPS. A program for solving two-stage mixed-integer stochastic programs.
 
 Usage:
-    smips [-h] [-m method] [-c cut | -t time] <file>
+    smips [-h] [-m method] [-c cut -l lb -u ub | -t time] <file>
 
 Options:
     -h  Prints this help text.
@@ -30,6 +30,8 @@ Options:
         * "lp". Uses cuts based on the LP dual of the second-stage problem.
         * "sb". Uses strengthened Benders' cuts, derived from the Lagrangian
           relaxation of the second-stage problem.
+    -l  Lower bound on the expected cost-to-go in the second stage. Default 0.
+    -u  Upper bound on the expected cost-to-go in the second stage. Default +inf.
     -t  Time limit (in seconds) to set when solving the deterministic equivalent.
         No time limit is set by default.
 
@@ -60,6 +62,8 @@ struct Arguments
     CutType cutType = LOOSE_BENDERS;        // cut family to use
     double timeLimit = arma::datum::inf;    // max. solve time in seconds
     bool printUsage = false;                // print help text?
+    double lb = 0;                          // lower bound on theta
+    double ub = arma::datum::inf;           // upper bound on theta
     std::string file;                       // smps file location
 };
 

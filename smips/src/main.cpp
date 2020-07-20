@@ -18,7 +18,7 @@ try
     {
         case Arguments::DECOMPOSITION:
         {
-            MasterProblem master(env, problem);
+            MasterProblem master(env, problem, arguments.lb, arguments.ub);
             CutFamily *cutFamily;
 
             // TODO how to set alpha?
@@ -79,7 +79,7 @@ argument_t parseArguments(int argc, char **argv)
     argument_t arguments;
     int option;
 
-    while ((option = getopt(argc, argv, "hm:c:t:")) != -1)
+    while ((option = getopt(argc, argv, "hm:c:l:u:t:")) != -1)
     {
         switch (option)
         {
@@ -100,6 +100,12 @@ argument_t parseArguments(int argc, char **argv)
                 if (std::strcmp(optarg, "sb") == 0)
                     arguments.cutType = arguments.STRONG_BENDERS;
 
+                break;
+            case 'l':
+                arguments.lb = std::stod(optarg);
+                break;
+            case 'u':
+                arguments.ub = std::stod(optarg);
                 break;
             case 't':
                 arguments.timeLimit = std::stod(optarg);

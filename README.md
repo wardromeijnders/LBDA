@@ -8,7 +8,7 @@ TODO intro.
 
 - Get CMake. This might already be available on your system. Since you
   also need to install Armadillo (see below), this step can be postponed until
-  later: the `scripts/install_arma.sh` script covers this step as a side-effect.
+  later: the `scripts/install.sh` script covers this step as a side-effect.
 
 - Make sure you have Gurobi installed. Any recent version should do, but the code
   was written and tested with Gurobi 9. The headers should be available in some 
@@ -18,7 +18,7 @@ TODO intro.
 - For linear algebra, we use [Armadillo](http://arma.sourceforge.net/), which is
   generally available for most distributions. The code was written and tested with
   Armadillo 9.8. You can install this yourself from the linked website, or run the
-  script `scripts/install_arma.sh` - this should work on most Debian-based distro's,
+  script `scripts/install.sh` - this should work on most Debian-based distro's,
   like Ubuntu. You probably need to be root for the script to work.
 
 - If everything's set-up correctly, you should now be able to compile `smips`.
@@ -26,6 +26,8 @@ TODO intro.
  
 - To test if the executable runs correctly, try running `bin/smips -h`. You should
   be greeted by a message detailing usage. 
+
+TODO test cases to be ran
 
 ## Contact
 
