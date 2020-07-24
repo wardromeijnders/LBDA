@@ -4,7 +4,6 @@
 #include "smps/stochparser.h"
 #include "smps/timeparser.h"
 
-#include <gurobi_c++.h>
 
 using namespace smps;
 

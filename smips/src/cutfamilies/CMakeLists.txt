@@ -7,3 +7,4 @@ set(SOURCES
 		strongbenders.cpp)
 
 add_library(cutfamilies ${SOURCES})
+target_link_libraries(cutfamilies armadillo ${GUROBI_LIBRARIES})

@@ -10,5 +10,5 @@ add_executable(data_tests
         test_lands.cpp
         test_sslp.cpp)
 
-target_link_libraries(data_tests gtest_main gtest pthread)
+target_link_libraries(data_tests libsmips gtest_main gtest pthread)
 add_test(DataTests data_tests)

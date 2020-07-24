@@ -8,4 +8,4 @@ add_library(smps
         stochparser.cpp
         timeparser.cpp)
 
-target_link_libraries(smps)
+target_link_libraries(smps armadillo)
