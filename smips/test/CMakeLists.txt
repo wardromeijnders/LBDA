@@ -6,9 +6,10 @@ find_package(Gurobi REQUIRED)
 include_directories(${GUROBI_INCLUDE_DIRS})
 include_directories(${gtest_SOURCE_DIR}/include ${gtest_SOURCE_DIR})
 
-add_executable(data_tests
+add_executable(tests
         test_lands.cpp
-        test_sslp.cpp)
+        test_sslp.cpp
+        test_smps.cpp)
 
-target_link_libraries(data_tests libsmips gtest_main gtest pthread)
-add_test(DataTests data_tests)
+target_link_libraries(tests libsmips gtest_main gtest pthread)
+add_test(UnitTests tests)
