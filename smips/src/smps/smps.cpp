@@ -4,14 +4,11 @@
 #include "smps/stochparser.h"
 #include "smps/timeparser.h"
 
-#include <gurobi_c++.h>
 
 using namespace smps;
 
 void Smps::read(std::string const &location)
 {
-    std::cout << "Reading " << location << '\n';
-
     CoreParser coreParser(*this);
     coreParser.parse(location + ".cor");
 

@@ -89,6 +89,7 @@ double LooseBenders::computeGomory(size_t scenario,
     auto const &Wmat = d_problem.Wmat();
 
     // TODO overhaul this method - make lookups more efficient?
+    //  maybe multimap?
     std::vector<int> basis(Wmat.n_rows + Wmat.n_cols);
     std::copy(vBasis.memptr(), vBasis.memptr() + Wmat.n_rows, basis.begin());
     std::copy(cBasis.memptr(),
