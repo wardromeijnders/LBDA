@@ -6,8 +6,8 @@ SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
 {
     auto const &Wmat = d_problem.Wmat();
 
-    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int
-    vTypes.fill(GRB_CONTINUOUS);
+    arma::Col<char> vTypes(Wmat.n_rows);  // TODO allow second-stage int?
+    vTypes.fill(GRB_CONTINUOUS);          //  (this is a relaxation instead)
 
     d_vars = d_model.addVars(d_problem.secondStageLowerBound().memptr(),
                              d_problem.secondStageUpperBound().memptr(),

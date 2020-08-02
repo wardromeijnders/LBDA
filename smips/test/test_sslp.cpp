@@ -87,7 +87,6 @@ TEST(TestDataSSLP_10_50_50, StrongBenders)
 
     ASSERT_NEAR(master.objective(), -364.76, 0.01);  // objective
 
-    // TODO find a better way for vector comparisons
     ASSERT_EQ(x[0], 1);  // first-stage decisions
     ASSERT_EQ(x[1], 0);
     ASSERT_EQ(x[2], 0);

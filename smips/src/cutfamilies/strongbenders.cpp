@@ -16,8 +16,6 @@ StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
                               nullptr,
                               Amat.n_rows);
 
-    // TODO: include first-stage constraints?
-
     auto const &Wmat = problem.Wmat();
 
     GRBVar *yVars = d_model.addVars(problem.secondStageLowerBound().memptr(),
