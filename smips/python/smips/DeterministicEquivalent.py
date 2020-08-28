@@ -1,0 +1,2 @@
+class DeterministicEquivalent:
+    pass
