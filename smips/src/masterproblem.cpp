@@ -1,10 +1,9 @@
 #include "masterproblem.h"
 
-MasterProblem::MasterProblem(GRBEnv &env,
-                             Problem &problem,
+MasterProblem::MasterProblem(ProblemData &problem,
                              double lowerBound,
                              double upperBound) :
-    d_problem(problem), d_model(env)
+    d_problem(problem), d_model(d_env)
 {
     d_model.addVar(lowerBound, upperBound, 1.0, GRB_CONTINUOUS, "theta");
 

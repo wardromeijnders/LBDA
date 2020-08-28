@@ -1,0 +1,229 @@
+\documentclass[12pt, english]{article}
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\lstset{
+	language=C++,
+	basicstyle=\ttfamily\footnotesize,
+	frame=lines,
+	keywordstyle=\color{blue},
+	tabsize=4
+}
+
+\title{SMIPS v1.0 user manual}
+\author{
+	Niels van der Laan
+	\and
+	Ward Romeijnders
+	\and
+	Niels Wouda
+}
+
+\date{\today}
+
+\begin{document}
+	
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+\label{sec:introduction}
+
+TODO Ward en Niels, kunnen jullie dit wat invullen? Een stukje motivatie en wat van de wiskunde, zodat ik daar in de examples op kan terugvallen.
+
+\section{Installation instructions}
+\label{sec:installation_instructions}
+
+TODO Can partially be copied from the repository
+
+\section{Examples}
+\label{sec:examples}
+
+TODO these examples are now all in C++, but we also want their equivalents in Python.
+
+TODO all C++ examples should be compiled against libsmips, and the headers should be available.
+
+\subsection{Solving an SMPS problem}
+\label{subsec:solving_smps_example}
+
+Solving a problem specified as a triplet of SMPS files is rather easy. Listing \ref{listing:smps_example_c++} provides some example code, solving a problem provided in the
+data section of the Github repository.
+
+\begin{lstlisting}[caption={Solving an SMPS problem in C++.},
+                   label={listing:smps_example_c++}]
+#include "masterproblem.h"
+#include "problemdata.h"
+#include "cutfamilies/lpdual.h"
+
+int main()
+{
+	auto problem = ProblemData::fromSmps("data/electric/LandS");
+	
+	MasterProblem master(problem, -500, 0);
+	LpDual cutFamily(problem);
+	
+	auto decisions = master.solveWith(cutFamily);
+	std::cout << *decisions;
+}
+\end{lstlisting}
+Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard. If this happens to you, the repository contains a simple Python script you can point to the
+offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
+
+In the listing above, we first read the problem data contained in the ``LandS'' files. This returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance.
+
+TODO text after we've standardised the math.
+
+TODO show different solution strategies (other cut families, deterministic equivalent)
+
+\subsection{Specifying your own problem data}
+\label{subsec:own_data_example}
+
+The \texttt{ProblemData} class exposes a constructor, which can be used to specify a problem instance that is not available in SMPS format.
+
+TODO text after we've standardised the math.
+
+\section{Reference manual}
+\label{sec:reference_manual}
+
+We present a short reference manual of the public methods on classes one might commonly use from the
+SMIPS library. The manual details the C++ interface, but these functions all have the same names in the Python interface and expect similar arguments. For examples in both languages, we refer to Section \ref{sec:examples}.
+
+Our code uses the Armadillo numerical library. Particularly, we often rely on the vector, matrix, and sparse matrix classes offered by Armadillo. Such an Armadillo class can be recognised as belonging to the \texttt{arma} namespace (\textit{e.g.} \texttt{arma::vec} for a real-valued column vector, \texttt{arma::mat} for a real-valued matrix, and \texttt{arma::sp\_mat} for a real-valued sparse matrix in compressed column format). The Armadillo library and documentation is available at \href{http://arma.sourceforge.net/}{their website}.
+
+\subsection{The \texttt{ProblemData} class}
+\label{subsec:problem_class}
+
+The \texttt{ProblemData} class contains all data describing a problem instance: the matrices $A$, $T$, and $W$, variable lower- and upper-bounds, constraint senses, objective coefficients, and scenario-specific right-hand sides. All solution methods solve problems described by a \texttt{ProblemData} instance. The public interface is given in Listing \ref{listing:problem_data}, and will be discussed below.
+\begin{lstlisting}[caption={Public interface of the \texttt{ProblemData} class.},
+                   label={listing:problem_data}]
+class ProblemData
+{
+public:
+    ProblemData(arma::sp_mat Amat,
+				arma::sp_mat Tmat,
+				arma::sp_mat Wmat,
+				arma::mat scenarios,
+				arma::vec scenarioProbabilities,
+				arma::Col<char> firstStageConstrSenses,
+				arma::Col<char> secondStageConstrSenses,
+				arma::Col<char> firstStageVarTypes,
+				arma::Col<char> secondStageVarTypes,
+				arma::vec firstStageCoeffs,
+				arma::vec secondStageCoeffs,
+				arma::vec firstStageLowerBound,
+				arma::vec firstStageUpperBound,
+				arma::vec secondStageLowerBound,
+				arma::vec secondStageUpperBound,
+				arma::vec firstStageRhs);
+
+	static ProblemData fromSmps(std::string const &location);
+	
+	arma::Col<char> const &firstStageConstrSenses() const;
+	
+	arma::Col<char> const &secondStageConstrSenses() const;
+	
+	arma::Col<char> &firstStageVarTypes();
+	
+	arma::Col<char> const &firstStageVarTypes() const;
+	
+	arma::Col<char> const &secondStageVarTypes() const;
+		
+	arma::sp_mat const &Amat() const;
+	
+	arma::sp_mat &Amat();
+	
+	arma::sp_mat const &Tmat() const;
+	
+	arma::sp_mat const &Wmat() const;
+	
+	arma::vec &firstStageCoeffs();
+	
+	arma::vec const &firstStageCoeffs() const;
+	
+	arma::vec const &secondStageCoeffs() const;
+	
+	arma::vec const &firstStageRhs() const;
+	
+	arma::vec const &firstStageLowerBound() const;
+	
+	arma::vec const &firstStageUpperBound() const;
+	
+	arma::vec const &secondStageLowerBound() const;
+	
+	arma::vec const &secondStageUpperBound() const;
+	
+	size_t nScenarios() const;
+	
+	arma::mat const &scenarios() const;
+	
+	double probability(size_t scenario) const;
+};
+\end{lstlisting}
+There are two ways to instantiate the \texttt{ProblemData} class: either by supplying your own vectors and matrices to the constructor, or supplying the filesystem location of an SMPS triplet of files to \texttt{fromSmps}. If one of the three SMSP files does not exist, \texttt{fromSmps} throws a \texttt{std::runtime\_error}.
+
+Most of the member functions are data getters, returning parts of the data that define a two-stage recourse problem. The functions \texttt{Amat()}, \texttt{Tmat()} and \texttt{Wmat()} return references to the (sparse) matrices $A$, $T$, and $W$, respectively. \texttt{nScenarios()} returns the number of scenarios, \texttt{scenarios()} a dense matrix of all scenario right-hand sides (one column for each scenario). Finally, \texttt{probability(scenario)} returns the occurrence probability of the given scenario (number). The use of the other member functions is hopefully clear based on their names.
+
+\subsection{The \texttt{DeterministicEquivalent} class}
+\label{subsec:det_eqv_class}
+
+The \texttt{DeterministicEquivalent} class formulates the two-stage recourse problem as a single deterministic (possibly mixed-integer) linear program, and solves it directly. This is sometimes also called the \textit{extensive form}. The public interface is given in Listing \ref{listing:det_eqv}.
+\begin{lstlisting}[caption={Public interface of the \texttt{DeterministicEquivalent} class.},
+                   label={listing:det_eqv}]
+class DeterministicEquivalent
+{
+public:
+	DeterministicEquivalent(ProblemData const &problem);
+	
+	std::unique_ptr<arma::vec> solve(
+		double timeLimit = arma::datum::inf);
+	
+	double firstStageObjective();
+	
+	double secondStageObjective();
+	
+	double objective() const;
+};
+\end{lstlisting}
+Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceeded, or the solution status is not optimal, \texttt{solve} throws a \texttt{std::runtime\_error}. The return argument is a (unique) pointer to a
+vector of optimal first-stage decisions.
+
+After solving the deterministic equivalent, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the optimal first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
+
+\subsection{The \texttt{CutFamily} classes}
+\label{subsec:cut_families}
+
+TODO text after we've standardised the math.
+
+\subsection{The \texttt{MasterProblem} class}
+\label{subsec:master_problem_class}
+
+TODO text after we've standardised the math.
+
+\begin{lstlisting}[caption={Public interface of the \texttt{MasterProblem} class.}, 
+                   label={listing:master_problem}]
+class MasterProblem
+{
+public:
+	MasterProblem(ProblemData &problem,
+				  double lowerBound = 0.,
+				  double upperBound = arma::datum::inf);
+	
+	void addCut(CutFamily::Cut &cut);
+	
+	std::unique_ptr<arma::vec> solveWith(CutFamily &cutFamily,
+	                                     double tol = 1e-4);
+	
+	double firstStageObjective() const;
+	
+	double secondStageObjective() const;
+	
+	double objective() const;
+};
+\end{lstlisting}
+
+
+
+	
+\end{document}

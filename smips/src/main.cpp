@@ -11,14 +11,13 @@ try
         return EXIT_SUCCESS;
     }
 
-    GRBEnv env;
-    auto problem = Problem::fromSmps(arguments.file);
+    auto problem = ProblemData::fromSmps(arguments.file);
 
     switch (arguments.methodType)
     {
         case Arguments::DECOMPOSITION:
         {
-            MasterProblem master(env, problem, arguments.lb, arguments.ub);
+            MasterProblem master(problem, arguments.lb, arguments.ub);
             CutFamily *cutFamily;
 
             // TODO how to set alpha?
@@ -27,14 +26,14 @@ try
             switch (arguments.cutType)
             {
                 case Arguments::LP_DUAL:
-                    cutFamily = new LpDual(env, problem);
+                    cutFamily = new LpDual(problem);
                     break;
                 case Arguments::STRONG_BENDERS:
-                    cutFamily = new StrongBenders(env, problem);
+                    cutFamily = new StrongBenders(problem);
                     break;
                 case Arguments::LOOSE_BENDERS:
                 default:
-                    cutFamily = new LooseBenders(env, problem, alpha);
+                    cutFamily = new LooseBenders(problem, alpha);
                     break;
             }
 
@@ -48,7 +47,7 @@ try
         }
         case Arguments::DETERMINISTIC_EQUIVALENT:
         {
-            DeterministicEquivalent deq(env, problem);
+            DeterministicEquivalent deq(problem);
 
             auto solution = deq.solve(arguments.timeLimit);
             auto decisions = *solution;

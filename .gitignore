@@ -50,3 +50,9 @@ lib/
 Makefile
 CMakeCache.txt
 cmake_install.cmake
+
+# Documentation
+*.toc
+*.synctex.gz
+*.log
+*.aux

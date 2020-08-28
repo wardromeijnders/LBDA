@@ -1,8 +1,8 @@
 #include "cutfamilies/cutfamily.h"
 
 
-CutFamily::CutFamily(GRBEnv &env, const Problem &problem) :
-    d_env(env), d_model(env), d_problem(problem), d_sub(env, problem)
+CutFamily::CutFamily(ProblemData const &problem) :
+    d_model(d_env), d_problem(problem), d_sub(problem)
 {
 }
 

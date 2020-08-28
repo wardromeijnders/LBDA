@@ -1,7 +1,7 @@
 #ifndef SUBPROBLEM_H
 #define SUBPROBLEM_H
 
-#include "problem.h"
+#include "problemdata.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
@@ -12,11 +12,13 @@
  */
 class SubProblem
 {
+    GRBEnv d_env = GRBEnv();
+
     GRBModel d_model;
     GRBConstr *d_constrs;
     GRBVar *d_vars;
 
-    Problem const &d_problem;
+    ProblemData const &d_problem;
 
 public:
     struct BasisInfo
@@ -31,7 +33,7 @@ public:
         arma::vec pi_u;
     };
 
-    SubProblem(GRBEnv &env, Problem const &problem);
+    SubProblem(ProblemData const &problem);
 
     SubProblem(SubProblem const &other);
 

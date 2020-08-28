@@ -17,7 +17,7 @@ target_link_libraries(masterproblem
         armadillo
         cutfamilies)
 
-add_library(problem problem.cpp)
+add_library(problem problemdata.cpp)
 target_link_libraries(problem armadillo)
 
 add_library(subproblem subproblem.cpp)

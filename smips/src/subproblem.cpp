@@ -1,8 +1,8 @@
 #include "subproblem.h"
 
 
-SubProblem::SubProblem(GRBEnv &env, Problem const &problem) :
-    d_model(env), d_problem(problem)
+SubProblem::SubProblem(ProblemData const &problem) :
+    d_model(d_env), d_problem(problem)
 {
     auto const &Wmat = d_problem.Wmat();
 

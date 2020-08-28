@@ -2,7 +2,7 @@
 #define STRONGBENDERS_H
 
 #include "cutfamily.h"
-#include "problem.h"
+#include "problemdata.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
@@ -15,7 +15,7 @@ class StrongBenders : public CutFamily
     void update(arma::vec &rhs, arma::vec &pi);
 
 public:
-    StrongBenders(GRBEnv &env, Problem const &problem);
+    StrongBenders(ProblemData const &problem);
 
     ~StrongBenders() override;
 

@@ -3,8 +3,7 @@
 #include "subproblem.h"
 
 
-StrongBenders::StrongBenders(GRBEnv &env, Problem const &problem) :
-    CutFamily(env, problem)
+StrongBenders::StrongBenders(ProblemData const &problem) : CutFamily(problem)
 {
     auto const &Amat = problem.Amat();
 

@@ -1,9 +1,8 @@
 #include "deterministicequivalent.h"
 
 
-DeterministicEquivalent::DeterministicEquivalent(GRBEnv &env,
-                                                 Problem const &problem) :
-    d_problem(problem), d_model(env)
+DeterministicEquivalent::DeterministicEquivalent(ProblemData const &problem) :
+    d_problem(problem), d_model(d_env)
 {
     initFirstStage();
     initSecondStage();

@@ -2,7 +2,7 @@
 #include "cutfamilies/lpdual.h"
 #include "cutfamilies/strongbenders.h"
 #include "masterproblem.h"
-#include "problem.h"
+#include "problemdata.h"
 
 #include "gtest/gtest.h"
 
@@ -16,12 +16,11 @@
 
 TEST(TestDataSSLP_5_25_50, LpDual)
 {
-    auto problem = Problem::fromSmps("data/sslp/sslp_5_25_50");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/sslp/sslp_5_25_50");
 
-    MasterProblem master(env, problem, -500, 0);
+    MasterProblem master(problem, -500, 0);
+    LpDual family(problem);
 
-    LpDual family(env, problem);
     auto const res = master.solveWith(family);
     auto const x = *res;
 
@@ -35,12 +34,11 @@ TEST(TestDataSSLP_5_25_50, LpDual)
 
 TEST(TestDataSSLP_5_25_50, StrongBenders)
 {
-    auto problem = Problem::fromSmps("data/sslp/sslp_5_25_50");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/sslp/sslp_5_25_50");
 
-    MasterProblem master(env, problem, -500, 0);
+    MasterProblem master(problem, -500, 0);
+    StrongBenders family(problem);
 
-    StrongBenders family(env, problem);
     auto const res = master.solveWith(family);
     auto const x = *res;
 
@@ -54,13 +52,12 @@ TEST(TestDataSSLP_5_25_50, StrongBenders)
 
 TEST(TestDataSSLP_5_25_50, LooseBenders)
 {
-    auto problem = Problem::fromSmps("data/sslp/sslp_5_25_50");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/sslp/sslp_5_25_50");
 
-    MasterProblem master(env, problem, -500, 0);
+    MasterProblem master(problem, -500, 0);
 
     arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
-    LooseBenders family(env, problem, alpha);
+    LooseBenders family(problem, alpha);
 
     auto const res = master.solveWith(family);
     auto const x = *res;
@@ -76,12 +73,11 @@ TEST(TestDataSSLP_5_25_50, LooseBenders)
 
 TEST(TestDataSSLP_10_50_50, StrongBenders)
 {
-    auto problem = Problem::fromSmps("data/sslp/sslp_10_50_50");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/sslp/sslp_10_50_50");
 
-    MasterProblem master(env, problem, -500, 0);
+    MasterProblem master(problem, -500, 0);
+    StrongBenders family(problem);
 
-    StrongBenders family(env, problem);
     auto const res = master.solveWith(family);
     auto const x = *res;
 

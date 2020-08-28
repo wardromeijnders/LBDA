@@ -2,7 +2,7 @@
 
 #include "subproblem.h"
 
-LpDual::LpDual(GRBEnv &env, Problem const &problem) : CutFamily(env, problem)
+LpDual::LpDual(ProblemData const &problem) : CutFamily(problem)
 {
 }
 

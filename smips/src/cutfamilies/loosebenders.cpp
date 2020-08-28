@@ -5,11 +5,10 @@
 #include <algorithm>
 
 
-LooseBenders::LooseBenders(GRBEnv &env,
-                           Problem const &problem,
+LooseBenders::LooseBenders(ProblemData const &problem,
                            arma::vec const &alpha,
                            double timeLimit) :
-    CutFamily(env, problem),
+    CutFamily(problem),
     d_alpha(alpha),
     d_visited(problem.nScenarios()),
     d_objectives(problem.nScenarios())
@@ -72,7 +71,8 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
 
         // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
         // lambda^T alpha.
-        gamma += prob * computeGomory(scenario, rhs, basis.vBasis, basis.cBasis);
+        gamma += prob
+                 * computeGomory(scenario, rhs, basis.vBasis, basis.cBasis);
         gamma += prob * arma::dot(duals.lambda, d_alpha);
 
         dual -= prob * duals.lambda;

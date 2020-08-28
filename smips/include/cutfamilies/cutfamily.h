@@ -1,7 +1,7 @@
 #ifndef CUT_H
 #define CUT_H
 
-#include "problem.h"
+#include "problemdata.h"
 #include "subproblem.h"
 
 #include <armadillo>
@@ -10,12 +10,13 @@
 class CutFamily
 {
 protected:
-    GRBEnv &d_env;
+    GRBEnv d_env = GRBEnv();
+
     GRBModel d_model;
-    Problem const &d_problem;
+    ProblemData const &d_problem;
     SubProblem d_sub;
 
-    explicit CutFamily(GRBEnv &env, Problem const &problem);
+    explicit CutFamily(ProblemData const &problem);
 
 public:
     struct Cut

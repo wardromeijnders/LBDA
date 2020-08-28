@@ -7,7 +7,7 @@
 class LpDual : public CutFamily
 {
 public:
-    LpDual(GRBEnv &env, Problem const &problem);
+    LpDual(ProblemData const &problem);
 
     CutFamily::Cut computeCut(arma::vec const &x) override;
 };

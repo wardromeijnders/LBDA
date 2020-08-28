@@ -2,7 +2,7 @@
 #define MASTERPROBLEM_H
 
 #include "cutfamilies/cutfamily.h"
-#include "problem.h"
+#include "problemdata.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
@@ -14,7 +14,9 @@
  */
 class MasterProblem
 {
-    Problem &d_problem;
+    GRBEnv d_env = GRBEnv();
+
+    ProblemData &d_problem;
     GRBModel d_model;
 
 public:
@@ -22,14 +24,12 @@ public:
      * Constructs the master problem from the data in the passed-in problem
      * instance.
      *
-     * @param env           Gurobi environment.
-     * @param problem       Problem instance.
+     * @param problem       ProblemData instance.
      * @param lowerBound    Lower bound for theta, the approximation of the
      *                      expected cost-to-go. Default 0.
      * @param upperBound    Upper bound for theta. Default +inf.
      */
-    MasterProblem(GRBEnv &env,
-                  Problem &problem,
+    MasterProblem(ProblemData &problem,
                   double lowerBound = 0.,
                   double upperBound = arma::datum::inf);
 

@@ -1,7 +1,7 @@
 #ifndef DETERMINISTICEQUIVALENT_H
 #define DETERMINISTICEQUIVALENT_H
 
-#include "problem.h"
+#include "problemdata.h"
 
 #include <armadillo>
 #include <gurobi_c++.h>
@@ -14,7 +14,9 @@
  */
 class DeterministicEquivalent
 {
-    Problem const &d_problem;
+    ProblemData const &d_problem;
+
+    GRBEnv d_env = GRBEnv();
     GRBModel d_model;
 
     void initFirstStage();
@@ -22,7 +24,7 @@ class DeterministicEquivalent
     void initSecondStage();
 
 public:
-    DeterministicEquivalent(GRBEnv &env, Problem const &problem);
+    DeterministicEquivalent(ProblemData const &problem);
 
     /**
      * Solves the deterministic equivalent.
@@ -30,7 +32,7 @@ public:
      * @param timeLimit Time limit for the Gurobi solver, in seconds.
      * @return Vector of optimal first-stage decisions.
      */
-    std::unique_ptr<arma::vec> solve(double timeLimit = 1e20);
+    std::unique_ptr<arma::vec> solve(double timeLimit = arma::datum::inf);
 
     /**
      * @return First-stage objective value.

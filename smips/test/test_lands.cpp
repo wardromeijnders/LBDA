@@ -2,7 +2,7 @@
 #include "cutfamilies/lpdual.h"
 #include "cutfamilies/strongbenders.h"
 #include "masterproblem.h"
-#include "problem.h"
+#include "problemdata.h"
 
 #include "gtest/gtest.h"
 
@@ -15,12 +15,11 @@
 
 TEST(TestDataLandS, LpDual)
 {
-    auto problem = Problem::fromSmps("data/electric/lands");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/electric/lands");
 
-    MasterProblem master(env, problem);
+    MasterProblem master(problem);
+    LpDual family(problem);
 
-    LpDual family(env, problem);
     auto const res = master.solveWith(family);
     auto const x = *res;
 
@@ -33,12 +32,11 @@ TEST(TestDataLandS, LpDual)
 
 TEST(TestDataLandS, StrongBenders)
 {
-    auto problem = Problem::fromSmps("data/electric/lands");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/electric/lands");
 
-    MasterProblem master(env, problem);
+    MasterProblem master(problem);
+    StrongBenders family(problem);
 
-    StrongBenders family(env, problem);
     auto const res = master.solveWith(family);
     auto const x = *res;
 
@@ -51,13 +49,12 @@ TEST(TestDataLandS, StrongBenders)
 
 TEST(TestDataLandS, LooseBenders)
 {
-    auto problem = Problem::fromSmps("data/electric/lands");
-    GRBEnv env;
+    auto problem = ProblemData::fromSmps("data/electric/lands");
 
-    MasterProblem master(env, problem);
+    MasterProblem master(problem);
 
     arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
-    LooseBenders family(env, problem, alpha);
+    LooseBenders family(problem, alpha);
 
     auto const res = master.solveWith(family);
     auto const x = *res;

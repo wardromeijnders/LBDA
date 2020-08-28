@@ -29,8 +29,7 @@ class LooseBenders : public CutFamily
                 arma::Col<int> const &cBasis);
 
 public:
-    LooseBenders(GRBEnv &env,
-                 Problem const &problem,
+    LooseBenders(ProblemData const &problem,
                  arma::vec const &alpha,
                  double timeLimit = 1e6);
 
