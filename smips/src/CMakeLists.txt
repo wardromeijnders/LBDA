@@ -5,9 +5,9 @@ include_directories(${GUROBI_INCLUDE_DIRS})
 
 set(cutFamiliesSources
         cutfamilies/cutfamily.cpp
-		cutfamilies/loosebenders.cpp
-		cutfamilies/lpdual.cpp
-		cutfamilies/strongbenders.cpp)
+        cutfamilies/loosebenders.cpp
+        cutfamilies/lpdual.cpp
+        cutfamilies/strongbenders.cpp)
 
 set(smpsSources
         smps/coreparser.cpp
@@ -23,23 +23,19 @@ set(smipsSources
         problemdata.cpp
         subproblem.cpp)
 
-# Master library, contains all SMIPS code
-add_library(smips SHARED
+# Command-line executable for the SMIPS code
+add_executable(smipsexec
+        main.cpp
         ${cutFamiliesSources}
         ${smpsSources}
         ${smipsSources})
+target_link_libraries(smipsexec PRIVATE armadillo ${GUROBI_LIBRARIES})
 
-target_link_libraries(smips
-        ${GUROBI_LIBRARIES}
-        armadillo)
-
-add_executable(smipsexec main.cpp)
-target_link_libraries(smipsexec smips)
-
+# SMIPS code, with Python bindings for use there
 pybind11_add_module(smipspy
-		bindings.cpp
-		${cutFamiliesSources}
+        typecasts.cpp
+        bindings.cpp
+        ${cutFamiliesSources}
         ${smpsSources}
         ${smipsSources})
-
 target_link_libraries(smipspy PRIVATE armadillo ${GUROBI_LIBRARIES})

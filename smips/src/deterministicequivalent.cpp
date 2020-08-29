@@ -45,7 +45,7 @@ void DeterministicEquivalent::initSecondStage()
 
     for (size_t scenario = 0; scenario != d_problem.nScenarios(); ++scenario)
     {
-        double const prob = d_problem.probability(scenario);
+        double const prob = d_problem.scenarioProbability(scenario);
         arma::vec const costs = prob * d_problem.secondStageCoeffs();
 
         GRBLinExpr lhs[Tmat.n_cols];

@@ -65,7 +65,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
         auto const basis = d_sub.basisInfo();
         auto const duals = d_sub.duals();
 
-        double const prob = d_problem.probability(scenario);
+        double const prob = d_problem.scenarioProbability(scenario);
 
         arma::vec rhs = omega - d_alpha;
 

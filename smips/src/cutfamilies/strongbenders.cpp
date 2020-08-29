@@ -71,7 +71,7 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
         d_sub.solve();
 
         auto const duals = d_sub.duals();
-        double const prob = d_problem.probability(scenario);
+        double const prob = d_problem.scenarioProbability(scenario);
 
         arma::vec pi = Tmat * duals.lambda;
 

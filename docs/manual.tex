@@ -59,7 +59,7 @@ int main()
 {
 	auto problem = ProblemData::fromSmps("data/electric/LandS");
 	
-	MasterProblem master(problem, -500, 0);
+	MasterProblem master(problem, 0, 500);
 	LpDual cutFamily(problem);
 	
 	auto decisions = master.solveWith(cutFamily);
@@ -74,7 +74,7 @@ from smipspy.cutfamilies import LpDual
 
 problem = ProblemData.from_smps("data/electric/LandS")
 
-master = MasterProblem(problem, -500, 0)
+master = MasterProblem(problem, 0, 500)
 cut_family = LpDual(problem)
 
 decisions = master.solve_with(cut_family)
@@ -169,12 +169,12 @@ public:
 	
 	arma::mat const &scenarios() const;
 	
-	double probability(size_t scenario) const;
+	double scenarioProbability(size_t scenario) const;
 };
 \end{lstlisting}
 There are two ways to instantiate the \texttt{ProblemData} class: either by supplying your own vectors and matrices to the constructor, or supplying the filesystem location of an SMPS triplet of files to \texttt{fromSmps}. If one of the three SMSP files does not exist, \texttt{fromSmps} throws a \texttt{std::runtime\_error}.
 
-Most of the member functions are data getters, returning parts of the data that define a two-stage recourse problem. The functions \texttt{Amat()}, \texttt{Tmat()} and \texttt{Wmat()} return references to the (sparse) matrices $A$, $T$, and $W$, respectively. \texttt{nScenarios()} returns the number of scenarios, \texttt{scenarios()} a dense matrix of all scenario right-hand sides (one column for each scenario). Finally, \texttt{probability(scenario)} returns the occurrence probability of the given scenario (number). The use of the other member functions is hopefully clear based on their names.
+Most of the member functions are data getters, returning parts of the data that define a two-stage recourse problem. The functions \texttt{Amat()}, \texttt{Tmat()} and \texttt{Wmat()} return references to the (sparse) matrices $A$, $T$, and $W$, respectively. \texttt{nScenarios()} returns the number of scenarios, \texttt{scenarios()} a dense matrix of all scenario right-hand sides (one column for each scenario). Finally, \texttt{scenarioProbability} returns the occurrence probability of the given scenario (number). The use of the other member functions is hopefully clear based on their names.
 
 \subsection{The \texttt{DeterministicEquivalent} class}
 \label{subsec:det_eqv_class}

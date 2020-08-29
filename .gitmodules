@@ -1,0 +1,6 @@
+[submodule "smips/vendor/pybind11"]
+	path = smips/vendor/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "smips/vendor/carma"]
+	path = smips/vendor/carma
+	url = https://github.com/RUrlus/carma
