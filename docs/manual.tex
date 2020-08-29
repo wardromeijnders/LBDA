@@ -41,16 +41,14 @@ TODO Can partially be copied from the repository
 \section{Examples}
 \label{sec:examples}
 
-TODO these examples are now all in C++, but we also want their equivalents in Python.
+TODO some text
 
 TODO all C++ examples should be compiled against libsmips, and the headers should be available.
 
 \subsection{Solving an SMPS problem}
 \label{subsec:solving_smps_example}
 
-Solving a problem specified as a triplet of SMPS files is rather easy. Listing \ref{listing:smps_example_c++} provides some example code, solving a problem provided in the
-data section of the Github repository.
-
+Solving a problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
 \begin{lstlisting}[caption={Solving an SMPS problem in C++.},
                    label={listing:smps_example_c++}]
 #include "masterproblem.h"
@@ -68,8 +66,21 @@ int main()
 	std::cout << *decisions;
 }
 \end{lstlisting}
-Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard. If this happens to you, the repository contains a simple Python script you can point to the
-offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
+\begin{lstlisting}[caption={Solving an SMPS problem in Python.},
+                   label={listing:smps_example_python},
+                   language={Python}]
+from smipspy import MasterProblem, ProblemData
+from smipspy.cutfamilies import LpDual
+
+problem = ProblemData.from_smps("data/electric/LandS")
+
+master = MasterProblem(problem, -500, 0)
+cut_family = LpDual(problem)
+
+decisions = master.solve_with(cut_family)
+print(decisions)
+\end{lstlisting}
+Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard \textit{exactly}. If this happens to you, the repository contains a simple Python script you can point to the offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
 
 In the listing above, we first read the problem data contained in the ``LandS'' files. This returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance.
 
@@ -88,7 +99,7 @@ TODO text after we've standardised the math.
 \label{sec:reference_manual}
 
 We present a short reference manual of the public methods on classes one might commonly use from the
-SMIPS library. The manual details the C++ interface, but these functions all have the same names in the Python interface and expect similar arguments. For examples in both languages, we refer to Section \ref{sec:examples}.
+SMIPS library. The manual details the C++ interface. The names are similar in the Python interface, but are written in their Pythonic equivalents (\textit{e.g.} \texttt{firstStageObjective} in the C++ code is accessed as \texttt{first\_stage\_objective} in the Python interface). Both interfaces expect similar arguments. For example code in both languages, we refer to Section \ref{sec:examples}.
 
 Our code uses the Armadillo numerical library. Particularly, we often rely on the vector, matrix, and sparse matrix classes offered by Armadillo. Such an Armadillo class can be recognised as belonging to the \texttt{arma} namespace (\textit{e.g.} \texttt{arma::vec} for a real-valued column vector, \texttt{arma::mat} for a real-valued matrix, and \texttt{arma::sp\_mat} for a real-valued sparse matrix in compressed column format). The Armadillo library and documentation is available at \href{http://arma.sourceforge.net/}{their website}.
 

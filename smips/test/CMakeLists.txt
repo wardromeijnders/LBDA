@@ -11,5 +11,5 @@ add_executable(tests
         test_sslp.cpp
         test_smps.cpp)
 
-target_link_libraries(tests libsmips gtest_main gtest pthread)
+target_link_libraries(tests smips gtest_main gtest pthread)
 add_test(UnitTests tests)

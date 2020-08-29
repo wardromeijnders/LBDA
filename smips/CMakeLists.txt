@@ -6,7 +6,7 @@ project(smips
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_definitions(-Wall -Wextra)
+add_definitions(-Wall -Wextra -fPIC)
 
 if (CMAKE_BUILD_TYPE MATCHES RELEASE)
     add_definitions(-O3)
@@ -20,5 +20,6 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 include_directories(include)
 
+add_subdirectory(pybind11)
 add_subdirectory(src)
 add_subdirectory(test)
