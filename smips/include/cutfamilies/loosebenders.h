@@ -6,7 +6,7 @@
 
 class LooseBenders : public CutFamily
 {
-    arma::vec const &d_alpha;
+    arma::vec const d_alpha;
 
     GRBConstr *d_constrs;
     GRBVar *d_vars;
@@ -30,7 +30,7 @@ class LooseBenders : public CutFamily
 
 public:
     LooseBenders(ProblemData const &problem,
-                 arma::vec const &alpha,
+                 arma::vec const alpha,
                  double timeLimit = 1e6);
 
     ~LooseBenders() override;

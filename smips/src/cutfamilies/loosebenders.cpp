@@ -6,7 +6,7 @@
 
 
 LooseBenders::LooseBenders(ProblemData const &problem,
-                           arma::vec const &alpha,
+                           arma::vec const alpha,
                            double timeLimit) :
     CutFamily(problem),
     d_alpha(alpha),

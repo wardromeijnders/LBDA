@@ -20,9 +20,6 @@ try
             MasterProblem master(problem, arguments.lb, arguments.ub);
             CutFamily *cutFamily;
 
-            // TODO how to set alpha?
-            arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
-
             switch (arguments.cutType)
             {
                 case Arguments::LP_DUAL:
@@ -33,6 +30,8 @@ try
                     break;
                 case Arguments::LOOSE_BENDERS:
                 default:
+                    // TODO how to set alpha from the command line?
+                    arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
                     cutFamily = new LooseBenders(problem, alpha);
                     break;
             }
