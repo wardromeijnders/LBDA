@@ -49,7 +49,10 @@ PYBIND11_MODULE(smipspy, m)
              py::arg("second_stage_lower_bound"),
              py::arg("second_stage_upper_bound"),
              py::arg("first_stage_rhs"))
-        .def("from_smps", &ProblemData::fromSmps);
+        .def("from_smps", &ProblemData::fromSmps)
+        .def("Amat", py::overload_cast<>(&ProblemData::Amat, py::const_))
+        .def("Tmat", &ProblemData::Tmat)
+        .def("Wmat", &ProblemData::Wmat);
 
     py::class_<DeterministicEquivalent>(m, "DeterministicEquivalent")
         .def(py::init<ProblemData const &>())
