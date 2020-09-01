@@ -33,7 +33,6 @@ target_link_libraries(smipsexec PRIVATE armadillo ${GUROBI_LIBRARIES})
 
 # SMIPS code, with Python bindings for use there
 pybind11_add_module(smipspy
-        sparse_converters.cpp
         bindings.cpp
         ${cutFamiliesSources}
         ${smpsSources}

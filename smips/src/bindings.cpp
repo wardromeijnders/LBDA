@@ -4,10 +4,10 @@
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
 #include "problemdata.h"
+#include "sparse_converters.h"
 
 #include <carma/carma.h>
 #include <pybind11/pybind11.h>
-
 
 namespace py = pybind11;
 
