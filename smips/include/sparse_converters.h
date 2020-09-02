@@ -17,51 +17,54 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
                              bool strict = false)
 {
     // TODO incref/decref
-    auto raw = src.ptr();
+    PyObject *raw = src.ptr();
 
-    auto indPtrRaw = PyObject_GetAttrString(raw, "indptr");
+    PyObject *indPtrRaw = PyObject_GetAttrString(raw, "indptr");
     py::handle indHandle(indPtrRaw);
     arma::uvec indPtr = carma::arr_to_col<arma::uword>(indHandle);
 
-    auto indicesRaw = PyObject_GetAttrString(raw, "indices");
+    PyObject *indicesRaw = PyObject_GetAttrString(raw, "indices");
     py::handle indicesHandle(indicesRaw);
     arma::uvec indices = carma::arr_to_col<arma::uword>(indicesHandle);
 
-    auto dataRaw = PyObject_GetAttrString(raw, "data");
+    PyObject *dataRaw = PyObject_GetAttrString(raw, "data");
     py::handle dataHandle(dataRaw);
     arma::vec data = carma::arr_to_col<double>(dataHandle);
 
-    auto shapePtr = PyObject_GetAttrString(raw, "shape");
+    PyObject *shapePtr = PyObject_GetAttrString(raw, "shape");
 
-    auto row = PyTuple_GetItem(shapePtr, 0);
-    auto col = PyTuple_GetItem(shapePtr, 1);
+    int row, col;
+    PyArg_ParseTuple(shapePtr, "ii", &row, &col);
 
-    return arma::SpMat<T>(indices,
-                          indPtr,
-                          data,
-                          PyLong_AsLong(row),
-                          PyLong_AsLong(col));
+    return arma::SpMat<T>(indices, indPtr, data, row, col);
 }
 
 /**
  * ARMADILLO TO SCIPY
  */
- template<typename T>
- inline py::array_t<T> sp_mat_to_csc(arma::SpMat<T> *src, bool copy)
+template<typename T> inline py::handle sp_mat_to_csc(arma::SpMat<T> const &src)
 {
-    /* Convert armadillo matrix to scipy.sparse csc array */
-    ssize_t tsize = static_cast<ssize_t>(sizeof(T));
-    ssize_t nrows = static_cast<ssize_t>(src->n_rows);
-    ssize_t ncols = static_cast<ssize_t>(src->n_cols);
+    // TODO incref/decref
+    py::module sparse = py::module::import("scipy.sparse");
+    py::object csc_matrix = sparse.attr("csc_matrix");
 
-    auto data = get_data<arma::SpMat<T>>(src, copy);
-    py::capsule base = create_capsule(data);
+    // TODO make the conversions work nicely
+    py::array_t<T> data = carma::to_numpy<T>(src.values, true);
+    py::array_t<T> indices = carma::to_numpy<T>(src.row_indices, true);
+    py::array_t<T> indPtr = carma::to_numpy<T>(src.col_ptrs, true);
 
-    return py::array_t<T>({nrows, ncols},          // shape
-                          {tsize, nrows * tsize},  // F-style contiguous
-                          strides data.data,               // the data pointer
-                          base  // numpy array references this parent
-    );
+    PyObject *args
+        = Py_BuildValue("(ooo)(ii)s",
+                        data,
+                        indices,
+                        indPtr,
+                        src.n_rows,
+                        src.n_cols,
+                        pybind11::detail::npy_format_descriptor<T>::name);
+
+    PyObject *mat = PyObject_CallObject(csc_matrix.ptr(), args);
+
+    return py::handle(mat);
 }
 
 namespace pybind11::detail
@@ -81,16 +84,14 @@ namespace pybind11::detail
 
         static handle cast(arma::SpMat<T> &src, return_value_policy, handle)
         {
-            // TODO
-            return handle();
+            return sp_mat_to_csc(src);
         }
 
         static handle cast(arma::SpMat<T> const &src,
                            return_value_policy,
                            handle)
         {
-            // TODO
-            return handle();
+            return sp_mat_to_csc(src);
         }
     };
 }  // namespace pybind11::detail
