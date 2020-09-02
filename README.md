@@ -12,8 +12,8 @@ TODO intro.
 
 - Make sure you have Gurobi installed. Any recent version should do, but the code
   was written and tested with Gurobi 9. The headers should be available in some 
-  standard location (up to you, as long as the linker can find them). Since this
-  is commercial software, you need to perform this step yourself.
+  standard location based on your `GUROBI_HOME` environment variable. Since this
+  is proprietary software, you need to set this up yourself.
 
 - For linear algebra, we use [Armadillo](http://arma.sourceforge.net/), which is
   generally available for most distributions. The code was written and tested with
@@ -29,6 +29,13 @@ TODO intro.
 
 TODO test cases to be ran
 
-## Contact
+## Dependencies
 
-TODO
+Our code builds on the following:
+
+- [Carma](https://github.com/RUrlus/carma), released under an Apache 2.0 license.
+  Included in this repository as a submodule under `smips/vendor`.
+- [pybind11](https://github.com/pybind/pybind11), released under a modified BSD license.
+  Included in this repository as a submodule under `smips/vendor`.
+- [Armadillo](http://arma.sourceforge.net/), released under an Apache 2.0 license.
+- [Gurobi](https://www.gurobi.com/).
