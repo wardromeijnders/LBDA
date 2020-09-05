@@ -325,7 +325,7 @@ TODO some of the notation in this section needs to move up to Section \ref{sec:i
 
 The \texttt{CutFamily} class specifies the way a family of cutting planes should be implemented within the Benders' decomposition solution approach. Specifically, a cut family solves a relaxation of the second-stage sub problems to obtain cut coefficients for insertion into the first-stage master problem (see also Section \ref{subsec:master_problem_class}). If $\theta$ is our first-stage approximation of the expected cost-to-go, such an optimality cut takes the form of
 \[ \theta \ge \gamma + \beta^\top x, \]
-where $\gamma$ is an intercept and $\beta$ the slope. The \texttt{CutFamily} class only specifies the public interface that should be implemented, given in Listing \ref{listing:cut_family}.
+where $\gamma$ is an intercept and $\beta$ the slope. The \texttt{CutFamily} class specifies the public interface that should be implemented, given in Listing \ref{listing:cut_family}.
 \begin{lstlisting}[caption={Public interface of the \texttt{CutFamily} class.}, 
                    label={listing:cut_family}]
 class CutFamily
@@ -438,7 +438,7 @@ Its constructor takes the familiar \texttt{ProblemData} instance, and two optima
 
 Once the master problem has been solved, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the optimal first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
 
-
+\clearpage
 \bibliographystyle{plain}
 \begin{thebibliography}{9}
 
