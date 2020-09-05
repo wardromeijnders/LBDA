@@ -60,6 +60,8 @@
 \maketitle
 \tableofcontents
 
+\clearpage
+
 \section{Introduction}
 \label{sec:introduction}
 This is the user manual for the computer code of the \emph{loose Benders decomposition algorithm (LBDA)}, introduced in van der Laan and Romeijnders~\cite{vanderLaan2020}. This algorithm approximately solves two-stage mixed-integer recourse models with uncertainty in the right-hand side; see Section~\ref{subsec:model}. 
@@ -83,13 +85,37 @@ Such models have many practical applications in for example energy, telecommunic
 \section{Installation instructions}
 \label{sec:installation_instructions}
 
-TODO Can partially be copied from the repository
+We explain how to set-up a local copy of the SMIPS codebase, for development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{smipspy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
+
+TODO tests with gtest
+
+\subsection{On Linux}
+A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distro's.
+\begin{enumerate}
+	\item Clone the repository into some folder. This also clones two submodules, \texttt{pybind} and \texttt{carma}, which are used to compile the Python bindings.
+	
+	\item We use \texttt{CMake} as out build tool. It might already be available on your system; if not, it will be installed when we install Armadillo.
+	
+	\item Install Gurobi. Any recent version should do, but the code was written and tested with Gurobi 9. The header files and libraries should be available in a standard location relative to the \texttt{GUROBI\_HOME} environment variable.
+	
+	\item For linear algebra, we use the Armadillo library. It is available for many distributions, often via the package manager. The code was written and tested against Armadillo 9.8. You can install the library yourself, or use the \texttt{scripts/install.sh} script to do this for you. It should work on most Debian-based distro's, like Ubuntu. You likely need to be root for the script to work.
+	
+	\item If everything is set-up correctly, cmake can build \texttt{smips} from the repository root as \texttt{cmake build smips}. The resulting Makefile has two targets, \texttt{smipsexec} and \texttt{smipspy}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. 
+	
+	\item If you run \texttt{make smipsexec}, you should obtain a compiled binary in \texttt{bin/smipsexec}. Run \texttt{bin/smipsexec -h} to be greeted by a help message explaining the command-line interface. Similarly, \texttt{make smipspy} should result in a compiled Python module in the \texttt{lib} directory.
+\end{enumerate}
+
+\subsection{On Windows}
+
+TODO
 
 \section{Examples}
 \label{sec:examples}
 
 We present two common use cases: solving a known problem given in SMPS format, and specifying a new problem by providing your own matrices and vectors as input. The example code can be ran as-is, either by compiling it against the source files (for the C++ code, where it offers an alternative implementation of the \texttt{main.cpp} file), or by installing the \texttt{smipspy} package from the package index (for the Python code).
-  
+
+TODO get the package on PyPI.  
+
 \subsection{Solving an SMPS problem}
 \label{subsec:solving_smps_example}
 
@@ -295,8 +321,10 @@ After solving the deterministic equivalent, the \texttt{firstStageObjective}, \t
 \subsection{The \texttt{CutFamily} classes}
 \label{subsec:cut_families}
 
+TODO some of the notation in this section needs to move up to Section \ref{sec:introduction}
+
 The \texttt{CutFamily} class specifies the way a family of cutting planes should be implemented within the Benders' decomposition solution approach. Specifically, a cut family solves a relaxation of the second-stage sub problems to obtain cut coefficients for insertion into the first-stage master problem (see also Section \ref{subsec:master_problem_class}). If $\theta$ is our first-stage approximation of the expected cost-to-go, such an optimality cut takes the form of
-\[ \theta \ge \gamma + \beta^T x, \]
+\[ \theta \ge \gamma + \beta^\top x, \]
 where $\gamma$ is an intercept and $\beta$ the slope. The \texttt{CutFamily} class only specifies the public interface that should be implemented, given in Listing \ref{listing:cut_family}.
 \begin{lstlisting}[caption={Public interface of the \texttt{CutFamily} class.}, 
                    label={listing:cut_family}]
@@ -319,8 +347,15 @@ Observe that \texttt{CutFamily} is an abstract class, and cannot itself be insta
 \subsubsection{The \texttt{LpDual} class}
 \label{subsubsec:lpdual}
 
-TODO
-
+These are the regular Benders' cuts, well-known in stochastic programming from their application in the L-shaped algorithm. The relaxation solved is the LP relaxation of the second-stage sub problem for each of the $K$ scenarios $\omega_k$, $k = 1,\ldots,K$. We denote the optimal objective by $v_{LP}(\omega_k, \bar x)$ for given first-stage solutions $\bar x$, and dual solutions by $\pi_k$. Define
+\[ \pi = \sum_{k = 1}^K p_k \pi_k. \]
+We have
+\begin{equation}
+\beta = -T\pi, \quad
+\gamma = \sum_{k = 1}^K \left[ p_k v_{LP}(\omega_k, \bar x) \right] - \beta^\top x.
+\label{eq:benders_coeffs}
+\end{equation}
+The \texttt{LpDual} class implements the \texttt{computeCut} method to return these coefficients. The public interface is straightforward, and given in Listing \ref{listing:lpdual}.
 \begin{lstlisting}[caption={Public interface of the \texttt{LpDual} class.}, 
                    label={listing:lpdual}]
 class LpDual : public CutFamily
@@ -335,8 +370,14 @@ public:
 \subsubsection{The \texttt{StrongBenders} class}
 \label{subsubsec:strong_benders}
 
-TODO
-
+This family is due to Zou et al. \cite{zou2019} and strengthens the regular Benders' cuts by raising the intercept $\gamma$. This is done by solving a Lagrangian relaxation problem at the dual solution of the LP relaxation. The Lagrangian problem is given by
+\[ \mathcal{L}(\omega, \pi) := \min_{y, z} \{ q^\top y + \pi^\top z~:~Tz + Wy \sim \omega, y \in Y, z \in X \}. \]
+For each scenario $k = 1,\ldots,K$ we solve the LP relaxation of the $k$\textsuperscript{th} sub problem and obtain dual solutions $\pi_k$. Let $\beta$ as in Equation \ref{eq:benders_coeffs}. For $\gamma$, we have
+\begin{equation}
+\quad \gamma = \sum_{k = 1}^K p_k \mathcal{L}(\omega_k, \pi_k).
+\label{eq:strong_benders_coeffs}
+\end{equation}
+The \texttt{StrongBenders} class implements the \texttt{computeCut} method to return these coefficients. The public interface is again straightforward, and given in Listing \ref{listing:strong_benders}.
 \begin{lstlisting}[caption={Public interface of the \texttt{StrongBenders} class.}, 
                    label={listing:strong_benders}]
 class StrongBenders : public CutFamily
@@ -353,7 +394,7 @@ public:
 \subsubsection{The \texttt{LooseBenders} class}
 \label{subsubsec:loose_benders}
 
-TODO
+TODO Niels, wil jij uitleggen hoe we hier aan beta en gamma komen?
 
 \begin{lstlisting}[caption={Public interface of the \texttt{LooseBenders} class.}, 
                    label={listing:loose_benders}]
@@ -403,6 +444,9 @@ Once the master problem has been solved, the \texttt{firstStageObjective}, \text
 
 	\bibitem{vanderLaan2020}
 	van der Laan, N., and W.\ Romeijnders, 2020. A loose Benders decomposition algorithm for approximating two-stage mixed-integer recourse models. Accepted for publication in \emph{Mathematical Programming}.
+
+	\bibitem{zou2019}
+	Zou, J., S. Ahmed, and X.A. Sun. 2019. Stochastic dual dynamic integer programming. \emph{Mathematical Programming}. 175, pp. 461--502.
 	
 \end{thebibliography}
 	

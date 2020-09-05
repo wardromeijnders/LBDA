@@ -29,8 +29,8 @@ LpDual::Cut LpDual::computeCut(arma::vec const &x)
         obj += prob * d_sub.objective();
     }
 
-    arma::vec beta = Tmat * dual;
-    double gamma = obj + arma::dot(beta, x);
+    arma::vec beta = -Tmat * dual;
+    double gamma = obj - arma::dot(beta, x);
 
-    return Cut{-beta, gamma};
+    return Cut{beta, gamma};
 }
