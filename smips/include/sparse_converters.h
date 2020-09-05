@@ -5,9 +5,6 @@
 #include <carma/carma.h>
 #include <pybind11/pybind11.h>
 
-// TODO make this work completely
-
-
 /**
  * SCIPY TO ARMADILLO
  */
@@ -19,24 +16,21 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
     // TODO incref/decref
     PyObject *raw = src.ptr();
 
-    PyObject *indPtrRaw = PyObject_GetAttrString(raw, "indptr");
-    py::handle indHandle(indPtrRaw);
-    arma::uvec indPtr = carma::arr_to_col<arma::uword>(indHandle);
+    PyObject *colPtrRaw = PyObject_GetAttrString(raw, "indptr");
+    arma::uvec colPtr = carma::arr_to_col<arma::uword>(colPtrRaw, copy, strict);
 
-    PyObject *indicesRaw = PyObject_GetAttrString(raw, "indices");
-    py::handle indicesHandle(indicesRaw);
-    arma::uvec indices = carma::arr_to_col<arma::uword>(indicesHandle);
+    PyObject *rowindRaw = PyObject_GetAttrString(raw, "indices");
+    arma::uvec rowind = carma::arr_to_col<arma::uword>(rowindRaw, copy, strict);
 
     PyObject *dataRaw = PyObject_GetAttrString(raw, "data");
-    py::handle dataHandle(dataRaw);
-    arma::vec data = carma::arr_to_col<double>(dataHandle);
+    arma::vec data = carma::arr_to_col<double>(dataRaw, copy, strict);
 
     PyObject *shapePtr = PyObject_GetAttrString(raw, "shape");
 
     int row, col;
     PyArg_ParseTuple(shapePtr, "ii", &row, &col);
 
-    return arma::SpMat<T>(indices, indPtr, data, row, col);
+    return arma::SpMat<T>(rowind, colPtr, data, row, col);
 }
 
 /**
