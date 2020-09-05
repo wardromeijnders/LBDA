@@ -96,7 +96,10 @@ SubProblem::Duals const SubProblem::duals()
 void SubProblem::solve()
 {
     d_model.optimize();
-    // TODO check feasibility of subproblem?
+
+    if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
+        throw std::runtime_error("Sub problem is infeasible: do we have "
+                                 "(relatively) complete recourse?");
 }
 
 void SubProblem::updateRhs(arma::vec &rhs)

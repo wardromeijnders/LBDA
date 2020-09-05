@@ -3,6 +3,38 @@
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{amssymb,amsmath}
+
+\newcommand\mred[1]{%
+	\protect\leavevmode
+	\begingroup
+	\color{red}%
+	#1%
+	\endgroup
+}
+
+\newcommand{\red}{\textcolor{black}}
+\newcommand{\redd}{\textcolor{black}}
+\newcommand{\reddd}{\textcolor{black}}
+\newcommand{\LP}{\text{LP}}
+\newcommand{\wpone}{w.p.~$1$ as $S \rightarrow \infty$}
+\newcommand{\Qfwd}{\red{\tilde Q}}
+\newcommand{\Qalpha}{\red{\hat Q_\alpha}}
+\newcommand{\QalphaS}{\hat Q_\alpha^S} 
+\newcommand{\QA}{\red{L_{\alpha}^S}}
+\newcommand{\valpha}{\red{\hat v_\alpha}}
+\newcommand{\valphak}{\red{\hat v_\alpha^k}}
+\newcommand{\vfwd}{\red{\tilde v}}
+\newcommand{\va}{\red{\nu_\alpha}}
+\newcommand{\QR}{\hat{Q}_{\text{out}}^{\tau}}
+\newcommand{\QRnext}{\hat{Q}_{\text{out}}^{\tau + 1}}
+\newcommand{\fs}{\lfloor s \rfloor}
+\newcommand{\lbd}{LBDA($\alpha$)}
+\newcommand{\icp}{\text{c}}
+\newcommand{\ks}{k_s^{\tau}}   
+\newcommand{\tks}{\hat k_s^{\tau}}   
+\newcommand{\xalpha}{\red{\hat x_\alpha}}
+\newcommand{\xalphaplus}{\red{\hat x_\alpha^+}}
 
 \lstset{
 	language=C++,
@@ -30,8 +62,23 @@
 
 \section{Introduction}
 \label{sec:introduction}
+This is the user manual for the computer code of the \emph{loose Benders decomposition algorithm (LBDA)}, introduced in van der Laan and Romeijnders~\cite{vanderLaan2020}. This algorithm approximately solves two-stage mixed-integer recourse models with uncertainty in the right-hand side; see Section~\ref{subsec:model}. 
 
-TODO Ward en Niels, kunnen jullie dit wat invullen? Een stukje motivatie en wat van de wiskunde, zodat ik daar in de examples op kan terugvallen.
+The algorithm is developed for solving mixed-integer recourse models \emph{with integer decision variables in the second stage}. In fact, the algorithm is based on a Benders decomposition for a convex approximation of the \emph{expected} mixed-integer value function. However, if all decision variables are continuous, then the algorithm reduces to the classical L-shaped algorithm. Moreover, if there are integer decision variables in the first stage, then the master problem is a MIP instead of LP.
+
+For convenience the repository does not only contain the code for LBDA, but also for solving the \emph{deterministic equivalent problem} using Gurobi. In this way the numerical experiments in van der Laan and Romeijnders~\cite{vanderLaan2020} can easily be replicated. Moreover, the code for LBDA is set up in such a way that different types of optimality cuts can easily be added. For example, next to the LBDA cuts and standard Benders cuts used in the paper, also strong Benders cuts are implemented, see Section~\ref{subsec:cut_families}.
+
+The algorithm is coded in C++, free to use and distribute, and also has a Python interface. A reference manual is provided in Section \ref{sec:reference_manual}. Within the algorithm, all linear and integer programs are solved using Gurobi. Moreover, SMPS input is accepted, but the problem data can also be specified manually. See Section~\ref{sec:examples} for examples on how to apply LBDA using both input methods. 
+
+TODO link to repository once public
+
+Before explaining the LBDA code in detail, we first briefly discuss in Section~\ref{subsec:model} the mathematics behind the two-stage mixed-integer recourse models that LBDA solves. This subsection coincides with part of the introduction of van der Laan and Romeijnders \cite{vanderLaan2020}.
+
+\subsection{Two-stage mixed-integer recourse models\label{subsec:model}}
+Consider the two-stage mixed-integer recourse model with random right-hand side \begin{equation}\label{etastar}\eta^* := \min_{x}\left\{c^{\top}x + Q(x) :\quad Ax = b,\;x \in X\subseteq \mathbb{R}^{n_1}_+\right\},\end{equation} where the recourse function $Q$ is defined as \begin{equation}\label{defQ}Q(x):=\mathbb{E}_{\omega}\left[ \min_y \left\{   q^{\top}y: Wy = \omega - Tx,\; y \in Y \subseteq \mathbb R^{n_2 }_+\right\}\right]  , \quad x\in \red{X}. \end{equation}This model represents a two-stage decision problem under uncertainty. In the first stage, a decision~$x$ has to be made here-and-now, subject to deterministic constraints $Ax = b$ and random goal constraints $Tx = \omega$. Here, $\omega$ is a \red{continuous or discrete} random vector whose probability distribution is known. In the second stage, the realization of $\omega$ becomes known and any infeasibilities with respect to $Tx = \omega$ have to be repaired. This is modelled by the second-stage problem \begin{equation}\label{vwx}v(\omega,x) := \min_y \left\{   q^{\top}y:Wy = \omega - Tx,\; y \in Y \subseteq  \mathbb{R} ^{n_2 }_+\right\}.\end{equation}The objective in this two-stage recourse model is to minimize the sum of immediate costs $c^{\top}x$ and expected second-stage costs $Q(x) = \mathbb{E}_\omega[v(\omega,x)]$, ${x \in X}$.
+
+Frequently, integrality restrictions are imposed on the first- and second-stage decisions. That is, $X$ and $Y$ are of the form $X = \mathbb Z^{p_1}_+ \times \mathbb{R}^{n_1 - p_1}_+$ and $Y = \mathbb Z^{p_2}_+\times \mathbb{R}^{n_2 - p_2}_+$. Such restrictions arise naturally when modelling real-life problems, for example to model on/off decisions or batch size restrictions. The resulting model is called a mixed-integer recourse (MIR) model.
+Such models have many practical applications in for example energy, telecommunication, production planning, and environmental control.
 
 \section{Installation instructions}
 \label{sec:installation_instructions}
@@ -41,7 +88,7 @@ TODO Can partially be copied from the repository
 \section{Examples}
 \label{sec:examples}
 
-TODO some text
+We present two common use cases: solving a known problem given in SMPS format, and specifying a new problem by providing your own matrices and vectors as input. The example code can be ran as-is, either by compiling it against the source files (for the C++ code, where it offers an alternative implementation of the \texttt{main.cpp} file), or by installing the \texttt{smipspy} package from the package index (for the Python code).
   
 \subsection{Solving an SMPS problem}
 \label{subsec:solving_smps_example}
@@ -67,7 +114,7 @@ int main()
 	std::cout << detEqv.firstStageObjective() << '\n';
 	std::cout << detEqv.secondStageObjective() << '\n';
 	
-	// This applies the L-shaped algorithm.
+	// Applies the L-shaped algorithm.
 	LpDual cutFamily(problem);
 	MasterProblem master(problem, 0);
 	decisions = master.solveWith(cutFamily);
@@ -109,12 +156,12 @@ print(master.second_stage_objective())
 \end{lstlisting}
 Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard \textit{exactly}. If this happens to you, the repository contains a simple Python script you can point to the offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
 
-In the listing above, we first read the problem data contained in the ``LandS'' files. A call to \texttt{fromSmps}/\texttt{from\_smps} returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of zero: since this is the default we did not have to, but in general it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. Since the ``LandS'' problem is fully continuous, we apply regular LP-duality based cuts. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
+In the listings above, we first read the problem data contained in the ``LandS'' files. A call to \texttt{fromSmps} (C++)/\texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of zero: since this is the default we did not have to, but in general it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. Since the ``LandS'' problem is fully continuous, we apply regular LP-duality based cuts. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
 
 \subsection{Specifying your own problem data}
 \label{subsec:own_data_example}
 
-The \texttt{ProblemData} class exposes a constructor, which can be used to specify a problem instance that is not available in SMPS format. This is a bit more involved as there is quite a bit of data to specify. The argument order is given in the reference manual, particularly in Listing \ref{listing:problem_data}.
+The \texttt{ProblemData} class exposes a constructor, which can be used to specify a problem instance that is not available in SMPS format. This is a bit more involved as there is quite a bit of data to specify. The argument order is given in the reference manual, in Listing \ref{listing:problem_data}.
 
 TODO which problem to develop (math and motivation)
 
@@ -136,7 +183,7 @@ from smipspy import ProblemData
 
 problem = ProblemData()
 \end{lstlisting}
-Once the problem is specified, the solution method is the same as for the other examples, and omitted here for brevity.
+Once the problem is specified, the solution method is the same as for the other examples. We omit it here for brevity.
 
 \section{Reference manual}
 \label{sec:reference_manual}
@@ -144,7 +191,7 @@ Once the problem is specified, the solution method is the same as for the other 
 We present a short reference manual of the public methods on classes one might commonly use from the
 SMIPS library. The manual details the C++ interface. The names are similar in the Python interface, but are written in their Pythonic equivalents (\textit{e.g.} \texttt{firstStageObjective} in the C++ code is accessed as \texttt{first\_stage\_objective} in the Python interface). Both interfaces expect similar arguments. For example code in both languages, we refer to Section \ref{sec:examples}.
 
-Our code uses the Armadillo numerical library. Particularly, we often rely on the vector, matrix, and sparse matrix classes offered by Armadillo. Such an Armadillo class can be recognised as belonging to the \texttt{arma} namespace (\textit{e.g.} \texttt{arma::vec} for a real-valued column vector, \texttt{arma::mat} for a real-valued matrix, and \texttt{arma::sp\_mat} for a real-valued sparse matrix in compressed column format). The Armadillo library and documentation is available at \href{http://arma.sourceforge.net/}{their website}.
+Our code uses the Armadillo numerical library. Particularly, we often rely on the vector, matrix, and sparse matrix classes offered by Armadillo. Such an Armadillo class can be recognised as belonging to the \texttt{arma} namespace (\textit{e.g.} \texttt{arma::vec} for a real-valued column vector, \texttt{arma::mat} for a real-valued matrix, and \texttt{arma::sp\_mat} for a real-valued sparse matrix in compressed column format). The Armadillo library and documentation are available at \href{http://arma.sourceforge.net/}{their website}.
 
 \subsection{The \texttt{ProblemData} class}
 \label{subsec:problem_class}
@@ -248,7 +295,80 @@ After solving the deterministic equivalent, the \texttt{firstStageObjective}, \t
 \subsection{The \texttt{CutFamily} classes}
 \label{subsec:cut_families}
 
-TODO text after we've standardised the math.
+The \texttt{CutFamily} class specifies the way a family of cutting planes should be implemented within the Benders' decomposition solution approach. Specifically, a cut family solves a relaxation of the second-stage sub problems to obtain cut coefficients for insertion into the first-stage master problem (see also Section \ref{subsec:master_problem_class}). If $\theta$ is our first-stage approximation of the expected cost-to-go, such an optimality cut takes the form of
+\[ \theta \ge \gamma + \beta^T x, \]
+where $\gamma$ is an intercept and $\beta$ the slope. The \texttt{CutFamily} class only specifies the public interface that should be implemented, given in Listing \ref{listing:cut_family}.
+\begin{lstlisting}[caption={Public interface of the \texttt{CutFamily} class.}, 
+                   label={listing:cut_family}]
+class CutFamily
+{
+public:
+	struct Cut
+	{
+		arma::vec beta;
+		double gamma;
+	};
+	
+	virtual CutFamily::Cut computeCut(arma::vec const &x) = 0;
+		
+	virtual ~CutFamily() = default;
+};
+\end{lstlisting}
+Observe that \texttt{CutFamily} is an abstract class, and cannot itself be instantiated. All that is required of a family of cutting planes is that it implements a method \texttt{computeCut}, which takes the current first-stage decisions and returns suitable cut coefficients, obtained from some relaxation of the sub problems. We now turn to several implementations.
+
+\subsubsection{The \texttt{LpDual} class}
+\label{subsubsec:lpdual}
+
+TODO
+
+\begin{lstlisting}[caption={Public interface of the \texttt{LpDual} class.}, 
+                   label={listing:lpdual}]
+class LpDual : public CutFamily
+{
+public:
+	LpDual(ProblemData const &problem);
+	
+	CutFamily::Cut computeCut(arma::vec const &x) override;
+};
+\end{lstlisting}
+
+\subsubsection{The \texttt{StrongBenders} class}
+\label{subsubsec:strong_benders}
+
+TODO
+
+\begin{lstlisting}[caption={Public interface of the \texttt{StrongBenders} class.}, 
+                   label={listing:strong_benders}]
+class StrongBenders : public CutFamily
+{
+public:
+	StrongBenders(ProblemData const &problem);
+	
+	~StrongBenders() override;
+	
+	CutFamily::Cut computeCut(arma::vec const &x) override;
+};
+\end{lstlisting}
+
+\subsubsection{The \texttt{LooseBenders} class}
+\label{subsubsec:loose_benders}
+
+TODO
+
+\begin{lstlisting}[caption={Public interface of the \texttt{LooseBenders} class.}, 
+                   label={listing:loose_benders}]
+class LooseBenders : public CutFamily
+{
+public:
+	LooseBenders(ProblemData const &problem,
+			 	 arma::vec const alpha,
+			 	 double timeLimit = 1e6);
+	
+	~LooseBenders() override;
+	
+	CutFamily::Cut computeCut(arma::vec const &x) override;
+};
+\end{lstlisting}
 
 \subsection{The \texttt{MasterProblem} class}
 \label{subsec:master_problem_class}
@@ -262,9 +382,7 @@ public:
 	MasterProblem(ProblemData &problem,
 				  double lowerBound = 0.,
 				  double upperBound = arma::datum::inf);
-	
-	void addCut(CutFamily::Cut &cut);
-	
+		
 	std::unique_ptr<arma::vec> solveWith(CutFamily &cutFamily,
 	                                     double tol = 1e-4);
 	
@@ -275,10 +393,17 @@ public:
 	double objective() const;
 };
 \end{lstlisting}
-Its constructor takes the familiar \texttt{ProblemData} instance, and two optimal arguments providing a lower- and upper-bound on $\theta$. If these are not passed, it is assumed that $0 \le \theta \le \infty$. After construction, one can call the \texttt{solveWith} method, with an appropriate family of cutting planes as an argument. This cut family is then used to derive optimality cuts solving the problem. An optional tolerance argument, \texttt{tol}, can be passed, which specifies the tolerance that should be used when evaluating the optimality of a current first-stage solution. The default tolerance is $0.0001$. If the master problem is ever infeasible, a \texttt{std::runtime\_error} is thrown. The return argument is a (unique) pointer to a vector of near-optimal first-stage decisions.
+Its constructor takes the familiar \texttt{ProblemData} instance, and two optimal arguments providing a lower- and upper-bound on $\theta$. If these are not passed, it is assumed that $0 \le \theta \le \infty$. After construction, one can call the \texttt{solveWith} method, with an appropriate family of cutting planes as an argument. This cut family is then used to derive optimality cuts solving the problem. An optional tolerance argument, \texttt{tol}, can be passed, which specifies the tolerance that should be used when evaluating the optimality of a current first-stage solution. The default tolerance is $0.0001$. If the master problem is infeasible, a \texttt{std::runtime\_error} is thrown. In case a sub problem is infeasible, the same exception is thrown; this might happen when we do not have (relatively) complete recourse. The return argument is a (unique) pointer to a vector of near-optimal first-stage decisions.
 
 Once the master problem has been solved, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the optimal first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
 
 
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+
+	\bibitem{vanderLaan2020}
+	van der Laan, N., and W.\ Romeijnders, 2020. A loose Benders decomposition algorithm for approximating two-stage mixed-integer recourse models. Accepted for publication in \emph{Mathematical Programming}.
+	
+\end{thebibliography}
 	
 \end{document}

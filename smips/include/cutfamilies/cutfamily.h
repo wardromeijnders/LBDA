@@ -18,6 +18,8 @@ protected:
 
     explicit CutFamily(ProblemData const &problem);
 
+    virtual double solve();
+
 public:
     struct Cut
     {
@@ -26,8 +28,6 @@ public:
     };
 
     virtual CutFamily::Cut computeCut(arma::vec const &x) = 0;
-
-    virtual double solve();
 
     virtual ~CutFamily() = default;
 };

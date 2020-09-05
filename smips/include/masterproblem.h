@@ -19,6 +19,11 @@ class MasterProblem
     ProblemData &d_problem;
     GRBModel d_model;
 
+    /**
+     * Adds cut <code>theta >= beta^T x + gamma</code>.
+     */
+    void addCut(CutFamily::Cut &cut);
+
 public:
     /**
      * Constructs the master problem from the data in the passed-in problem
@@ -32,11 +37,6 @@ public:
     MasterProblem(ProblemData &problem,
                   double lowerBound = 0.,
                   double upperBound = arma::datum::inf);
-
-    /**
-     * Adds cut <code>theta >= beta^T x + gamma</code>.
-     */
-    void addCut(CutFamily::Cut &cut);
 
     /**
      * Solves the master problem using the given cutting strategy. The
