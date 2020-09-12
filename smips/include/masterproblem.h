@@ -16,13 +16,13 @@ class MasterProblem
 {
     GRBEnv d_env = GRBEnv();
 
-    ProblemData &d_problem;
+    ProblemData const &d_problem;
     GRBModel d_model;
 
     /**
      * Adds cut <code>theta >= beta^T x + gamma</code>.
      */
-    void addCut(CutFamily::Cut &cut);
+    void addCut(CutFamily::Cut const &cut);
 
 public:
     /**
@@ -34,7 +34,7 @@ public:
      *                      expected cost-to-go. Default 0.
      * @param upperBound    Upper bound for theta. Default +inf.
      */
-    MasterProblem(ProblemData &problem,
+    MasterProblem(ProblemData const &problem,
                   double lowerBound = 0.,
                   double upperBound = arma::datum::inf);
 

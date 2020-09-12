@@ -90,6 +90,8 @@ Such models have many practical applications in for example energy, telecommunic
 
 We explain how to set-up a local copy of the SMIPS codebase, for development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{smipspy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
+TODO get the package on PyPI.  
+
 \subsection{On Linux}
 A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distro's.
 \begin{enumerate}
@@ -114,8 +116,6 @@ TODO
 \label{sec:examples}
 
 We present two common use cases: solving a known problem given in SMPS format, and specifying a new problem by providing your own matrices and vectors as input. The example code can be ran as-is, either by compiling it against the source files (for the C++ code, where it offers an alternative implementation of the \texttt{main.cpp} file), or by installing the \texttt{smipspy} package from the package index (for the Python code).
-
-TODO get the package on PyPI.  
 
 \subsection{Solving an SMPS problem}
 \label{subsec:solving_smps_example}
@@ -183,7 +183,7 @@ print(master.second_stage_objective())
 \end{lstlisting}
 Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard \textit{exactly}. If this happens to you, the repository contains a simple Python script you can point to the offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
 
-In the listings above, we first read the problem data contained in the ``LandS'' files. A call to \texttt{fromSmps} (C++)/\texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of zero: since this is the default we did not have to, but in general it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. Since the ``LandS'' problem is fully continuous, we apply regular LP-duality based cuts. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
+In the listings above, we first read the problem data contained in the ``LandS'' files. A call to \texttt{fromSmps} (C++) or \texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of zero: since this is the default we did not have to, but in general it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. Since the ``LandS'' problem is fully continuous, we apply regular LP-duality based cuts. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
 
 \subsection{Specifying your own problem data}
 \label{subsec:own_data_example}
@@ -251,23 +251,17 @@ public:
 	arma::Col<char> const &firstStageConstrSenses() const;
 	
 	arma::Col<char> const &secondStageConstrSenses() const;
-	
-	arma::Col<char> &firstStageVarTypes();
-	
+		
 	arma::Col<char> const &firstStageVarTypes() const;
 	
 	arma::Col<char> const &secondStageVarTypes() const;
 		
 	arma::sp_mat const &Amat() const;
-	
-	arma::sp_mat &Amat();
-	
+		
 	arma::sp_mat const &Tmat() const;
 	
 	arma::sp_mat const &Wmat() const;
-	
-	arma::vec &firstStageCoeffs();
-	
+		
 	arma::vec const &firstStageCoeffs() const;
 	
 	arma::vec const &secondStageCoeffs() const;
@@ -425,7 +419,7 @@ The \texttt{MasterProblem} class solves the two-stage recourse problem by means 
 class MasterProblem
 {
 public:
-	MasterProblem(ProblemData &problem,
+	MasterProblem(ProblemData const &problem,
 				  double lowerBound = 0.,
 				  double upperBound = arma::datum::inf);
 		

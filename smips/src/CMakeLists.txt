@@ -23,18 +23,17 @@ set(smipsSources
         problemdata.cpp
         subproblem.cpp)
 
-# Command-line executable for the SMIPS code
-add_executable(smipsexec
-        main.cpp
+# (Internal) library
+add_library(smips
         ${cutFamiliesSources}
         ${smpsSources}
         ${smipsSources})
-target_link_libraries(smipsexec PRIVATE armadillo ${GUROBI_LIBRARIES})
+target_link_libraries(smips PRIVATE armadillo ${GUROBI_LIBRARIES})
+
+# Command-line executable for the SMIPS code
+add_executable(smipsexec main.cpp)
+target_link_libraries(smipsexec PRIVATE armadillo ${GUROBI_LIBRARIES} smips)
 
 # SMIPS code, with Python bindings for use there
-pybind11_add_module(smipspy
-        bindings.cpp
-        ${cutFamiliesSources}
-        ${smpsSources}
-        ${smipsSources})
-target_link_libraries(smipspy PRIVATE armadillo ${GUROBI_LIBRARIES})
+pybind11_add_module(smipspy bindings.cpp)
+target_link_libraries(smipspy PRIVATE armadillo ${GUROBI_LIBRARIES} smips)

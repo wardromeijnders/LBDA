@@ -1,6 +1,6 @@
 #include "masterproblem.h"
 
-MasterProblem::MasterProblem(ProblemData &problem,
+MasterProblem::MasterProblem(ProblemData const &problem,
                              double lowerBound,
                              double upperBound) :
     d_problem(problem), d_model(d_env)
@@ -33,7 +33,7 @@ MasterProblem::MasterProblem(ProblemData &problem,
     d_model.update();
 }
 
-void MasterProblem::addCut(CutFamily::Cut &cut)
+void MasterProblem::addCut(CutFamily::Cut const &cut)
 {
     GRBVar const *vars = d_model.getVars();
     arma::vec const coeffs = -cut.beta;

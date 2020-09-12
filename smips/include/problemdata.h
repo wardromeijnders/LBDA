@@ -69,11 +69,6 @@ public:
         return d_secondStageConstrSenses;
     }
 
-    arma::Col<char> &firstStageVarTypes()
-    {
-        return d_firstStageVarTypes;
-    }
-
     arma::Col<char> const &firstStageVarTypes() const
     {
         return d_firstStageVarTypes;
@@ -94,15 +89,6 @@ public:
     }
 
     /**
-     * Sparse, first-stage constraint matrix. Each column specifies a
-     * constraint, each row a variable.
-     */
-    arma::sp_mat &Amat()
-    {
-        return d_Amat;
-    }
-
-    /**
      * Sparse, second-stage linking matrix for the first-stage variables. Each
      * column specifies coefficients for a constraint, each row a variable.
      */
@@ -118,11 +104,6 @@ public:
     arma::sp_mat const &Wmat() const
     {
         return d_Wmat;
-    }
-
-    arma::vec &firstStageCoeffs()
-    {
-        return d_firstStageCoeffs;
     }
 
     arma::vec const &firstStageCoeffs() const
