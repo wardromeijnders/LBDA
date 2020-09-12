@@ -15,7 +15,7 @@
 
 TEST(TestDataLandS, LpDual)
 {
-    auto problem = ProblemData::fromSmps("data/electric/lands");
+    auto problem = ProblemData::fromSmps("data/electric/LandS");
 
     MasterProblem master(problem);
     LpDual family(problem);
@@ -32,7 +32,7 @@ TEST(TestDataLandS, LpDual)
 
 TEST(TestDataLandS, StrongBenders)
 {
-    auto problem = ProblemData::fromSmps("data/electric/lands");
+    auto problem = ProblemData::fromSmps("data/electric/LandS");
 
     MasterProblem master(problem);
     StrongBenders family(problem);
@@ -49,7 +49,7 @@ TEST(TestDataLandS, StrongBenders)
 
 TEST(TestDataLandS, LooseBenders)
 {
-    auto problem = ProblemData::fromSmps("data/electric/lands");
+    auto problem = ProblemData::fromSmps("data/electric/LandS");
 
     MasterProblem master(problem);
 

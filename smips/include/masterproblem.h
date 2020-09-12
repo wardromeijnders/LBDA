@@ -48,7 +48,7 @@ public:
      * @return Vector of (near) optimal first-stage decisions.
      */
     std::unique_ptr<arma::vec> solveWith(CutFamily &cutFamily,
-                                         double tol = 1e-4);
+                                         double tol = 1e-3);
 
     /**
      * Returns the (exact) first stage objective value, that is, the value of
