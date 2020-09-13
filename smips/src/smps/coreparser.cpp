@@ -5,7 +5,7 @@
 
 using namespace smps;
 
-bool (CoreParser::*(CoreParser::d_actions)[])(smps::DataLine const &)
+void (CoreParser::*(CoreParser::d_actions)[])(smps::DataLine const &)
     = {&CoreParser::parseNone,
        &CoreParser::parseName,
        &CoreParser::parseRows,
@@ -34,8 +34,14 @@ void CoreParser::parse(std::string const &location)
 
         DataLine const dataLine(line);
 
-        if (!std::invoke(d_actions[d_state], this, dataLine))  // bad parse
-            std::cerr << "Failed parsing: " << line << '\n';
+        try
+        {
+            std::invoke(d_actions[d_state], this, dataLine);
+        }
+        catch (...)  // bad parse
+        {
+            throw std::runtime_error("Failed parsing: " + line + '\n');
+        }
     }
 }
 
@@ -60,12 +66,12 @@ bool CoreParser::transition(std::string const &line)
     return false;
 }
 
-bool CoreParser::parseName(DataLine const &dataLine)
+void CoreParser::parseName(DataLine const &dataLine)
 {
-    return d_smps.setName(dataLine.firstDataName());
+    d_smps.setName(dataLine.firstDataName());
 }
 
-bool CoreParser::parseRows(DataLine const &dataLine)
+void CoreParser::parseRows(DataLine const &dataLine)
 {
     std::map<char, char> senses = {{'L', GRB_LESS_EQUAL},
                                    {'E', GRB_EQUAL},
@@ -74,14 +80,15 @@ bool CoreParser::parseRows(DataLine const &dataLine)
     char type = dataLine.indicator()[0];
 
     if (std::string("NLEG").find(type) == std::string::npos)
-        return false;
+        return;
 
-    return type == 'N'  // "free" row, which is generally the objective.
-               ? d_smps.addObjective(dataLine.name())
-               : d_smps.addConstr(dataLine.name(), senses[type]);
+    if (type == 'N')  // "free" row, which is generally the objective.
+        d_smps.addObjective(dataLine.name());
+    else
+        d_smps.addConstr(dataLine.name(), senses[type]);
 }
 
-bool CoreParser::parseCols(DataLine const &dataLine)
+void CoreParser::parseCols(DataLine const &dataLine)
 {
     auto const &firstDataName = dataLine.firstDataName();
     auto const &secondDataName = dataLine.secondDataName();
@@ -94,64 +101,67 @@ bool CoreParser::parseCols(DataLine const &dataLine)
         if (secondDataName.find("INTEND") != std::string::npos)
             d_parseInts = false;
 
-        return true;  // this is a marker line, nothing to parse.
+        return;  // this is a marker line, nothing to parse.
     }
 
     auto const &var = dataLine.name();
     auto const &[constr1, coeff1] = dataLine.firstDataEntry();
     auto type = d_parseInts ? GRB_INTEGER : GRB_CONTINUOUS;
 
-    auto res = d_smps.addCoeff(constr1, var, coeff1, type);
+    d_smps.addCoeff(constr1, var, coeff1, type);
 
     if (!dataLine.hasSecondDataEntry())
-        return res;
+        return;
 
     auto const &[constr2, coeff2] = dataLine.secondDataEntry();
-    return res && d_smps.addCoeff(constr2, var, coeff2, type);
+    d_smps.addCoeff(constr2, var, coeff2, type);
 }
 
-bool CoreParser::parseRhs(DataLine const &dataLine)
+void CoreParser::parseRhs(DataLine const &dataLine)
 {
     auto [constr1, coeff1] = dataLine.firstDataEntry();
-    auto res = d_smps.addRhs(constr1, coeff1);
+    d_smps.addRhs(constr1, coeff1);
 
     if (!dataLine.hasSecondDataEntry())
-        return res;
+        return;
 
     auto [constr2, coeff2] = dataLine.secondDataEntry();
-    return res && d_smps.addRhs(constr2, coeff2);
+    d_smps.addRhs(constr2, coeff2);
 }
 
-bool CoreParser::parseBounds(DataLine const &dataLine)
+void CoreParser::parseBounds(DataLine const &dataLine)
 {
     auto [var, bound] = dataLine.firstDataEntry();
 
     // This follows mostly from
     // http://www-eio.upc.es/lceio/manuals/cplex-11/html/reffileformatscplex/reffileformatscplex11.html
     if (dataLine.indicator() == "LO")  // lower bound
-        return d_smps.addLowerBound(var, bound);
+        d_smps.addLowerBound(var, bound);
 
     if (dataLine.indicator() == "UP")  // upper bound
-        return d_smps.addUpperBound(var, bound);
+        d_smps.addUpperBound(var, bound);
 
     if (dataLine.indicator() == "LI")  // integer lower bound
-        return d_smps.addVarType(var, GRB_INTEGER)
-               && d_smps.addLowerBound(var, bound);
+    {
+        d_smps.addVarType(var, GRB_INTEGER);
+        d_smps.addLowerBound(var, bound);
+    }
 
     if (dataLine.indicator() == "UI")  // integer upper bound
-        return d_smps.addVarType(var, GRB_INTEGER)
-               && d_smps.addUpperBound(var, bound);
+    {
+        d_smps.addVarType(var, GRB_INTEGER);
+        d_smps.addUpperBound(var, bound);
+    }
 
     if (dataLine.indicator() == "BV")  // binary variable
-        return d_smps.addVarType(var, GRB_BINARY)
-               && d_smps.addLowerBound(var, 0.0)
-               && d_smps.addUpperBound(var, 1.0);
-
-    return false;
+    {
+        d_smps.addVarType(var, GRB_BINARY);
+        d_smps.addLowerBound(var, 0.0);
+        d_smps.addUpperBound(var, 1.0);
+    }
 }
 
-bool CoreParser::parseRanges(DataLine const &dataLine)
+void CoreParser::parseRanges(DataLine const &dataLine)
 {
     std::cerr << "SMIPS does not currently understand RANGES.\n";
-    return false;
 }

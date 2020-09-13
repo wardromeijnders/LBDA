@@ -11,9 +11,9 @@ namespace smps
     protected:
         Smps &d_smps;  // reference to the SMPS object to be populated
 
-        bool parseNone(smps::DataLine const &dataLine);
+        void parseNone(smps::DataLine const &dataLine);
 
-        bool parseEndata(smps::DataLine const &dataLine);
+        void parseEndata(smps::DataLine const &dataLine);
 
     public:
         explicit FileParser(Smps &smps);

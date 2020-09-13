@@ -66,42 +66,40 @@ namespace smps
             return d_name;
         }
 
-        bool setName(std::string const &name)
+        void setName(std::string const &name)
         {
             d_name = name;
-            return true;
         }
 
-        bool addObjective(std::string const &name);
+        void addObjective(std::string const &name);
 
-        bool addConstr(std::string const &name, char type);
+        void addConstr(std::string const &name, char type);
 
-        bool addCoeff(std::string const &constr,
+        void addCoeff(std::string const &constr,
                       std::string const &var,
                       double coeff,
                       char varType);
 
-        bool addRhs(std::string const &constr, double coeff);
+        void addRhs(std::string const &constr, double coeff);
 
-        bool addLowerBound(std::string const &var, double bound);
+        void addLowerBound(std::string const &var, double bound);
 
-        bool addUpperBound(std::string const &var, double bound);
+        void addUpperBound(std::string const &var, double bound);
 
-        bool addStage(std::string const &constr, std::string const &var);
+        void addStage(std::string const &constr, std::string const &var);
 
-        bool addIndep(std::string const &constr,
+        void addIndep(std::string const &constr,
                       std::pair<double, double> value);
 
-        bool addScenario(std::string const &scenario, double probability);
+        void addScenario(std::string const &scenario, double probability);
 
-        bool addScenarioRealisation(std::string const &scenario,
+        void addScenarioRealisation(std::string const &scenario,
                                     std::string const &constr,
                                     double value);
 
-        bool addVarType(std::string const &var, char type)
+        void addVarType(std::string const &var, char type)
         {
             d_varTypes(d_var2idx[var]) = type;
-            return true;
         }
 
         arma::sp_mat Amat();

@@ -22,17 +22,17 @@ namespace smps
             ENDATA
         };
 
-        static bool (StochParser::*d_actions[])(smps::DataLine const &);
+        static void (StochParser::*d_actions[])(smps::DataLine const &);
 
         State d_state = State::NONE;
 
-        bool parseStoch(smps::DataLine const &dataLine);
+        void parseStoch(smps::DataLine const &dataLine);
 
-        bool parseIndep(smps::DataLine const &dataLine);
+        void parseIndep(smps::DataLine const &dataLine);
 
-        bool parseBlocks(smps::DataLine const &dataLine);
+        void parseBlocks(smps::DataLine const &dataLine);
 
-        bool parseScenarios(smps::DataLine const &dataLine);
+        void parseScenarios(smps::DataLine const &dataLine);
 
     public:
         void parse(std::string const &location);

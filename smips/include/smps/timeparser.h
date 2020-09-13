@@ -18,13 +18,13 @@ namespace smps
             ENDATA
         };
 
-        static bool (TimeParser::*d_actions[])(smps::DataLine const &);
+        static void (TimeParser::*d_actions[])(smps::DataLine const &);
 
         State d_state = State::NONE;
 
-        bool parseTime(smps::DataLine const &dataLine);
+        void parseTime(smps::DataLine const &dataLine);
 
-        bool parsePeriods(smps::DataLine const &dataLine);
+        void parsePeriods(smps::DataLine const &dataLine);
 
     public:
         void parse(std::string const &location);

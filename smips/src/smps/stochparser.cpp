@@ -4,7 +4,7 @@
 
 using namespace smps;
 
-bool (StochParser::*(StochParser::d_actions)[])(smps::DataLine const &)
+void (StochParser::*(StochParser::d_actions)[])(smps::DataLine const &)
     = {&StochParser::parseNone,
        &StochParser::parseStoch,
        &StochParser::parseIndep,
@@ -31,8 +31,14 @@ void StochParser::parse(std::string const &location)
 
         DataLine const dataLine(line);
 
-        if (!std::invoke(d_actions[d_state], this, dataLine))  // bad parse
-            std::cerr << "Failed parsing: " << line << '\n';
+        try
+        {
+            std::invoke(d_actions[d_state], this, dataLine);
+        }
+        catch (...)  // bad parse
+        {
+            throw std::runtime_error("Failed parsing: " + line + '\n');
+        }
     }
 }
 
@@ -55,51 +61,49 @@ bool StochParser::transition(std::string const &line)
     return false;
 }
 
-bool StochParser::parseStoch(const smps::DataLine &dataLine)
+void StochParser::parseStoch(const smps::DataLine &dataLine)
 {
-    return d_smps.name() == dataLine.firstDataName();
+    // name field, but this does not really matter as the core file already
+    // contains this info.
 }
 
-bool StochParser::parseIndep(smps::DataLine const &dataLine)
+void StochParser::parseIndep(smps::DataLine const &dataLine)
 {
     if (dataLine.name() != "RHS")
     {
         std::cerr << "SMIPS currently understands only stochastic RHS.\n";
-        return false;
+        return;
     }
 
     auto [constr, value] = dataLine.firstDataEntry();
     auto [_, prob] = dataLine.secondDataEntry();
 
-    return d_smps.addIndep(constr, std::make_pair(value, prob));
+    d_smps.addIndep(constr, std::make_pair(value, prob));
 }
 
-bool StochParser::parseBlocks(smps::DataLine const &dataLine)
+void StochParser::parseBlocks(smps::DataLine const &dataLine)
 {
     if (dataLine.name() != "RHS")
     {
         std::cerr << "SMIPS currently understands only stochastic RHS.\n";
-        return false;
+        return;
     }
-
-    return false;  // TODO
 }
 
-bool StochParser::parseScenarios(smps::DataLine const &dataLine)
+void StochParser::parseScenarios(smps::DataLine const &dataLine)
 {
     if (dataLine.indicator() == "SC")  // new scenario
     {
         d_scenarioName = dataLine.name();
         auto const &[_, prob] = dataLine.firstDataEntry();
 
-        return d_smps.addScenario(d_scenarioName, prob);
+        d_smps.addScenario(d_scenarioName, prob);
     }
     else if (dataLine.name() != "RHS")
     {
         std::cerr << "SMIPS currently understands only stochastic RHS.\n";
-        return false;
     }
 
     auto const &[constr, value] = dataLine.firstDataEntry();
-    return d_smps.addScenarioRealisation(d_scenarioName, constr, value);
+    d_smps.addScenarioRealisation(d_scenarioName, constr, value);
 }

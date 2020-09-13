@@ -6,12 +6,12 @@ FileParser::FileParser(Smps &smps) : d_smps(smps)
 {
 }
 
-bool FileParser::parseNone(smps::DataLine const &dataLine)
+void FileParser::parseNone(smps::DataLine const &dataLine)
 {
-    return true;  // nothing to do in initial state.
+    // nothing to do in initial state.
 }
 
-bool FileParser::parseEndata(smps::DataLine const &dataLine)
+void FileParser::parseEndata(smps::DataLine const &dataLine)
 {
-    return true;  // finished parsing.
+    // finished parsing.
 }

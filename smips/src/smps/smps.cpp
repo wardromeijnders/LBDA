@@ -19,18 +19,13 @@ void Smps::read(std::string const &location)
     stochParser.parse(location + ".sto");
 }
 
-bool Smps::addObjective(std::string const &name)
+void Smps::addObjective(std::string const &name)
 {
     if (d_objName.empty())
-    {
         d_objName = name;
-        return true;
-    }
-
-    return false;  // we already have an objective.
 }
 
-bool Smps::addConstr(std::string const &name, char type)
+void Smps::addConstr(std::string const &name, char type)
 {
     d_core.resize(d_core.n_rows + 1, d_core.n_cols);
 
@@ -41,11 +36,9 @@ bool Smps::addConstr(std::string const &name, char type)
     d_constrSenses(d_core.n_rows - 1) = type;
 
     d_constr2idx[name] = d_core.n_rows - 1;
-
-    return true;
 }
 
-bool Smps::addCoeff(std::string const &constr,
+void Smps::addCoeff(std::string const &constr,
                     std::string const &var,
                     double coeff,
                     char varType)
@@ -66,33 +59,23 @@ bool Smps::addCoeff(std::string const &constr,
         d_objCoeffs(d_var2idx[var]) = coeff;
     else if (d_constr2idx.count(constr))  // is an existing constraint.
         d_core(d_constr2idx[constr], d_var2idx[var]) = coeff;
-    else
-        return false;  // is another free row (but we already have an objective)
-
-    return true;
 }
 
-bool Smps::addRhs(std::string const &constr, double coeff)
+void Smps::addRhs(std::string const &constr, double coeff)
 {
-    if (!d_constr2idx.count(constr))
-        return false;
-
-    d_rhs[d_constr2idx[constr]] = coeff;
-
-    return true;
+    if (d_constr2idx.count(constr))
+        d_rhs[d_constr2idx[constr]] = coeff;
 }
 
-bool Smps::addStage(std::string const &constr, std::string const &var)
+void Smps::addStage(std::string const &constr, std::string const &var)
 {
     if (!d_constr2idx.count(constr) || !d_var2idx.count(var))
-        return false;
+        return;
 
     d_stageOffsets.resize(d_stageOffsets.n_rows + 1, 2);
 
     d_stageOffsets(d_stageOffsets.n_rows - 1, 0) = d_constr2idx[constr];
     d_stageOffsets(d_stageOffsets.n_rows - 1, 1) = d_var2idx[var];
-
-    return true;
 }
 
 arma::sp_mat Smps::Amat()
@@ -125,54 +108,47 @@ arma::sp_mat Smps::Wmat()
     return d_core.submat(rowSpan, colSpan).t();
 }
 
-bool Smps::addLowerBound(std::string const &var, double bound)
+void Smps::addLowerBound(std::string const &var, double bound)
 {
     if (d_lowerBounds.size() != d_core.n_cols)  // not initialised before
         d_lowerBounds = arma::zeros(d_core.n_cols);
 
     d_lowerBounds[d_var2idx[var]] = bound;
-    return true;
 }
 
-bool Smps::addUpperBound(std::string const &var, double bound)
+void Smps::addUpperBound(std::string const &var, double bound)
 {
     if (d_upperBounds.size() != d_core.n_cols)  // not initialised before
         d_upperBounds = arma::vec(d_core.n_cols).fill(arma::datum::inf);
 
     d_upperBounds[d_var2idx[var]] = bound;
-    return true;
 }
 
-bool Smps::addIndep(std::string const &constr, std::pair<double, double> value)
+void Smps::addIndep(std::string const &constr, std::pair<double, double> value)
 {
     d_indep[d_constr2idx[constr]].emplace_back(value);
-    return true;
 }
 
-bool Smps::addScenario(std::string const &scenario, double probability)
+void Smps::addScenario(std::string const &scenario, double probability)
 {
     size_t const idx = d_scenarios.size();
     ScenNode scen{probability, {}};
 
     d_scenarios.push_back(scen);
     d_scen2idx[scenario] = idx;
-
-    return true;
 }
 
-bool Smps::addScenarioRealisation(std::string const &scenario,
+void Smps::addScenarioRealisation(std::string const &scenario,
                                   std::string const &constr,
                                   double value)
 {
     if (!d_scen2idx.count(scenario) || !d_constr2idx.count(constr))
-        return false;
+        return;
 
     size_t const idx = d_scen2idx[scenario];
     size_t const constrIdx = d_constr2idx[constr];
 
     d_scenarios[idx].rhs[constrIdx] = value;
-
-    return true;
 }
 
 arma::vec Smps::firstStageObjCoeffs()

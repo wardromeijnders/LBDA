@@ -4,7 +4,7 @@
 
 using namespace smps;
 
-bool (TimeParser::*(TimeParser::d_actions)[])(smps::DataLine const &)
+void (TimeParser::*(TimeParser::d_actions)[])(smps::DataLine const &)
     = {&TimeParser::parseNone,
        &TimeParser::parseTime,
        &TimeParser::parsePeriods,
@@ -29,8 +29,14 @@ void TimeParser::parse(std::string const &location)
 
         DataLine const dataLine(line);
 
-        if (!std::invoke(d_actions[d_state], this, dataLine))  // bad parse
-            std::cerr << "Failed parsing: " << line << '\n';
+        try
+        {
+            std::invoke(d_actions[d_state], this, dataLine);
+        }
+        catch (...)  // bad parse
+        {
+            throw std::runtime_error("Failed parsing: " + line + '\n');
+        }
     }
 }
 
@@ -48,12 +54,13 @@ bool TimeParser::transition(std::string const &line)
     return false;
 }
 
-bool TimeParser::parseTime(smps::DataLine const &dataLine)
+void TimeParser::parseTime(smps::DataLine const &dataLine)
 {
-    return d_smps.name() == dataLine.firstDataName();
+    // name field, but this does not really matter as the core file already
+    // contains this info.
 }
 
-bool TimeParser::parsePeriods(smps::DataLine const &dataLine)
+void TimeParser::parsePeriods(smps::DataLine const &dataLine)
 {
-    return d_smps.addStage(dataLine.firstDataName(), dataLine.name());
+    d_smps.addStage(dataLine.firstDataName(), dataLine.name());
 }
