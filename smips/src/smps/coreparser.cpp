@@ -154,11 +154,7 @@ void CoreParser::parseBounds(DataLine const &dataLine)
     }
 
     if (dataLine.indicator() == "BV")  // binary variable
-    {
         d_smps.addVarType(var, GRB_BINARY);
-        d_smps.addLowerBound(var, 0.0);
-        d_smps.addUpperBound(var, 1.0);
-    }
 }
 
 void CoreParser::parseRanges(DataLine const &dataLine)
