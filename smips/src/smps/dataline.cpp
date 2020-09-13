@@ -7,16 +7,16 @@ DataLine::DataLine(const std::string &line)
     d_indicator = trim(line.substr(1, 2));
     d_name = trim(line.substr(4, 8));
 
-    if (line.length() >= 14)
+    if (line.length() >= 15)
         d_dataName1 = trim(line.substr(14, 8));
 
-    if (line.length() >= 24)
+    if (line.length() >= 25)
         d_numeric1 = trim(line.substr(24, 12));
 
-    if (line.length() >= 39)
+    if (line.length() >= 40)
         d_dataName2 = trim(line.substr(39, 8));
 
-    if (line.length() >= 49)
+    if (line.length() >= 50)
         d_numeric2 = trim(line.substr(49, 12));
 }
 
@@ -42,7 +42,7 @@ std::pair<std::string, double> DataLine::firstDataEntry() const
 
 bool DataLine::hasSecondDataEntry() const
 {
-    return !d_dataName2.empty();
+    return !d_dataName2.empty() && !d_numeric2.empty();
 }
 
 std::string const &DataLine::secondDataName() const
