@@ -14,18 +14,16 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
                              bool strict = false)
 {
     // TODO incref/decref
-    PyObject *raw = src.ptr();
-
-    PyObject *colPtrRaw = PyObject_GetAttrString(raw, "indptr");
+    PyObject *colPtrRaw = src.attr("indptr").ptr();
     arma::uvec colPtr = carma::arr_to_col<arma::uword>(colPtrRaw, copy, strict);
 
-    PyObject *rowindRaw = PyObject_GetAttrString(raw, "indices");
+    PyObject *rowindRaw = src.attr("indices").ptr();
     arma::uvec rowind = carma::arr_to_col<arma::uword>(rowindRaw, copy, strict);
 
-    PyObject *dataRaw = PyObject_GetAttrString(raw, "data");
-    arma::vec data = carma::arr_to_col<double>(dataRaw, copy, strict);
+    PyObject *dataRaw = src.attr("data").ptr();
+    arma::Col<T> data = carma::arr_to_col<T>(dataRaw, copy, strict);
 
-    PyObject *shapePtr = PyObject_GetAttrString(raw, "shape");
+    PyObject *shapePtr = src.attr("shape").ptr();
 
     int row, col;
     PyArg_ParseTuple(shapePtr, "ii", &row, &col);
@@ -39,26 +37,38 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
 template<typename T> inline py::handle sp_mat_to_csc(arma::SpMat<T> const &src)
 {
     // TODO incref/decref
+    src.sync();  // ensures the following data accesses are valid.
+
+    py::array_t<T> data(src.n_nonzero, src.values);
+    py::array_t<arma::uword> indices(src.n_nonzero, src.row_indices);
+    py::array_t<arma::uword> indPtr(src.n_cols + 1, src.col_ptrs);
+
+    if (!data || !indices || !indPtr)
+        throw std::runtime_error("Could not convert matrix data.");
+
+    PyObject *args = Py_BuildValue("((OOO))",
+                                   data.ptr(),
+                                   indices.ptr(),
+                                   indPtr.ptr());
+
+    if (!args)
+        throw std::runtime_error("Could not construct matrix arguments.");
+
+    PyObject *shape = Py_BuildValue("ii", src.n_rows, src.n_cols);
+    PyObject *kwargs = PyDict_New();
+
+    if (!kwargs || PyDict_SetItemString(kwargs, "shape", shape) == -1)
+        throw std::runtime_error("Could not set shape kwarg.");
+
     py::module sparse = py::module::import("scipy.sparse");
     py::object csc_matrix = sparse.attr("csc_matrix");
 
-    // TODO make the conversions work nicely
-    py::array_t<T> data = carma::to_numpy<T>(src.values, true);
-    py::array_t<T> indices = carma::to_numpy<T>(src.row_indices, true);
-    py::array_t<T> indPtr = carma::to_numpy<T>(src.col_ptrs, true);
+    PyObject *mat = PyObject_Call(csc_matrix.ptr(), args, kwargs);
 
-    PyObject *args
-        = Py_BuildValue("(ooo)(ii)s",
-                        data,
-                        indices,
-                        indPtr,
-                        src.n_rows,
-                        src.n_cols,
-                        pybind11::detail::npy_format_descriptor<T>::name);
+    if (!mat)
+        throw std::runtime_error("Could not construct scipy.sparse matrix.");
 
-    PyObject *mat = PyObject_CallObject(csc_matrix.ptr(), args);
-
-    return py::handle(mat);
+    return mat;
 }
 
 namespace pybind11::detail
@@ -74,11 +84,6 @@ namespace pybind11::detail
         {
             value = csc_to_sp_mat<T>(src);
             return !PyErr_Occurred();
-        }
-
-        static handle cast(arma::SpMat<T> &src, return_value_policy, handle)
-        {
-            return sp_mat_to_csc(src);
         }
 
         static handle cast(arma::SpMat<T> const &src,

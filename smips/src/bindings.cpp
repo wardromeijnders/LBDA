@@ -7,11 +7,9 @@
 #include "sparse_converters.h"
 
 #include <carma/carma.h>
-#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 
-// TODO type casts to/from scipy sparse mat and arma::sp_mat
 // TODO include the ProblemData getters
 
 PYBIND11_MODULE(smipspy, m)
@@ -50,7 +48,7 @@ PYBIND11_MODULE(smipspy, m)
              py::arg("second_stage_upper_bound"),
              py::arg("first_stage_rhs"))
         .def("from_smps", &ProblemData::fromSmps)
-        .def("Amat", py::overload_cast<>(&ProblemData::Amat, py::const_))
+        .def("Amat", &ProblemData::Amat)
         .def("Tmat", &ProblemData::Tmat)
         .def("Wmat", &ProblemData::Wmat);
 
