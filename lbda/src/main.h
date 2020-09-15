@@ -14,10 +14,10 @@
 #include <unistd.h>
 
 auto const USAGE = R"(
-SMIPS. A program for solving two-stage mixed-integer stochastic programs.
+LBDA+. A program for solving two-stage mixed-integer stochastic programs.
 
 Usage:
-    smips [-h] [-m method] [-c cut -l lb -u ub | -t time] <file>
+    lbdaexec [-h] [-m method] [-c cut -l lb -u ub | -t time] <file>
 
 Options:
     -h  Prints this help text.

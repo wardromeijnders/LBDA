@@ -17,23 +17,23 @@ set(smpsSources
         smps/stochparser.cpp
         smps/timeparser.cpp)
 
-set(smipsSources
+set(lbdaSources
         deterministicequivalent.cpp
         masterproblem.cpp
         problemdata.cpp
         subproblem.cpp)
 
-# (Internal) library
-add_library(smips
+# (Internal) librarySM
+add_library(lbda
         ${cutFamiliesSources}
         ${smpsSources}
-        ${smipsSources})
-target_link_libraries(smips PRIVATE armadillo ${GUROBI_LIBRARIES})
+        ${lbdaSources})
+target_link_libraries(lbda PRIVATE armadillo ${GUROBI_LIBRARIES})
 
-# Command-line executable for the SMIPS code
-add_executable(smipsexec main.cpp)
-target_link_libraries(smipsexec PRIVATE armadillo ${GUROBI_LIBRARIES} smips)
+# Command-line executable for the LBDA+ code
+add_executable(lbdaexec main.cpp)
+target_link_libraries(lbdaexec PRIVATE armadillo ${GUROBI_LIBRARIES} lbda)
 
-# SMIPS code, with Python bindings for use there
-pybind11_add_module(smipspy bindings.cpp)
-target_link_libraries(smipspy PRIVATE armadillo ${GUROBI_LIBRARIES} smips)
+# LBDA+ code, with Python bindings for use there
+pybind11_add_module(lbdapy bindings.cpp)
+target_link_libraries(lbdapy PRIVATE armadillo ${GUROBI_LIBRARIES} lbda)

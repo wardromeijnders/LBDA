@@ -232,7 +232,7 @@ arma::mat Smps::generateScenarios()
     if (!d_scenarios.empty())
         return genScenarios();
 
-    throw std::runtime_error("SMIPS does not understand this type of "
+    throw std::runtime_error("LBDA+ does not understand this type of "
                              ".sto file yet.");
 }
 
@@ -244,7 +244,7 @@ arma::vec Smps::scenarioProbabilities()
     if (!d_scenarios.empty())
         return scenProbabilities();
 
-    throw std::runtime_error("SMIPS does not understand this type of "
+    throw std::runtime_error("LBDA+ does not understand this type of "
                              ".sto file yet.");
 }
 

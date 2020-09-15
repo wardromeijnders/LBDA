@@ -52,6 +52,8 @@ try
             auto decisions = *solution;
 
             printSolution(decisions, deq);
+
+            std::cout << "Gap (%) = " << deq.mipGap() << "%\n";
             break;
         }
     }
@@ -124,7 +126,7 @@ argument_t parseArguments(int argc, char **argv)
 template<class T> void printSolution(arma::vec const &decisions, T &method)
 {
     std::cout << "x = \n" << decisions << '\n';
-    std::cout << "Obj.  = " << method.objective() << '\n';
-    std::cout << "c^T x = " << method.firstStageObjective() << '\n';
-    std::cout << "Q(x)  = " << method.secondStageObjective() << '\n';
+    std::cout << "Obj.    = " << method.objective() << '\n';
+    std::cout << "c^T x   = " << method.firstStageObjective() << '\n';
+    std::cout << "Q(x)    = " << method.secondStageObjective() << '\n';
 }

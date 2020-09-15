@@ -12,7 +12,7 @@ namespace py = pybind11;
 
 // TODO include the ProblemData getters
 
-PYBIND11_MODULE(smipspy, m)
+PYBIND11_MODULE(lbdapy, m)
 {
     py::class_<ProblemData>(m, "ProblemData")
         .def(py::init<arma::sp_mat,
@@ -61,6 +61,8 @@ PYBIND11_MODULE(smipspy, m)
                 return carma::col_to_arr(*res);
             },
             py::arg("time_limit") = arma::datum::inf)
+        .def("is_optimal", &DeterministicEquivalent::isOptimal)
+        .def("mip_gap", &DeterministicEquivalent::mipGap)
         .def("first_stage_objective",
              &DeterministicEquivalent::firstStageObjective)
         .def("second_stage_objective",

@@ -44,7 +44,7 @@
 	tabsize=4
 }
 
-\title{SMIPS v1.0 user manual}
+\title{LBDA+ v1.0 user manual}
 \author{
 	Niels van der Laan
 	\and
@@ -88,24 +88,24 @@ Such models have many practical applications in for example energy, telecommunic
 \section{Installation instructions}
 \label{sec:installation_instructions}
 
-We explain how to set-up a local copy of the SMIPS codebase, for development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{smipspy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
+We explain how to set-up a local copy of the LBDA C++ codebase, for development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
 TODO get the package on PyPI.  
 
 \subsection{On Linux}
-A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distro's.
+A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distributions.
 \begin{enumerate}
 	\item Clone the repository into some folder. This also clones two submodules, \texttt{pybind11} and \texttt{carma}, which are used to compile the Python bindings.
 	
-	\item We use \texttt{CMake} as out build tool. It might already be available on your system; if not, it will be installed when we install Armadillo.
+	\item We use \texttt{CMake} as our build tool. It might already be available on your system; if not, it will be installed when we install Armadillo.
 	
 	\item Install Gurobi. Any recent version should do, but the code was written and tested with Gurobi 9. The header files and libraries should be available in a standard location relative to the \texttt{GUROBI\_HOME} environment variable.
 	
-	\item For linear algebra, we use the Armadillo library. It is available for many distributions, often via the package manager. The code was written and tested against Armadillo 9.8. You can install the library yourself, or use the \texttt{scripts/install.sh} script to do this for you. It should work on most Debian-based distro's, like Ubuntu. You likely need to be root for the script to work.
+	\item For linear algebra, we use the Armadillo library. It is available for many distributions, often via the package manager. The code was written and tested against Armadillo 9.8. You can install the library yourself, or use the \texttt{scripts/install.sh} script to do this for you. It should work on most Debian-based distributions, like Ubuntu. You likely need to be root for the script to work.
 	
-	\item If everything is set-up correctly, cmake can build \texttt{smips} from the repository root as \texttt{cmake build smips}. The resulting Makefile has three targets: \texttt{smipsexec}, \texttt{smipspy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
+	\item If everything is set-up correctly, cmake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdaspy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
 	
-	\item If you run \texttt{make smipsexec}, you should obtain a compiled binary in \texttt{bin/smipsexec}. Run \texttt{bin/smipsexec -h} to be greeted by a help message explaining the command-line interface. \texttt{make smipspy} should result in a compiled Python module in the \texttt{lib} directory. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
+	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. \texttt{make lbdapy} should result in a compiled Python module in the \texttt{lib} directory. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
 \end{enumerate}
 
 \subsection{On Windows}
@@ -115,22 +115,23 @@ TODO
 \section{Examples}
 \label{sec:examples}
 
-We present two common use cases: solving a known problem given in SMPS format, and specifying a new problem by providing your own matrices and vectors as input. The example code can be ran as-is, either by compiling it against the source files (for the C++ code, where it offers an alternative implementation of the \texttt{main.cpp} file), or by installing the \texttt{smipspy} package from the package index (for the Python code).
+We present two common use cases: solving a known problem given in SMPS format, and specifying a new problem by providing your own matrices and vectors as input. The example code can be ran as-is, either by compiling it against the source files (for the C++ code, where it offers an alternative implementation of the \texttt{main.cpp} file), or by installing the \texttt{lbdapy} package from the package index (for the Python code).
 
-\subsection{Solving an SMPS problem}
+\subsection{Solving a MIR problem using SMPS input}
 \label{subsec:solving_smps_example}
 
-Solving a problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
+Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
 \begin{lstlisting}[caption={Solving an SMPS problem in C++.},
                    label={listing:smps_example_c++}]
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
 #include "problemdata.h"
-#include "cutfamilies/lpdual.h"
+#include "cutfamilies/loosebenders.h"
 
 int main()
 {
-	auto problem = ProblemData::fromSmps("data/electric/LandS");
+	auto problem = ProblemData::fromSmps(
+		"data/sslp/sslp_5_25_50");
 	
 	// Solves the deterministic equivalent formulation.
 	DeterministicEquivalent detEqv(problem);
@@ -141,9 +142,11 @@ int main()
 	std::cout << detEqv.firstStageObjective() << '\n';
 	std::cout << detEqv.secondStageObjective() << '\n';
 	
-	// Applies the L-shaped algorithm.
-	LpDual cutFamily(problem);
-	MasterProblem master(problem, 0);
+	// Applies the LBDA.
+	arma::vec alpha = arma::zeros(problem.scenarios().n_rows);
+	LooseBenders cutFamily(problem, alpha);
+	
+	MasterProblem master(problem, -1000);
 	decisions = master.solveWith(cutFamily);
 	
 	std::cout << *decisions << '\n';
@@ -155,11 +158,13 @@ int main()
 \begin{lstlisting}[caption={Solving an SMPS problem in Python.},
                    label={listing:smps_example_python},
                    language={Python}]
-from smipspy import (DeterministicEquivalent, MasterProblem, 
-                     ProblemData)
-from smipspy.cutfamilies import LpDual
+from lbdapy import (DeterministicEquivalent, MasterProblem, 
+                    ProblemData)
+from lbdapy.cutfamilies import LooseBenders
 
-problem = ProblemData.from_smps("data/electric/LandS")
+import numpy as np
+
+problem = ProblemData.from_smps("data/sslp/sslp_5_25_50")
 
 # Solves the deterministic equivalent formulation.
 det_eqv = DeterministicEquivalent(problem)
@@ -170,10 +175,11 @@ print(det_eqv.objective())
 print(det_eqv.first_stage_objective())
 print(det_eqv.second_stage_objective())
 
-# Applies the L-shaped algorithm.
-cut_family = LpDual(problem)
+# Applies the LBDA.
+alpha = np.zeros(problem.scenarios.shape[0])
+cut_family = LooseBenders(problem, alpha)
 
-master = MasterProblem(problem, lower_bound=0)
+master = MasterProblem(problem, lower_bound=-1000)
 decisions = master.solve_with(cut_family)
 
 print(decisions)
@@ -183,14 +189,16 @@ print(master.second_stage_objective())
 \end{lstlisting}
 Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard \textit{exactly}. If this happens to you, the repository contains a simple Python script you can point to the offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
 
-In the listings above, we first read the problem data contained in the ``LandS'' files. A call to \texttt{fromSmps} (C++) or \texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of zero: since this is the default we did not have to, but in general it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. Since the ``LandS'' problem is fully continuous, we apply regular LP-duality based cuts. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
+In the listings above, we first read the problem data contained in the ``sslp\_5\_25\_50'' files. This is a stochastic server location problem with binary first- and second-stage variables, due to Ntaimo and Sen \cite{ntaimo2005}.  A call to \texttt{fromSmps} (C++) or \texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of $-1000$. In general, it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. We apply the LBDA cuts of \ref{subsubsec:loose_benders} with $\alpha = 0$. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
 
 \subsection{Specifying your own problem data}
 \label{subsec:own_data_example}
 
 The \texttt{ProblemData} class exposes a constructor, which can be used to specify a problem instance that is not available in SMPS format. This is a bit more involved as there is quite a bit of data to specify. The argument order is given in the reference manual, in Listing \ref{listing:problem_data}.
 
-TODO small problem
+We solve a small investment problem, originally due to Schultz et al. \cite{schultz1998}. 
+
+TODO complete write-up 
 
 The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}.
 
@@ -206,7 +214,7 @@ int main()
 \begin{lstlisting}[caption={Specifying a custom problem in Python.},
 label={listing:custom_example_python},
 language={Python}]
-from smipspy import ProblemData
+from lbdapy import ProblemData
 
 problem = ProblemData()
 \end{lstlisting}
@@ -216,7 +224,7 @@ Once the problem is specified, the solution method is the same as for the other 
 \label{sec:reference_manual}
 
 We present a short reference manual of the public methods on classes one might commonly use from the
-SMIPS library. The manual details the C++ interface. The names are similar in the Python interface, but are written in their Pythonic equivalents (\textit{e.g.} \texttt{firstStageObjective} in the C++ code is accessed as \texttt{first\_stage\_objective} in the Python interface). Both interfaces expect similar arguments. For example code in both languages, we refer to Section \ref{sec:examples}.
+LBDA+ library. The manual details the C++ interface. The names are similar in the Python interface, but are written in their Pythonic equivalents (\textit{e.g.} \texttt{firstStageObjective} in the C++ code is accessed as \texttt{first\_stage\_objective} in the Python interface). Both interfaces expect similar arguments. For example code in both languages, we refer to Section \ref{sec:examples}.
 
 Our code uses the Armadillo numerical library. Particularly, we often rely on the vector, matrix, and sparse matrix classes offered by Armadillo. Such an Armadillo class can be recognised as belonging to the \texttt{arma} namespace (\textit{e.g.} \texttt{arma::vec} for a real-valued column vector, \texttt{arma::mat} for a real-valued matrix, and \texttt{arma::sp\_mat} for a real-valued sparse matrix in compressed column format). The Armadillo library and documentation are available at \href{http://arma.sourceforge.net/}{their website}.
 
@@ -285,7 +293,7 @@ public:
 \end{lstlisting}
 There are two ways to instantiate the \texttt{ProblemData} class: either by supplying your own vectors and matrices to the constructor, or supplying the filesystem location of an SMPS triplet of files to \texttt{fromSmps}. If one of the three SMSP files does not exist, \texttt{fromSmps} throws a \texttt{std::runtime\_error}.
 
-Most of the member functions are data getters, returning parts of the data that define a two-stage recourse problem. The functions \texttt{Amat()}, \texttt{Tmat()} and \texttt{Wmat()} return references to the (sparse) matrices $A$, $T$, and $W$, respectively. \texttt{nScenarios()} returns the number of scenarios, \texttt{scenarios()} a dense matrix of all scenario right-hand sides (one column for each scenario). Finally, \texttt{scenarioProbability} returns the occurrence probability of the given scenario (number). The use of the other member functions is hopefully clear based on their names.
+Most of the member functions are data getters, returning parts of the data that define a two-stage recourse problem. The functions \texttt{Amat()}, \texttt{Tmat()} and \texttt{Wmat()} return references to the (sparse) matrices $A$, $T$, and $W$, respectively. \texttt{nScenarios()} returns the number of scenarios, \texttt{scenarios()} a dense matrix of all scenario right-hand sides (one column for each scenario). Finally, \texttt{scenarioProbability} returns the occurrence probability of the given scenario (number). The use of the other member functions should be clear based on their names.
 
 \subsection{The \texttt{DeterministicEquivalent} class}
 \label{subsec:det_eqv_class}
@@ -301,6 +309,10 @@ public:
 	std::unique_ptr<arma::vec> solve(
 		double timeLimit = arma::datum::inf);
 	
+	bool isOptimal();
+	
+	double mipGap();
+	
 	double firstStageObjective();
 	
 	double secondStageObjective();
@@ -308,17 +320,16 @@ public:
 	double objective() const;
 };
 \end{lstlisting}
-Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceeded, or the solution status is not optimal, \texttt{solve} throws a \texttt{std::runtime\_error}. The return argument is a (unique) pointer to a
-vector of optimal first-stage decisions.
+Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceed and no feasible solutions are available, \texttt{solve} throws a \texttt{std::runtime\_error}. This exception is also thrown when the problem is infeasible. The return argument is a (unique) pointer to a vector of first-stage decisions. These decisions are optimal when \texttt{isOptimal} returns true. When \texttt{isOptimal} returns false, the decisions are the best solution found by Gurobi, and \texttt{mipGap} returns the relative optimality gap (as a percentage) of this solution.
 
-After solving the deterministic equivalent, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the optimal first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
+After solving the deterministic equivalent, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
 
 \subsection{The \texttt{CutFamily} classes}
 \label{subsec:cut_families}
 
-The \texttt{CutFamily} abstract class specifies the way a family of cutting planes should be implemented within the Benders' decomposition solution approach. Specifically, a cut family solves a relaxation of the second-stage sub problems to obtain cut coefficients for insertion into the first-stage master problem (see also Section \ref{subsec:master_problem_class}). If $\theta$ is our first-stage approximation of the expected cost-to-go, such an optimality cut takes the form of
+The \texttt{CutFamily} abstract class specifies the way a family of cutting planes should be implemented within the Benders' decomposition solution approach. Specifically, a cut family solves a relaxation of the second-stage sub problems to obtain cut coefficients for insertion into the first-stage master problem (see also Section \ref{subsec:master_problem_class}). If $\theta$ is our first-stage approximation of the recourse function $Q$, such an optimality cut takes the form of
 \[ \theta \ge \gamma + \beta^\top x, \]
-where $\gamma$ is an intercept and $\beta$ the slope. The public interface a cut family should implement is given in Listing \ref{listing:cut_family}.
+where $\gamma \in \mathbb{R}$ is an intercept and $\beta \in \mathbb{R}^{n_1}$ the slope. The public interface a cut family should implement is given in Listing \ref{listing:cut_family}.
 \begin{lstlisting}[caption={Public interface of the \texttt{CutFamily} class.}, 
                    label={listing:cut_family}]
 class CutFamily
@@ -345,7 +356,7 @@ These are the regular Benders' cuts, well-known in stochastic programming from t
 where $\beta_k = -\pi_k T$.
 We choose $\gamma$ as
 \begin{equation}
-\gamma = \sum_{k = 1}^K \left[ p_k v_{LP}(\omega_k, \bar x) \right] - \beta^\top x.
+\gamma = \sum_{k = 1}^K \left[ p_k v_{LP}(\omega_k, \bar x) \right] - \beta^\top \bar x.
 \label{eq:benders_coeffs}
 \end{equation}
 The \texttt{LpDual} class implements the \texttt{computeCut} method to return these coefficients. The public interface is straightforward, and given in Listing \ref{listing:lpdual}.
@@ -363,10 +374,9 @@ public:
 \subsubsection{The \texttt{StrongBenders} class}
 \label{subsubsec:strong_benders}
 
-This family is due to Zou et al. \cite{zou2019} and strengthens the regular Benders' cuts by raising the intercept $\gamma$. This is done by solving a Lagrangian relaxation problem at the dual solution of the LP relaxation. The Lagrangian problem is given by
+This family is due to Zou et al. \cite{zou2019} and strengthens the regular LP-duality cuts by raising the intercept $\gamma$. As before, we obtain an optimal dual solution $\pi_k$ of the LP relaxation of the $k$\textsuperscript{th} sub problem, for each $k = 1,\ldots,K$, and we compute $\beta_k = -\pi_k T$ and $\beta = \sum_{k = 1}^K p_k \beta_k$. We then solve a Lagrangian relaxation problem at the dual solution of the LP relaxation. This problem is given by
 \[ \mathcal{L}(\omega, \beta) := \min_{y, z} \{ q^\top y - \beta^\top z~:~Tz + Wy = \omega, Az = b, y \in Y, z \in X \}. \]
-As before, we obtain an optimal dual solution~$\pi_k$ of the LP relaxation of the $k$\textsuperscript{th} sub problem, for each $k = 1,\ldots,K$, and we compute $\beta_k = -\pi_k T$ and $\beta = \sum_{k = 1}^K p_k \beta_k$. 
-For $\gamma$, we have
+For $\gamma$, we now take
 \begin{equation}
 \quad \gamma = \sum_{k = 1}^K p_k \mathcal{L}(\omega_k, \beta_k).
 \label{eq:strong_benders_coeffs}
@@ -390,7 +400,7 @@ public:
 
 The \texttt{LooseBenders} class implements the loose Benders' cuts for the generalized $\alpha$-approximations in~\cite{vanderLaan2020}.
 The generalized $\alpha$-approximations and the corresponding loose Benders' cuts depend on a parameter $\alpha$, which is a vector of the same size as $\omega$.
-In particular, let $B_k$ denote an optimal basis matrix of $v_{LP}(\omega_k, \bar x)$, and consider the corresponding \emph{Gomory relaxation} $v_{B_k}(\omega_k, x)$, obtained by relaxing the integer restrictions on the basic variables, see~\cite{vanderLaan2020} for details.
+In particular, let $B_k$ denote an optimal basis matrix of $v_{LP}(\omega_k, \bar x)$, and consider the corresponding \emph{Gomory relaxation} $v_{B_k}(\omega_k, \bar x)$, obtained by relaxing the integer restrictions on the basic variables, see~\cite{vanderLaan2020} for details.
 Then, $\gamma$ is given by 
 \[\gamma = \sum_{k = 1}^K p_k\left(v_{B_k}(\omega_k - \alpha, 0) + \pi_k^\top\alpha \right),\]
 and, as before, $\beta = -\sum_{k = 1}^K p_k \pi_k T$. The public interface is given in Listing \ref{listing:loose_benders}.
@@ -435,7 +445,7 @@ public:
 \end{lstlisting}
 Its constructor takes the familiar \texttt{ProblemData} instance, and two optimal arguments providing a lower- and upper-bound on $\theta$. If these are not passed, it is assumed that $0 \le \theta \le \infty$. After construction, one can call the \texttt{solveWith} method, with an appropriate family of cutting planes as an argument. This cut family is then used to derive optimality cuts solving the problem. An optional tolerance argument, \texttt{tol}, can be passed, which specifies the tolerance that should be used when evaluating the optimality of a current first-stage solution. The default tolerance is $0.001$. If the master problem is infeasible, a \texttt{std::runtime\_error} is thrown. In case a sub problem is infeasible, the same exception is thrown; this might happen when we do not have (relatively) complete recourse. The return argument is a (unique) pointer to a vector of near-optimal first-stage decisions.
 
-Once the master problem has been solved, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the optimal first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
+Once the master problem has been solved, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the first-stage costs, the expected second-stage costs, and the overall objective cost, respectively.
 
 \clearpage
 \bibliographystyle{plain}
@@ -446,6 +456,12 @@ Once the master problem has been solved, the \texttt{firstStageObjective}, \text
 
 	\bibitem{zou2019}
 	Zou, J., S. Ahmed, and X.A. Sun. 2019. Stochastic dual dynamic integer programming. \emph{Mathematical Programming}. 175, pp. 461--502.
+
+	\bibitem{ntaimo2005}
+	Ntaimo, L., and S. Sen. 2005. The Million-Variable ``March'' for Stochastic Combinatorial Optimization. \emph{Journal of Global Optimization}. 32, pp. 385-–400.
+	
+	\bibitem{schultz1998}
+	Schultz, R., L. Stougie, and M.H. van der Vlerk. 1998. Solving stochastic programs with integer recourse by enumeration: a framework using Gr\"obner basis reductions. \emph{Mathematical Programming}. 83(1–3), pp. 229-–252.
 	
 \end{thebibliography}
 	

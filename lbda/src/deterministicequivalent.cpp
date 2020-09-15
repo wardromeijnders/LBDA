@@ -87,23 +87,29 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
     d_model.set(GRB_DoubleParam_TimeLimit, timeLimit);
     d_model.optimize();
 
-    if (d_model.get(GRB_IntAttr_Status) == GRB_TIME_LIMIT)
-        throw std::runtime_error("Time limit exceeded.");
+    auto status = d_model.get(GRB_IntAttr_Status);
+    auto nSolutions = d_model.get(GRB_IntAttr_SolCount);
 
-    if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
-        throw std::runtime_error("Deterministic equivalent is infeasible.");
+    // Time limit reached, and no feasible solution is available.
+    if (status == GRB_TIME_LIMIT && nSolutions == 0)
+        throw std::runtime_error("Time limit exceeded; no feasible solutions.");
 
-    auto const &Amat = d_problem.Amat();
+    if (isOptimal() || nSolutions > 0)
+    {
+        auto const &Amat = d_problem.Amat();
 
-    auto const *vars = d_model.getVars();
-    auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
+        auto const *vars = d_model.getVars();
+        auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
 
-    auto result = std::make_unique<arma::vec>(xPtr, Amat.n_rows);
+        auto result = std::make_unique<arma::vec>(xPtr, Amat.n_rows);
 
-    delete[] vars;
-    delete[] xPtr;
+        delete[] vars;
+        delete[] xPtr;
 
-    return result;
+        return result;
+    }
+
+    throw std::runtime_error("Deterministic equivalent is infeasible.");
 }
 
 double DeterministicEquivalent::firstStageObjective()
@@ -124,4 +130,14 @@ double DeterministicEquivalent::firstStageObjective()
 double DeterministicEquivalent::secondStageObjective()
 {
     return objective() - firstStageObjective();
+}
+
+bool DeterministicEquivalent::isOptimal()
+{
+    return d_model.get(GRB_IntAttr_Status) == GRB_OPTIMAL;
+}
+
+double DeterministicEquivalent::mipGap()
+{
+    return 100 * d_model.get(GRB_DoubleAttr_MIPGap);
 }

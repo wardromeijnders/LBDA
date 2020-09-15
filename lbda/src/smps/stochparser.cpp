@@ -71,7 +71,7 @@ void StochParser::parseIndep(smps::DataLine const &dataLine)
 {
     if (dataLine.name() != "RHS")
     {
-        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        std::cerr << "LBDA+ currently understands only stochastic RHS.\n";
         return;
     }
 
@@ -85,7 +85,7 @@ void StochParser::parseBlocks(smps::DataLine const &dataLine)
 {
     if (dataLine.name() != "RHS")
     {
-        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        std::cerr << "LBDA+ currently understands only stochastic RHS.\n";
         return;
     }
 }
@@ -101,7 +101,7 @@ void StochParser::parseScenarios(smps::DataLine const &dataLine)
     }
     else if (dataLine.name() != "RHS")
     {
-        std::cerr << "SMIPS currently understands only stochastic RHS.\n";
+        std::cerr << "LBDA+ currently understands only stochastic RHS.\n";
     }
 
     auto const &[constr, value] = dataLine.firstDataEntry();

@@ -30,9 +30,20 @@ public:
      * Solves the deterministic equivalent.
      *
      * @param timeLimit Time limit for the Gurobi solver, in seconds.
-     * @return Vector of optimal first-stage decisions.
+     * @return Vector of optimal first-stage decisions, or best so far.
      */
     std::unique_ptr<arma::vec> solve(double timeLimit = arma::datum::inf);
+
+    /**
+     * @return True if the model was solved to optimality, false otherwise.
+     */
+    bool isOptimal();
+
+    /**
+     * @return Returns the optimality gap of the current solution. Only non-zero
+     *         when <code>isOptimal()</code> is false.
+     */
+    double mipGap();
 
     /**
      * @return First-stage objective value.

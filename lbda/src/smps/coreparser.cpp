@@ -159,5 +159,5 @@ void CoreParser::parseBounds(DataLine const &dataLine)
 
 void CoreParser::parseRanges(DataLine const &dataLine)
 {
-    std::cerr << "SMIPS does not currently understand RANGES.\n";
+    std::cerr << "LBDA+ does not currently understand RANGES.\n";
 }
