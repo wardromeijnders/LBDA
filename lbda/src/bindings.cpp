@@ -10,7 +10,6 @@
 
 namespace py = pybind11;
 
-// TODO include the ProblemData getters
 
 PYBIND11_MODULE(lbdapy, m)
 {
@@ -51,6 +50,7 @@ PYBIND11_MODULE(lbdapy, m)
         .def("Amat", &ProblemData::Amat)
         .def("Tmat", &ProblemData::Tmat)
         .def("Wmat", &ProblemData::Wmat);
+    // TODO include the ProblemData getters
 
     py::class_<DeterministicEquivalent>(m, "DeterministicEquivalent")
         .def(py::init<ProblemData const &>())

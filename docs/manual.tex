@@ -143,7 +143,7 @@ int main()
 	std::cout << detEqv.secondStageObjective() << '\n';
 	
 	// Applies the LBDA.
-	arma::vec alpha = arma::zeros(problem.scenarios().n_rows);
+	arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
 	LooseBenders cutFamily(problem, alpha);
 	
 	MasterProblem master(problem, -1000);
@@ -176,7 +176,7 @@ print(det_eqv.first_stage_objective())
 print(det_eqv.second_stage_objective())
 
 # Applies the LBDA.
-alpha = np.zeros(problem.scenarios.shape[0])
+alpha = np.zeros(problem.Wmat().shape[1])
 cut_family = LooseBenders(problem, alpha)
 
 master = MasterProblem(problem, lower_bound=-1000)
@@ -198,7 +198,7 @@ The \texttt{ProblemData} class exposes a constructor, which can be used to speci
 
 We solve a small investment problem, originally due to Schultz et al. \cite{schultz1998}. 
 
-TODO complete write-up
+TODO complete write-up investment problem paper (5.2.3)
 
 The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}.
 
