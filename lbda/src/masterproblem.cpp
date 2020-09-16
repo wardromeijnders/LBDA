@@ -13,7 +13,7 @@ MasterProblem::MasterProblem(ProblemData const &problem,
                                   d_problem.firstStageCoeffs().memptr(),
                                   d_problem.firstStageVarTypes().memptr(),
                                   nullptr,
-                                  Amat.n_rows);
+                                  d_problem.firstStageCoeffs().n_elem);
 
     GRBLinExpr lhs[Amat.n_cols];
 
@@ -57,7 +57,7 @@ std::unique_ptr<arma::vec> MasterProblem::solveWith(CutFamily &cutFamily,
         if (d_model.get(GRB_IntAttr_Status) != GRB_OPTIMAL)
             throw std::runtime_error("Master problem is infeasible.");
 
-        size_t const numVars = d_problem.Amat().n_rows;
+        size_t const numVars = d_problem.firstStageCoeffs().n_elem;
 
         auto *vars = d_model.getVars();
 

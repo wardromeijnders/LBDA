@@ -196,29 +196,173 @@ In the listings above, we first read the problem data contained in the ``sslp\_5
 
 The \texttt{ProblemData} class exposes a constructor, which can be used to specify a problem instance that is not available in SMPS format. This is a bit more involved as there is quite a bit of data to specify. The argument order is given in the reference manual, in Listing \ref{listing:problem_data}.
 
-We solve a small investment problem, originally due to Schultz et al. \cite{schultz1998}. 
-
-TODO complete write-up investment problem paper (5.2.3)
-
-The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}.
+We solve a small investment problem, originally due to Schultz et al. \cite{schultz1998}. In the first stage, we select $x \in [0, 5]^2$ yielding some immediate revenue. Further revenue is gained from projects $y \in \{0, 1\}^4$ for which investment is done in the second stage, after having observed the random vector $\omega \in [5, 15]^2$, leading to the budget $\omega - x$. As a minimization problem, we have
+\[ \min_x \left\{ -\frac{3}{2}x_1 -4 x_2 + \mathbb{E}_\omega [v(\omega, x)]~:~x \in [0, 5]^2 \right\}, \]
+where
+\[
+\begin{split}
+	% The second constraint differs between LBDA paper (y_4) and Schultz et al. (2y_4). I follow 
+	% the LBDA paper here.
+	v(\omega, x) = \min_{y \in Y} \{ -16y_1 -19y_2 -23y_3 - 28y_4~&: \\
+							            2y_1 + 3y_2 + 4y_3 + 5y_4 &\le \omega_1 - x_1 \\
+					                     6y_1 + y_2 + 3y_3 + y_4 &\le \omega_2 - x_2 \},
+\end{split}
+\]
+and $Y = \{0, 1\}^4$. The problem has relatively complete recourse. We discretize the support of $\omega$ as $\{5, 10, 15\} \times \{5, 10, 15\}$, resulting in $9$ scenarios. Each scenario occurs with fixed probability $p_k = 1 / 9$, $k = 1, \ldots, 9$. The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}.
 
 \begin{lstlisting}[caption={Specifying a custom problem in C++.},
-label={listing:custom_example_c++}]
+                   label={listing:custom_example_c++}]
+#include "deterministicequivalent.h"
+#include "masterproblem.h"
 #include "problemdata.h"
+#include "cutfamilies/loosebenders.h"
 
 int main()
 {
-	auto problem = ProblemData();
+    arma::sp_mat A;
+	arma::sp_mat T = arma::speye(2, 2);
+	
+	// In the example the W matrix is fully dense, so this
+	// is a shortcut.
+	arma::mat WDense = {{2, 6}, {3, 1}, {4, 3}, {5, 1}};
+	arma::sp_mat W(WDense);
+	
+	arma::mat scenarios = {{5, 5, 5, 10, 10, 10, 15, 15, 15},
+	                       {5, 10, 15, 5, 10, 15, 5, 10, 15}};
+	
+	arma::vec probs = arma::ones(9) / 9;
+	
+	arma::Col<char> firstStageSenses;
+	arma::Col<char> secondStageSenses = {'<', '<'};
+	
+	arma::Col<char> firstStageVarTypes = {'C', 'C'};
+	arma::Col<char> secondStageVarTypes = {'B', 'B', 'B', 'B'};
+	
+	arma::vec firstStageCoeffs = {-1.5, -4};
+	arma::vec secondStageCoeffs = {-16, -19, -23, -28};
+	
+	arma::vec firstStageLB = {0, 0};
+	arma::vec firstStageUB = {5, 5};
+	
+	arma::vec secondStageLB = {0, 0, 0, 0};
+	arma::vec secondStageUB = {1, 1, 1, 1};
+	
+	arma::vec firstStageRhs;
+	
+	ProblemData problem(A,
+						T,
+						W,
+						scenarios,
+						probs,
+						firstStageSenses,
+						secondStageSenses,
+						firstStageVarTypes,
+						secondStageVarTypes,
+						firstStageCoeffs,
+						secondStageCoeffs,
+						firstStageLB,
+						firstStageUB,
+						secondStageLB,
+						secondStageUB,
+						firstStageRhs);
+
+	// Solves the deterministic equivalent formulation.
+	DeterministicEquivalent detEqv(problem);
+	auto decisions = detEqv.solve();
+	
+	std::cout << *decisions << '\n';
+	std::cout << detEqv.objective() << '\n';
+	std::cout << detEqv.firstStageObjective() << '\n';
+	std::cout << detEqv.secondStageObjective() << '\n';
+	
+	// Applies the LBDA.
+	arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
+	LooseBenders cutFamily(problem, alpha);
+	
+	MasterProblem master(problem, -100);
+	decisions = master.solveWith(cutFamily);
+	
+	std::cout << *decisions << '\n';
+	std::cout << master.objective() << '\n';
+	std::cout << master.firstStageObjective() << '\n';
+	std::cout << master.secondStageObjective() << '\n';
 }
 \end{lstlisting}
 \begin{lstlisting}[caption={Specifying a custom problem in Python.},
-label={listing:custom_example_python},
-language={Python}]
-from lbdapy import ProblemData
+                   label={listing:custom_example_python},
+                   language={Python}]
+import numpy as np
+from lbdapy import DeterministicEquivalent, ProblemData
+from lbdapy.cutfamilies import LooseBenders
+from scipy.sparse import eye
 
-problem = ProblemData()
+A = []
+T = eye(2, 2, format="csc")
+W = [[2, 6],
+     [3, 1],
+     [4, 3],
+     [5, 1]]
+
+scenarios = [[5, 5, 5, 10, 10, 10, 15, 15, 15],
+             [5, 10, 15, 5, 10, 15, 5, 10, 15]]
+
+probs = np.ones(9) / 9
+
+first_stage_senses = []
+second_stage_senses = ['<', '<']
+first_stage_var_types = ['C', 'C']
+second_stage_var_types = ['B', 'B', 'B', 'B']
+
+first_stage_coeffs = [-1.5, -4]
+second_stage_coeffs = [-16, -19, -23, -28]
+
+first_stage_lb = [0, 0]
+first_stage_ub = [5, 5]
+
+second_stage_lb = [0, 0, 0, 0]
+second_stage_ub = [1, 1, 1, 1]
+
+first_stage_rhs = []
+
+problem = ProblemData(A,
+				      T,
+					  W,
+					  scenarios,
+					  probs,
+					  first_stage_senses,
+					  second_stage_senses,
+					  first_stage_var_types,
+					  second_stage_var_types,
+					  first_stage_coeffs,
+					  second_stage_coeffs,
+					  first_stage_lb,
+					  first_stage_ub,
+					  second_stage_lb,
+					  second_stage_ub,
+					  first_stage_rhs)
+
+# Solves the deterministic equivalent formulation.
+det_eqv = DeterministicEquivalent(problem)
+decisions = det_eqv.solve()
+
+print(decisions)
+print(det_eqv.objective())
+print(det_eqv.first_stage_objective())
+print(det_eqv.second_stage_objective())
+
+# Applies the LBDA.
+alpha = np.zeros(problem.Wmat().shape[1])
+cut_family = LooseBenders(problem, alpha)
+
+master = MasterProblem(problem, lower_bound=-100)
+decisions = master.solve_with(cut_family)
+
+print(decisions)
+print(master.objective())
+print(master.first_stage_objective())
+print(master.second_stage_objective())
 \end{lstlisting}
-Once the problem is specified, the solution method is the same as for the other examples. We omit it here for brevity.
+Once the problem is specified, the solution method is the same as for the other examples. Observe that arbitrary constraints senses may be specified.
 
 \section{Reference manual}
 \label{sec:reference_manual}

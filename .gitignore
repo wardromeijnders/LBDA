@@ -56,3 +56,7 @@ cmake_install.cmake
 *.synctex.gz
 *.log
 *.aux
+
+
+# Python stuff
+*.pyc

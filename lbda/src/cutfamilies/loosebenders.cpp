@@ -20,7 +20,7 @@ LooseBenders::LooseBenders(ProblemData const &problem,
                              problem.secondStageCoeffs().memptr(),
                              problem.secondStageVarTypes().memptr(),
                              nullptr,
-                             Wmat.n_rows);
+                             problem.secondStageCoeffs().n_elem);
 
     GRBLinExpr lhs[Wmat.n_cols];
 
@@ -28,13 +28,13 @@ LooseBenders::LooseBenders(ProblemData const &problem,
         lhs[iter.col()] += *iter * d_vars[iter.row()];  // Wy
 
     auto const &senses = d_problem.secondStageConstrSenses();
-    arma::vec rhs = arma::zeros(Wmat.n_cols);
+    arma::vec rhs = arma::zeros(senses.n_elem);
 
     d_constrs = d_model.addConstrs(lhs,
                                    senses.memptr(),
                                    rhs.memptr(),
                                    nullptr,
-                                   Wmat.n_cols);
+                                   rhs.n_elem);
 
     d_model.set(GRB_DoubleParam_TimeLimit, timeLimit);
     d_model.update();
@@ -51,7 +51,7 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
     auto const &Tmat = d_problem.Tmat();
 
     arma::vec Tx = Tmat.t() * x;
-    arma::vec dual = arma::zeros(Tmat.n_cols);  // decomposition coeffs
+    arma::vec dual = arma::zeros(Tmat.n_cols);
 
     double gamma = 0;
 
@@ -67,14 +67,14 @@ LooseBenders::Cut LooseBenders::computeCut(arma::vec const &x)
 
         double const prob = d_problem.scenarioProbability(scenario);
 
-        arma::vec rhs = omega - d_alpha;
-
         // Gomory is lambda^T (omega - alpha) + psi(omega - alpha), so we add
         // lambda^T alpha.
-        gamma += prob
-                 * computeGomory(scenario, rhs, basis.vBasis, basis.cBasis);
-        gamma += prob * arma::dot(duals.lambda, d_alpha);
+        arma::vec rhs = omega - d_alpha;
 
+        double res = computeGomory(scenario, rhs, basis.vBasis, basis.cBasis);
+        res += arma::dot(duals.lambda, d_alpha);
+
+        gamma += prob * res;
         dual -= prob * duals.lambda;
     }
 
@@ -133,9 +133,7 @@ void LooseBenders::update(arma::vec &rhs,
             rhs[idx] = -arma::datum::inf;
     }
 
-    auto const &Wmat = d_problem.Wmat();
-
-    d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);
+    d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), rhs.n_elem);
 
     arma::vec lb = d_problem.secondStageLowerBound();
     arma::vec ub = d_problem.secondStageUpperBound();
@@ -144,6 +142,6 @@ void LooseBenders::update(arma::vec &rhs,
     lb.elem(arma::find(vBasis != GRB_NONBASIC_LOWER)).fill(-arma::datum::inf);
     ub.elem(arma::find(vBasis != GRB_NONBASIC_UPPER)).fill(arma::datum::inf);
 
-    d_model.set(GRB_DoubleAttr_LB, d_vars, lb.memptr(), Wmat.n_rows);
-    d_model.set(GRB_DoubleAttr_UB, d_vars, ub.memptr(), Wmat.n_rows);
+    d_model.set(GRB_DoubleAttr_LB, d_vars, lb.memptr(), lb.n_elem);
+    d_model.set(GRB_DoubleAttr_UB, d_vars, ub.memptr(), ub.n_elem);
 }

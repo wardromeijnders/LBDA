@@ -17,7 +17,7 @@ void DeterministicEquivalent::initFirstStage()
                                   d_problem.firstStageCoeffs().memptr(),
                                   d_problem.firstStageVarTypes().memptr(),
                                   nullptr,
-                                  Amat.n_rows);
+                                  d_problem.firstStageCoeffs().n_elem);
 
     GRBLinExpr lhs[Amat.n_cols];
     for (auto iter = Amat.begin(); iter != Amat.end(); ++iter)
@@ -96,12 +96,11 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
 
     if (isOptimal() || nSolutions > 0)
     {
-        auto const &Amat = d_problem.Amat();
-
         auto const *vars = d_model.getVars();
-        auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
+        auto const numVars = d_problem.firstStageCoeffs().n_elem;
 
-        auto result = std::make_unique<arma::vec>(xPtr, Amat.n_rows);
+        auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, numVars);
+        auto result = std::make_unique<arma::vec>(xPtr, numVars);
 
         delete[] vars;
         delete[] xPtr;
@@ -114,12 +113,11 @@ std::unique_ptr<arma::vec> DeterministicEquivalent::solve(double timeLimit)
 
 double DeterministicEquivalent::firstStageObjective()
 {
-    auto const &Amat = d_problem.Amat();
-
     auto const *vars = d_model.getVars();
-    auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, Amat.n_rows);
+    auto const numVars = d_problem.firstStageCoeffs().n_elem;
 
-    arma::vec x(xPtr, Amat.n_rows);
+    auto const *xPtr = d_model.get(GRB_DoubleAttr_X, vars, numVars);
+    arma::vec x(xPtr, numVars);
 
     delete[] vars;
     delete[] xPtr;

@@ -5,15 +5,13 @@
 
 StrongBenders::StrongBenders(ProblemData const &problem) : CutFamily(problem)
 {
-    auto const &Amat = problem.Amat();
-
     // Free first-stage variables for Lagrangian relaxation.
     d_zVars = d_model.addVars(problem.firstStageLowerBound().memptr(),
                               problem.firstStageUpperBound().memptr(),
                               nullptr,
                               problem.firstStageVarTypes().memptr(),
                               nullptr,
-                              Amat.n_rows);
+                              problem.firstStageCoeffs().n_elem);
 
     auto const &Wmat = problem.Wmat();
 
@@ -86,8 +84,10 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
 
 void StrongBenders::update(arma::vec &rhs, arma::vec &pi)
 {
-    auto const &Amat = d_problem.Amat();
-    d_model.set(GRB_DoubleAttr_Obj, d_zVars, pi.memptr(), Amat.n_rows);
+    d_model.set(GRB_DoubleAttr_Obj,
+                d_zVars,
+                pi.memptr(),
+                d_problem.firstStageCoeffs().n_elem);
 
     auto const &Wmat = d_problem.Wmat();
     d_model.set(GRB_DoubleAttr_RHS, d_constrs, rhs.memptr(), Wmat.n_cols);
