@@ -78,8 +78,6 @@ Before explaining the LBDA code in detail, we first briefly discuss in Section~\
 
 \subsection{Two-stage mixed-integer recourse models\label{subsec:model}}
 
-TODO we accept arbitrary constraints, use $\sim$?
-
 Consider the two-stage mixed-integer recourse model with random right-hand side \begin{equation}\label{etastar}\eta^* := \min_{x}\left\{c^{\top}x + Q(x) :\quad Ax = b,\;x \in X\subseteq \mathbb{R}^{n_1}_+\right\},\end{equation} where the recourse function $Q$ is defined as \begin{equation}\label{defQ}Q(x):=\mathbb{E}_{\omega}\left[ \min_y \left\{   q^{\top}y: Wy = \omega - Tx,\; y \in Y \subseteq \mathbb R^{n_2 }_+\right\}\right]  , \quad x\in \red{X}. \end{equation}This model represents a two-stage decision problem under uncertainty. In the first stage, a decision~$x$ has to be made here-and-now, subject to deterministic constraints $Ax = b$ and random goal constraints $Tx = \omega$. Here, $\omega$ is a \red{continuous or discrete} random vector whose probability distribution is known. In the second stage, the realization of $\omega$ becomes known and any infeasibilities with respect to $Tx = \omega$ have to be repaired. This is modelled by the second-stage problem \begin{equation}\label{vwx}v(\omega,x) := \min_y \left\{   q^{\top}y:Wy = \omega - Tx,\; y \in Y \subseteq  \mathbb{R} ^{n_2 }_+\right\}.\end{equation}The objective in this two-stage recourse model is to minimize the sum of immediate costs $c^{\top}x$ and expected second-stage costs $Q(x) = \mathbb{E}_\omega[v(\omega,x)]$, ${x \in X}$.
 
 Frequently, integrality restrictions are imposed on the first- and second-stage decisions. That is, $X$ and $Y$ are of the form $X = \mathbb Z^{p_1}_+ \times \mathbb{R}^{n_1 - p_1}_+$ and $Y = \mathbb Z^{p_2}_+\times \mathbb{R}^{n_2 - p_2}_+$. Such restrictions arise naturally when modelling real-life problems, for example to model on/off decisions or batch size restrictions. The resulting model is called a mixed-integer recourse (MIR) model.
@@ -90,7 +88,9 @@ Such models have many practical applications in for example energy, telecommunic
 
 We explain how to set-up a local copy of the LBDA C++ codebase for use and development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
-TODO get the package on PyPI.  
+After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
+
+TODO get the package on PyPI.
 
 \subsection{On Linux}
 A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distributions.
@@ -361,7 +361,7 @@ print(master.objective())
 print(master.first_stage_objective())
 print(master.second_stage_objective())
 \end{lstlisting}
-The Python interface is rather forgiving: it only requires that the arguments can be turned into a \texttt{scipy.sparse} matrix (the matrices $A$, $T$, and $W$), or a \texttt{numpy} array (all other problem data). A crucial remark is that the matrices $T$ and $W$ are specified in code as $T^\top$ and $W^\top$: \emph{all three matrices $A$, $T$, and $W$ must be specified this way, transposed}. This is required for performance reasons and follows the memory lay-out of the numerical library we use. 
+Although we did not explicitly mention this in Section \ref{subsec:model}, it is not required to specify the problem with strict equality constraints before applying the LBDA: arbitrary constraint senses are accepted, as shown in the listings above. Observe that the matrices $T$ and $W$ are specified in code as $T^\top$ and $W^\top$: \emph{all three matrices $A$, $T$, and $W$ must be specified in this manner}. We require this for performance reasons, due to the memory lay-out of the numerical library we use. 
 
 Once the problem is specified, the solution method is the same as for the other examples. First we construct the deterministic equivalent and solve it. Then we solve the decomposition using loose Benders' cuts with $\alpha = 0$. Observe that we again specify a lower bound, this time of $-100$.
 

@@ -23,7 +23,7 @@ set(lbdaSources
         problemdata.cpp
         subproblem.cpp)
 
-# (Internal) librarySM
+# (Internal) library
 add_library(lbda
         ${cutFamiliesSources}
         ${smpsSources}
