@@ -88,7 +88,7 @@ Such models have many practical applications in for example energy, telecommunic
 \section{Installation instructions}
 \label{sec:installation_instructions}
 
-We explain how to set-up a local copy of the LBDA C++ codebase, for development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
+We explain how to set-up a local copy of the LBDA C++ codebase for use and development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
 TODO get the package on PyPI.  
 
@@ -121,7 +121,7 @@ We present two common use cases: solving a known problem given in SMPS format, a
 \label{subsec:solving_smps_example}
 
 Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
-\begin{lstlisting}[caption={Solving an SMPS problem in C++.},
+\begin{lstlisting}[caption={Solving SMPS input in C++.},
                    label={listing:smps_example_c++}]
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
@@ -155,7 +155,7 @@ int main()
 	std::cout << master.secondStageObjective() << '\n';
 }
 \end{lstlisting}
-\begin{lstlisting}[caption={Solving an SMPS problem in Python.},
+\begin{lstlisting}[caption={Solving SMPS input in Python.},
                    label={listing:smps_example_python},
                    language={Python}]
 from lbdapy import (DeterministicEquivalent, MasterProblem, 
@@ -189,7 +189,7 @@ print(master.second_stage_objective())
 \end{lstlisting}
 Our SMPS reader is rather strict and might reject reading your files if they do not adhere to the standard \textit{exactly}. If this happens to you, the repository contains a simple Python script you can point to the offending problem set. The script is given in \texttt{data/fix\_faulty\_smps.py}.
 
-In the listings above, we first read the problem data contained in the ``sslp\_5\_25\_50'' files. This is a stochastic server location problem with binary first- and second-stage variables, due to Ntaimo and Sen \cite{ntaimo2005}.  A call to \texttt{fromSmps} (C++) or \texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of $-1000$. In general, it is important not to forget to pass a lower (and possibly upper) bound when using the decomposition. We apply the LBDA cuts of \ref{subsubsec:loose_benders} with $\alpha = 0$. Observe that the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}.
+In the listings above, we first read the problem data contained in the ``sslp\_5\_25\_50'' files. This is a stochastic server location problem with binary first- and second-stage variables, due to Ntaimo and Sen \cite{ntaimo2005}.  A call to \texttt{fromSmps} (C++) or \texttt{from\_smps} (Python) returns an instance of the class \texttt{ProblemData} (Section \ref{subsec:problem_class}). All solution methods take such a \texttt{ProblemData} instance. Thereafter, we apply two solution methods. First, we construct and solve the deterministic equivalent, and print its optimal first-stage decisions, and objective costs. Then, we solve the same problem with the L-shaped algorithm. We also specify a lower bound of $-1000$. In general, it is important not to forget setting a lower (and possibly upper) bound when using the decomposition. We apply the LBDA cuts of \ref{subsubsec:loose_benders} with $\alpha = 0$. Observe that \emph{the interface for obtaining decisions and objective values is similar for both the decomposition-based \texttt{MasterProblem}, and the direct solution of the \texttt{DeterministicEquivalent}}.
 
 \subsection{Specifying your own problem data}
 \label{subsec:own_data_example}
@@ -208,7 +208,7 @@ where
 					                     6y_1 + y_2 + 3y_3 + y_4 &\le \omega_2 - x_2 \},
 \end{split}
 \]
-and $Y = \{0, 1\}^4$. The problem has relatively complete recourse. We discretize the support of $\omega$ as $\{5, 10, 15\} \times \{5, 10, 15\}$, resulting in $9$ scenarios. Each scenario occurs with fixed probability $p_k = 1 / 9$, $k = 1, \ldots, 9$. The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}.
+and $Y = \{0, 1\}^4$. The problem has relatively complete recourse. We discretize the support of $\omega$ as $\{5, 10, 15\} \times \{5, 10, 15\}$, resulting in $9$ scenarios. Each scenario occurs with fixed probability $p_k = 1 / 9$, $k = 1, \ldots, 9$. The problem is then specified in C++ and Python as given in Listings \ref{listing:custom_example_c++} and \ref{listing:custom_example_python}, respectively.
 
 \begin{lstlisting}[caption={Specifying a custom problem in C++.},
                    label={listing:custom_example_c++}]
@@ -222,8 +222,9 @@ int main()
     arma::sp_mat A;
 	arma::sp_mat T = arma::speye(2, 2);
 	
-	// In the example the W matrix is fully dense, so this
-	// is a shortcut.
+	// This is a quicker way to specify the fully dense 
+	// matrix W in our small toy problem, but should not
+	// be used when W is large and sparse. 
 	arma::mat WDense = {{2, 6}, {3, 1}, {4, 3}, {5, 1}};
 	arma::sp_mat W(WDense);
 	
@@ -292,16 +293,14 @@ int main()
                    label={listing:custom_example_python},
                    language={Python}]
 import numpy as np
-from lbdapy import DeterministicEquivalent, ProblemData
+from lbdapy import (DeterministicEquivalent, MasterProblem, 
+					ProblemData)
 from lbdapy.cutfamilies import LooseBenders
 from scipy.sparse import eye
 
 A = []
 T = eye(2, 2, format="csc")
-W = [[2, 6],
-     [3, 1],
-     [4, 3],
-     [5, 1]]
+W = [[2, 6], [3, 1], [4, 3], [5, 1]]
 
 scenarios = [[5, 5, 5, 10, 10, 10, 15, 15, 15],
              [5, 10, 15, 5, 10, 15, 5, 10, 15]]
@@ -362,7 +361,9 @@ print(master.objective())
 print(master.first_stage_objective())
 print(master.second_stage_objective())
 \end{lstlisting}
-Once the problem is specified, the solution method is the same as for the other examples. Observe that arbitrary constraints senses may be specified.
+The Python interface is rather forgiving: it only requires that the arguments can be turned into a \texttt{scipy.sparse} matrix (the matrices $A$, $T$, and $W$), or a \texttt{numpy} array (all other problem data). A crucial remark is that the matrices $T$ and $W$ are specified in code as $T^\top$ and $W^\top$: \emph{all three matrices $A$, $T$, and $W$ must be specified this way, transposed}. This is required for performance reasons and follows the memory lay-out of the numerical library we use. 
+
+Once the problem is specified, the solution method is the same as for the other examples. First we construct the deterministic equivalent and solve it. Then we solve the decomposition using loose Benders' cuts with $\alpha = 0$. Observe that we again specify a lower bound, this time of $-100$.
 
 \section{Reference manual}
 \label{sec:reference_manual}

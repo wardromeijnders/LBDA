@@ -10,23 +10,27 @@
  */
 template<typename T>
 arma::SpMat<T> csc_to_sp_mat(py::handle &src,
-                             bool copy = false,
+                             // bool copy = false,
                              bool strict = false)
 {
     // TODO incref/decref
+
     PyObject *colPtrRaw = src.attr("indptr").ptr();
-    arma::uvec colPtr = carma::arr_to_col<arma::uword>(colPtrRaw, copy, strict);
-
     PyObject *rowindRaw = src.attr("indices").ptr();
-    arma::uvec rowind = carma::arr_to_col<arma::uword>(rowindRaw, copy, strict);
-
     PyObject *dataRaw = src.attr("data").ptr();
-    arma::Col<T> data = carma::arr_to_col<T>(dataRaw, copy, strict);
-
     PyObject *shapePtr = src.attr("shape").ptr();
+
+    if (!colPtrRaw || !rowindRaw || !dataRaw || !shapePtr)
+        throw std::runtime_error("Could not obtain scipy.sparse matrix data.");
 
     int row, col;
     PyArg_ParseTuple(shapePtr, "ii", &row, &col);
+
+    // I don't really understand why these *must* be copied. But I get bogus
+    // data if I don't, so copy remains true.
+    arma::uvec colPtr = carma::arr_to_col<arma::uword>(colPtrRaw, true, strict);
+    arma::Col<T> data = carma::arr_to_col<T>(dataRaw, true, strict);
+    arma::uvec rowind = carma::arr_to_col<arma::uword>(rowindRaw, true, strict);
 
     return arma::SpMat<T>(rowind, colPtr, data, row, col);
 }

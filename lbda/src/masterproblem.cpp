@@ -39,7 +39,7 @@ void MasterProblem::addCut(CutFamily::Cut const &cut)
     arma::vec const coeffs = -cut.beta;
 
     GRBLinExpr lhs;  // first variable is theta, and then all the x's.
-    lhs.addTerms(coeffs.memptr(), vars + 1, d_problem.Amat().n_rows);
+    lhs.addTerms(coeffs.memptr(), vars + 1, coeffs.n_elem);
     lhs += vars[0];
 
     delete[] vars;

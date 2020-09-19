@@ -31,8 +31,9 @@
 *.out
 *.app
 
-# Jetbrains IDEs
+# IDEs
 .idea/
+.vs/
 
 # CMake and build files
 build/
