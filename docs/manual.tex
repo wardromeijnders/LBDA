@@ -90,7 +90,7 @@ We explain how to set-up a local copy of the LBDA C++ codebase for use and devel
 
 After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
 
-TODO get the package on PyPI.
+TODO get the package on PyPI and link to it.
 
 \subsection{On Linux}
 A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distributions.
@@ -103,9 +103,9 @@ A development installation is set-up as follows in a Unix/Linux environment. Thi
 	
 	\item For linear algebra, we use the Armadillo library. It is available for many distributions, often via the package manager. The code was written and tested against Armadillo 9.8. You can install the library yourself, or use the \texttt{scripts/install.sh} script to do this for you. It should work on most Debian-based distributions, like Ubuntu. You likely need to be root for the script to work.
 	
-	\item If everything is set-up correctly, cmake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdaspy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
+	\item If everything is set-up correctly, cmake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdapy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
 	
-	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. \texttt{make lbdapy} should result in a compiled Python module in the \texttt{lib} directory. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
+	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. \texttt{make lbdapy} should result in a compiled Python module in the \texttt{lib} directory. This library can be used together with the Python code in \texttt{lbda/python/lbdapy}. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
 \end{enumerate}
 
 \subsection{On Windows}
