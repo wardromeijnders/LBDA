@@ -1,19 +1,47 @@
 from glob import iglob
+from pathlib import Path
+
+try:
+    import gurobipy
+except ImportError:
+    HAS_GUROBI = False
+else:
+    HAS_GUROBI = True
 
 """
 Simple, one-off script for fixing up SCENARIO-based stoch files, and a time 
-file.
+file. Can be used to possibly correct problematic SMPS files, though you really
+should back those up first before using this script.
 """
+
+# Passed to glob below, so all glob wildcards are allowed here. This is the
+# location of all three SMPS files, with extensions {cor, tim, sto}.
+WHERE = "sizes/*"
 
 
 def main():
-    for file in iglob("*.sto"):
+    if HAS_GUROBI:
+        # This basically hijacks Gurobi to do the iffy parsing, and then write
+        # a standards-compliant core file as an MPS.
+        for file in iglob(WHERE + ".cor"):
+            # First renames the core file to have an mps extension, applies
+            # Gurobi, and then resets the extension to cor.
+            # TODO test this.
+            loc = Path(file)
+            loc.rename(loc.with_suffix(".mps"))
+
+            m = gurobipy.read(str(loc))
+            m.write(loc)
+
+            loc.rename(loc.with_suffix(".cor"))
+
+    for file in iglob(WHERE + ".sto"):
         with open(file) as fh:
             data = fh.readlines()
 
         parse_stoch(file, data)
 
-    for file in iglob("*.tim"):
+    for file in iglob(WHERE + ".tim"):
         with open(file) as fh:
             data = fh.readlines()
 
