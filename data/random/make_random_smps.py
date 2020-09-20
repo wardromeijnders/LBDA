@@ -1,9 +1,9 @@
 import ast
+import codecs
 import glob
+import itertools
 import pathlib
 import re
-import shutil
-import itertools
 
 TIME = """TIME          Deterministic Equivalent
 PERIODS
@@ -50,8 +50,10 @@ def main():
         loc = pathlib.Path(file)
 
         for idx in range(6):
-            # Move MPS files as .cor files
-            shutil.copy(loc, f"{loc.stem}_{idx}.cor")
+            # Write .mps files as .cor files, and decode win-1252 to utf-8.
+            with codecs.open(loc, encoding="cp1252") as source, \
+                    codecs.open(f"{loc.stem}_{idx}.cor", "w", "utf8") as target:
+                target.write(source.read())
 
             # Make .tim file
             with open(f"{loc.stem}_{idx}.tim", "w") as fh:
