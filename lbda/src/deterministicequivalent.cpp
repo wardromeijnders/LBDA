@@ -130,12 +130,12 @@ double DeterministicEquivalent::secondStageObjective()
     return objective() - firstStageObjective();
 }
 
-bool DeterministicEquivalent::isOptimal()
+bool DeterministicEquivalent::isOptimal() const
 {
     return d_model.get(GRB_IntAttr_Status) == GRB_OPTIMAL;
 }
 
-double DeterministicEquivalent::mipGap()
+double DeterministicEquivalent::mipGap() const
 {
     return 100 * d_model.get(GRB_DoubleAttr_MIPGap);
 }

@@ -74,6 +74,8 @@ The algorithm is coded in C++, free to use and distribute, and also has a Python
 
 TODO link to repository once public
 
+TODO link to data location once public
+
 Before explaining the LBDA code in detail, we first briefly discuss in Section~\ref{subsec:model} the mathematics behind the two-stage mixed-integer recourse models that LBDA solves. This subsection coincides with part of the introduction of van der Laan and Romeijnders \cite{vanderLaan2020}.
 
 \subsection{Two-stage mixed-integer recourse models\label{subsec:model}}
@@ -454,9 +456,9 @@ public:
 	std::unique_ptr<arma::vec> solve(
 		double timeLimit = arma::datum::inf);
 	
-	bool isOptimal();
+	bool isOptimal() const;
 	
-	double mipGap();
+	double mipGap() const;
 	
 	double firstStageObjective();
 	
@@ -465,7 +467,7 @@ public:
 	double objective() const;
 };
 \end{lstlisting}
-Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceed and no feasible solutions are available, \texttt{solve} throws a \texttt{std::runtime\_error}. This exception is also thrown when the problem is infeasible. The return argument is a (unique) pointer to a vector of first-stage decisions. These decisions are optimal when \texttt{isOptimal} returns true. When \texttt{isOptimal} returns false, the decisions are the best solution found by Gurobi, and \texttt{mipGap} returns the relative optimality gap (as a percentage) of this solution.
+Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceed and no feasible solutions are available, \texttt{solve} throws a \texttt{std::runtime\_error}. This exception is also thrown when the problem is infeasible. The return argument is a (unique) pointer to a vector of first-stage decisions. These decisions are optimal when \texttt{isOptimal} returns true. When \texttt{isOptimal} returns false, the decisions are the best solution found by Gurobi. \texttt{mipGap} returns the relative optimality gap (as a percentage) of the returned solution: this is generally only informative when the solution is not optimal.
 
 After solving the deterministic equivalent, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
 
