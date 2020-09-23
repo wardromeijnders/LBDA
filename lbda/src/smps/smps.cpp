@@ -85,6 +85,10 @@ arma::sp_mat Smps::Amat()
     auto const rowEnd = std::max(d_stageOffsets(1, 0), 1ULL) - 1;
     auto const colEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
 
+    // Starts in the same row (constraint), so the first stage is empty
+    if (d_stageOffsets(1, 0) == d_stageOffsets(0, 0))
+        return arma::sp_mat();
+
     return d_core.submat(arma::span(0, rowEnd), arma::span(0, colEnd)).t();
 }
 
