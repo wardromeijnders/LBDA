@@ -31,7 +31,7 @@ class LooseBenders : public CutFamily
 public:
     LooseBenders(ProblemData const &problem,
                  arma::vec const alpha,
-                 double timeLimit = 1e3);
+                 double timeLimit = 1e2);
 
     ~LooseBenders() override;
 

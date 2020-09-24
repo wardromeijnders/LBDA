@@ -35,8 +35,6 @@ public:
 
     SubProblem(ProblemData const &problem);
 
-    SubProblem(SubProblem const &other);
-
     ~SubProblem();
 
     BasisInfo const basisInfo();

@@ -37,13 +37,13 @@ public:
     /**
      * @return True if the model was solved to optimality, false otherwise.
      */
-    bool isOptimal();
+    bool isOptimal() const;
 
     /**
-     * @return Returns the optimality gap of the current solution. Only non-zero
-     *         when <code>isOptimal()</code> is false.
+     * @return Returns the optimality gap of the solution returned by
+     *         <code>solve</code>.
      */
-    double mipGap();
+    double mipGap() const;
 
     /**
      * @return First-stage objective value.

@@ -1,0 +1,7 @@
+# These are all part of the data sets, and do not need to enter the repo.
+*.cor
+*.sto
+*.tim
+*.mps
+*.py
+*.zip

@@ -74,6 +74,8 @@ The algorithm is coded in C++, free to use and distribute, and also has a Python
 
 TODO link to repository once public
 
+TODO link to data location once public
+
 Before explaining the LBDA code in detail, we first briefly discuss in Section~\ref{subsec:model} the mathematics behind the two-stage mixed-integer recourse models that LBDA solves. This subsection coincides with part of the introduction of van der Laan and Romeijnders \cite{vanderLaan2020}.
 
 \subsection{Two-stage mixed-integer recourse models\label{subsec:model}}
@@ -110,7 +112,7 @@ A development installation is set-up as follows in a Unix/Linux environment. Thi
 
 \subsection{On Windows}
 
-TODO
+A Windows set-up can be obtained as follows. TODO
 
 \section{Examples}
 \label{sec:examples}
@@ -121,7 +123,7 @@ We present two common use cases: solving a known problem given in SMPS format, a
 \label{subsec:solving_smps_example}
 
 Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
-\begin{lstlisting}[caption={Solving SMPS input in C++.},
+\begin{lstlisting}[caption={Solving MIR using SMPS input in C++.},
                    label={listing:smps_example_c++}]
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
@@ -155,7 +157,7 @@ int main()
 	std::cout << master.secondStageObjective() << '\n';
 }
 \end{lstlisting}
-\begin{lstlisting}[caption={Solving SMPS input in Python.},
+\begin{lstlisting}[caption={Solving MIR using SMPS input in Python.},
                    label={listing:smps_example_python},
                    language={Python}]
 from lbdapy import (DeterministicEquivalent, MasterProblem, 
@@ -454,9 +456,9 @@ public:
 	std::unique_ptr<arma::vec> solve(
 		double timeLimit = arma::datum::inf);
 	
-	bool isOptimal();
+	bool isOptimal() const;
 	
-	double mipGap();
+	double mipGap() const;
 	
 	double firstStageObjective();
 	
@@ -465,7 +467,7 @@ public:
 	double objective() const;
 };
 \end{lstlisting}
-Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceed and no feasible solutions are available, \texttt{solve} throws a \texttt{std::runtime\_error}. This exception is also thrown when the problem is infeasible. The return argument is a (unique) pointer to a vector of first-stage decisions. These decisions are optimal when \texttt{isOptimal} returns true. When \texttt{isOptimal} returns false, the decisions are the best solution found by Gurobi, and \texttt{mipGap} returns the relative optimality gap (as a percentage) of this solution.
+Its constructor takes a \texttt{ProblemData} instance to solve (see Section \ref{subsec:problem_class}). After construction, one can call the \texttt{solve} method, with an optional time limit argument (in seconds). When such an argument is not passed, the time limit defaults to infinity. If the time limit is exceed and no feasible solutions are available, \texttt{solve} throws a \texttt{std::runtime\_error}. This exception is also thrown when the problem is infeasible. The return argument is a (unique) pointer to a vector of first-stage decisions. These decisions are optimal when \texttt{isOptimal} returns true. When \texttt{isOptimal} returns false, the decisions are the best solution found by Gurobi. \texttt{mipGap} returns the relative optimality gap (as a percentage) of the returned solution: this is generally only informative when the solution is not optimal.
 
 After solving the deterministic equivalent, the \texttt{firstStageObjective}, \texttt{secondStageObjective}, and \texttt{objective} methods return the first-stage costs, the expected cost-to-go in the second-stage, and the overall objective cost, respectively.
 
@@ -556,14 +558,14 @@ class LooseBenders : public CutFamily
 public:
 	LooseBenders(ProblemData const &problem,
 			 	 arma::vec const alpha,
-			 	 double timeLimit = 1e3);
+			 	 double timeLimit = 1e2);
 	
 	~LooseBenders() override;
 	
 	CutFamily::Cut computeCut(arma::vec const &x) override;
 };
 \end{lstlisting}
-Observe that the \texttt{LooseBenders} class takes a vector $\alpha$ as an argument, and a time limit (in seconds). The time limit applies to the Gomory relaxation $v_{B_k}$, and defaults to $1000$s.
+Observe that the \texttt{LooseBenders} class takes a vector $\alpha$ as an argument, and a time limit (in seconds). The time limit applies to the Gomory relaxation $v_{B_k}$, and defaults to $100$s. If the time limit is exceeded, the best known lower bound for $v_{B_k}$ is used instead.
 
 \subsection{The \texttt{MasterProblem} class}
 \label{subsec:master_problem_class}

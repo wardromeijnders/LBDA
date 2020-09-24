@@ -32,7 +32,9 @@ try
                 default:
                     // TODO how to set alpha from the command line?
                     arma::vec alpha = arma::zeros(problem.Wmat().n_cols);
-                    cutFamily = new LooseBenders(problem, alpha);
+                    cutFamily = new LooseBenders(problem,
+                                                 alpha,
+                                                 arguments.timeLimit);
                     break;
             }
 

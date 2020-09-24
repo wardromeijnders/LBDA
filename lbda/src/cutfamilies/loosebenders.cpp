@@ -107,7 +107,13 @@ double LooseBenders::computeGomory(size_t scenario,
     }
 
     update(rhs, vBasis, cBasis);
-    auto const objective = solve();
+    d_model.optimize();
+
+    // Either optimal objective value, or best known lower bound (the latter
+    // often in case of a time out).
+    auto const objective = d_model.get(GRB_IntAttr_Status) == GRB_OPTIMAL
+                               ? d_model.get(GRB_DoubleAttr_ObjVal)
+                               : d_model.get(GRB_DoubleAttr_ObjBound);
 
     visited.emplace_back(basis);
     d_objectives[scenario].emplace_back(objective);

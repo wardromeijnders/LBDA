@@ -82,18 +82,25 @@ arma::sp_mat Smps::Amat()
 {
     // Of the entire core tableau, the A matrix (first stage constraints on x)
     // is given by the top-left, first stage matrix.
-    auto const rowSpan = arma::span(0, d_stageOffsets(1, 0) - 1);
-    auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
+    auto const rowEnd = std::max(d_stageOffsets(1, 0), 1ULL) - 1;
+    auto const colEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
 
-    return d_core.submat(rowSpan, colSpan).t();
+    // Starts in the same row (constraint), so the first stage is empty
+    if (d_stageOffsets(1, 0) == d_stageOffsets(0, 0))
+        return arma::sp_mat();
+
+    return d_core.submat(arma::span(0, rowEnd), arma::span(0, colEnd)).t();
 }
 
 arma::sp_mat Smps::Tmat()
 {
     // Given by the bottom-left matrix. These are the second-stage constraint
     // coefficients on the first-stage variables x.
-    auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
-    auto const colSpan = arma::span(0, d_stageOffsets(1, 1) - 1);
+    auto const rowEnd = std::max(d_core.n_rows, 1ULL) - 1;
+    auto const colEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
+
+    auto const rowSpan = arma::span(d_stageOffsets(1, 0), rowEnd);
+    auto const colSpan = arma::span(0, colEnd);
 
     return d_core.submat(rowSpan, colSpan).t();
 }
@@ -102,8 +109,11 @@ arma::sp_mat Smps::Wmat()
 {
     // Given by the bottom-right matrix. These are the second-stage constraint
     // coefficients on the second-stage variables y.
-    auto const rowSpan = arma::span(d_stageOffsets(1, 0), d_core.n_rows - 1);
-    auto const colSpan = arma::span(d_stageOffsets(1, 1), d_core.n_cols - 1);
+    auto const rowEnd = std::max(d_core.n_rows, 1ULL) - 1;
+    auto const colEnd = std::max(d_core.n_cols, 1ULL) - 1;
+
+    auto const rowSpan = arma::span(d_stageOffsets(1, 0), rowEnd);
+    auto const colSpan = arma::span(d_stageOffsets(1, 1), colEnd);
 
     return d_core.submat(rowSpan, colSpan).t();
 }
@@ -153,33 +163,38 @@ void Smps::addScenarioRealisation(std::string const &scenario,
 
 arma::vec Smps::firstStageObjCoeffs()
 {
-    return d_objCoeffs.subvec(0, d_stageOffsets(1, 1) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
+    return d_objCoeffs.subvec(0, vecEnd);
 }
 
 arma::vec Smps::secondStageObjCoeffs()
 {
-    return d_objCoeffs.subvec(d_stageOffsets(1, 1), d_objCoeffs.size() - 1);
+    auto const vecEnd = std::max(d_objCoeffs.size(), 1ULL) - 1;
+    return d_objCoeffs.subvec(d_stageOffsets(1, 1), vecEnd);
 }
 
 arma::Col<char> Smps::firstStageConstrSenses()
 {
-    return d_constrSenses.subvec(0, d_stageOffsets(1, 0) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 0), 1ULL) - 1;
+    return d_constrSenses.subvec(0, vecEnd);
 }
 
 arma::Col<char> Smps::secondStageConstrSenses()
 {
-    return d_constrSenses.subvec(d_stageOffsets(1, 0),
-                                 d_constrSenses.size() - 1);
+    auto const vecEnd = std::max(d_constrSenses.size(), 1ULL) - 1;
+    return d_constrSenses.subvec(d_stageOffsets(1, 0), vecEnd);
 }
 
 arma::Col<char> Smps::firstStageVarTypes()
 {
-    return d_varTypes.subvec(0, d_stageOffsets(1, 1) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
+    return d_varTypes.subvec(0, vecEnd);
 }
 
 arma::Col<char> Smps::secondStageVarTypes()
 {
-    return d_varTypes.subvec(d_stageOffsets(1, 1), d_varTypes.size() - 1);
+    auto const vecEnd = std::max(d_varTypes.size(), 1ULL) - 1;
+    return d_varTypes.subvec(d_stageOffsets(1, 1), vecEnd);
 }
 
 arma::vec Smps::firstStageLowerBound()
@@ -187,7 +202,8 @@ arma::vec Smps::firstStageLowerBound()
     if (d_lowerBounds.size() != d_core.n_cols)
         d_lowerBounds = arma::zeros(d_core.n_cols);
 
-    return d_lowerBounds.subvec(0, d_stageOffsets(1, 1) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
+    return d_lowerBounds.subvec(0, vecEnd);
 }
 
 arma::vec Smps::firstStageUpperBound()
@@ -195,7 +211,8 @@ arma::vec Smps::firstStageUpperBound()
     if (d_upperBounds.size() != d_core.n_cols)
         d_upperBounds = arma::vec(d_core.n_cols).fill(arma::datum::inf);
 
-    return d_upperBounds.subvec(0, d_stageOffsets(1, 1) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 1), 1ULL) - 1;
+    return d_upperBounds.subvec(0, vecEnd);
 }
 
 arma::vec Smps::secondStageLowerBound()
@@ -203,7 +220,8 @@ arma::vec Smps::secondStageLowerBound()
     if (d_lowerBounds.size() != d_core.n_cols)
         d_lowerBounds = arma::zeros(d_core.n_cols);
 
-    return d_lowerBounds.subvec(d_stageOffsets(1, 1), d_lowerBounds.size() - 1);
+    auto const vecEnd = std::max(d_lowerBounds.size(), 1ULL) - 1;
+    return d_lowerBounds.subvec(d_stageOffsets(1, 1), vecEnd);
 }
 
 arma::vec Smps::secondStageUpperBound()
@@ -211,17 +229,20 @@ arma::vec Smps::secondStageUpperBound()
     if (d_upperBounds.size() != d_core.n_cols)
         d_upperBounds = arma::vec(d_core.n_cols).fill(arma::datum::inf);
 
-    return d_upperBounds.subvec(d_stageOffsets(1, 1), d_upperBounds.size() - 1);
+    auto const vecEnd = std::max(d_upperBounds.size(), 1ULL) - 1;
+    return d_upperBounds.subvec(d_stageOffsets(1, 1), vecEnd);
 }
 
 arma::vec Smps::firstStageRhs()
 {
-    return d_rhs.subvec(0, d_stageOffsets(1, 0) - 1);
+    auto const vecEnd = std::max(d_stageOffsets(1, 0), 1ULL) - 1;
+    return d_rhs.subvec(0, vecEnd);
 }
 
 arma::vec Smps::secondStageRhs()
 {
-    return d_rhs.subvec(d_stageOffsets(1, 0), d_rhs.size() - 1);
+    auto const vecEnd = std::max(d_rhs.size(), 1ULL) - 1;
+    return d_rhs.subvec(d_stageOffsets(1, 0), vecEnd);
 }
 
 arma::mat Smps::generateScenarios()
