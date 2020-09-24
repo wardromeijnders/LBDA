@@ -18,8 +18,6 @@ protected:
 
     explicit CutFamily(ProblemData const &problem);
 
-    virtual double solve();
-
 public:
     struct Cut
     {

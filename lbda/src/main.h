@@ -32,8 +32,9 @@ Options:
           relaxation of the second-stage problem.
     -l  Lower bound on the expected cost-to-go in the second stage. Default 0.
     -u  Upper bound on the expected cost-to-go in the second stage. Default +inf.
-    -t  Time limit (in seconds) to set when solving the deterministic equivalent.
-        No time limit is set by default.
+    -t  Time limit (in seconds) to set when solving the deterministic equivalent,
+        or time limit for the Gurobi relaxations when solving the decomposition
+        using Loose Benders cuts.
 
 Arguments:
     <file>  Location of the SMPS file triplet to solve. Should not contain any

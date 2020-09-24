@@ -123,7 +123,7 @@ We present two common use cases: solving a known problem given in SMPS format, a
 \label{subsec:solving_smps_example}
 
 Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
-\begin{lstlisting}[caption={Solving SMPS input in C++.},
+\begin{lstlisting}[caption={Solving MIR using SMPS input in C++.},
                    label={listing:smps_example_c++}]
 #include "deterministicequivalent.h"
 #include "masterproblem.h"
@@ -157,7 +157,7 @@ int main()
 	std::cout << master.secondStageObjective() << '\n';
 }
 \end{lstlisting}
-\begin{lstlisting}[caption={Solving SMPS input in Python.},
+\begin{lstlisting}[caption={Solving MIR using SMPS input in Python.},
                    label={listing:smps_example_python},
                    language={Python}]
 from lbdapy import (DeterministicEquivalent, MasterProblem, 
@@ -558,14 +558,14 @@ class LooseBenders : public CutFamily
 public:
 	LooseBenders(ProblemData const &problem,
 			 	 arma::vec const alpha,
-			 	 double timeLimit = 1e3);
+			 	 double timeLimit = 1e2);
 	
 	~LooseBenders() override;
 	
 	CutFamily::Cut computeCut(arma::vec const &x) override;
 };
 \end{lstlisting}
-Observe that the \texttt{LooseBenders} class takes a vector $\alpha$ as an argument, and a time limit (in seconds). The time limit applies to the Gomory relaxation $v_{B_k}$, and defaults to $1000$s.
+Observe that the \texttt{LooseBenders} class takes a vector $\alpha$ as an argument, and a time limit (in seconds). The time limit applies to the Gomory relaxation $v_{B_k}$, and defaults to $100$s. If the time limit is exceeded, the best known lower bound for $v_{B_k}$ is used instead.
 
 \subsection{The \texttt{MasterProblem} class}
 \label{subsec:master_problem_class}

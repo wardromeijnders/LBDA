@@ -74,8 +74,9 @@ StrongBenders::Cut StrongBenders::computeCut(arma::vec const &x)
         arma::vec pi = Tmat * duals.lambda;
 
         update(omega, pi);
+        d_model.optimize();
 
-        gamma += prob * solve();
+        gamma += prob * d_model.get(GRB_DoubleAttr_ObjVal);
         beta -= prob * pi;
     }
 
