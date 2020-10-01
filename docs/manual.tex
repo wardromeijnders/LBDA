@@ -72,9 +72,7 @@ For convenience the repository does not only contain the code for LBDA, but also
 
 The algorithm is coded in C++, free to use and distribute, and also has a Python interface. A reference manual is provided in Section \ref{sec:reference_manual}. Within the algorithm, all linear and integer programs are solved using Gurobi. Moreover, SMPS input is accepted, but the problem data can also be specified manually. See Section~\ref{sec:examples} for examples on how to apply LBDA using both input methods. 
 
-TODO link to repository once public
-
-TODO link to data location once public
+The problem instances that are solved using the LBDA in \cite{vanderLaan2020} are available in SMPS format. These, and a frozen version of the code, can be found at \url{https://doi.org/10.34894/45RPGB}. The (latest) version of the code is also available as a git repository, here: \url{https://github.com/wardromeijnders/LBDA.}
 
 Before explaining the LBDA code in detail, we first briefly discuss in Section~\ref{subsec:model} the mathematics behind the two-stage mixed-integer recourse models that LBDA solves. This subsection coincides with part of the introduction of van der Laan and Romeijnders \cite{vanderLaan2020}.
 
@@ -90,9 +88,9 @@ Such models have many practical applications in for example energy, telecommunic
 
 We explain how to set-up a local copy of the LBDA C++ codebase for use and development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
-After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
+TODO get the package on PyPI
 
-TODO get the package on PyPI and link to it.
+After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
 
 \subsection{On Linux}
 A development installation is set-up as follows in a Unix/Linux environment. This was tested on Ubuntu 20.04, but should work similarly for many other distributions.
@@ -107,7 +105,9 @@ A development installation is set-up as follows in a Unix/Linux environment. Thi
 	
 	\item If everything is set-up correctly, cmake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdapy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
 	
-	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. \texttt{make lbdapy} should result in a compiled Python module in the \texttt{lib} directory. This library can be used together with the Python code in \texttt{lbda/python/lbdapy}. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
+	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
+
+	\item \textbf{Python}. Running \texttt{make lbdapy} should result in a compiled Python module in the \texttt{lib} directory. This library can be used together with the Python code in \texttt{lbda/python/lbdapy}, by putting the compiled Python module in \texttt{lbda/python/lbdapy/lib}, and installing the package with the \texttt{pip install .} command from the \texttt{lbda/python} directory. Thereafter, one can solve the Python examples of Section \ref{sec:examples}.
 \end{enumerate}
 
 \subsection{On Windows}
@@ -122,7 +122,7 @@ We present two common use cases: solving a known problem given in SMPS format, a
 \subsection{Solving a MIR problem using SMPS input}
 \label{subsec:solving_smps_example}
 
-Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data directory of the Github repository.
+Solving a MIR problem specified as a triplet of SMPS files is rather easy. Listings \ref{listing:smps_example_c++} and \ref{listing:smps_example_python} provide some example code, solving a problem provided in the data set, assumed present in the data directory of the repository (see Section \ref{sec:introduction} for a link to obtain these SMPS files).
 \begin{lstlisting}[caption={Solving MIR using SMPS input in C++.},
                    label={listing:smps_example_c++}]
 #include "deterministicequivalent.h"

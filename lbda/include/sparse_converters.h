@@ -13,8 +13,7 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
                              // bool copy = false,
                              bool strict = false)
 {
-    // TODO incref/decref
-
+    // TODO decrefs
     PyObject *colPtrRaw = src.attr("indptr").ptr();
     PyObject *rowindRaw = src.attr("indices").ptr();
     PyObject *dataRaw = src.attr("data").ptr();
@@ -40,7 +39,7 @@ arma::SpMat<T> csc_to_sp_mat(py::handle &src,
  */
 template<typename T> inline py::handle sp_mat_to_csc(arma::SpMat<T> const &src)
 {
-    // TODO incref/decref
+    // TODO decrefs
     src.sync();  // ensures the following data accesses are valid.
 
     py::array_t<T> data(src.n_nonzero, src.values);
@@ -67,7 +66,8 @@ template<typename T> inline py::handle sp_mat_to_csc(arma::SpMat<T> const &src)
     py::module sparse = py::module::import("scipy.sparse");
     py::object csc_matrix = sparse.attr("csc_matrix");
 
-    PyObject *mat = PyObject_Call(csc_matrix.ptr(), args, kwargs);
+    PyObject *callable = csc_matrix.ptr();
+    PyObject *mat = PyObject_Call(callable, args, kwargs);
 
     if (!mat)
         throw std::runtime_error("Could not construct scipy.sparse matrix.");
