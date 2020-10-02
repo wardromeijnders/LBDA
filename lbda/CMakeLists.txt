@@ -6,7 +6,11 @@ project(lbda+
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_definitions(-Wall -Wextra -fPIC)
+if (MSVC)
+    add_definitions(-Wall)
+else()
+    add_definitions(-Wall -Wextra -fPIC)
+endif()
 
 if (CMAKE_BUILD_TYPE MATCHES RELEASE)
     add_definitions(-O3)

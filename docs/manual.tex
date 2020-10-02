@@ -88,7 +88,7 @@ Such models have many practical applications in for example energy, telecommunic
 
 We explain how to set-up a local copy of the LBDA C++ codebase for use and development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
-TODO get the package on PyPI
+% TODO get the package on PyPI
 
 After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
 
@@ -97,13 +97,13 @@ A development installation is set-up as follows in a Unix/Linux environment. Thi
 \begin{enumerate}
 	\item Clone the repository into some folder. This also clones two submodules, \texttt{pybind11} and \texttt{carma}, which are used to compile the Python bindings.
 	
-	\item We use \texttt{CMake} as our build tool. It might already be available on your system; if not, it will be installed when we install Armadillo.
+	\item We use CMake as our build tool. It might already be available on your system; if not, it will be installed when we install Armadillo.
 	
 	\item Install Gurobi. Any recent version should do, but the code was written and tested with Gurobi 9. The header files and libraries should be available in a standard location relative to the \texttt{GUROBI\_HOME} environment variable.
 	
 	\item For linear algebra, we use the Armadillo library. It is available for many distributions, often via the package manager. The code was written and tested against Armadillo 9.8. You can install the library yourself, or use the \texttt{scripts/install.sh} script to do this for you. It should work on most Debian-based distributions, like Ubuntu. You likely need to be root for the script to work.
 	
-	\item If everything is set-up correctly, cmake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdapy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
+	\item If everything is set-up correctly, CMake can build \texttt{lbda} from the repository root as \texttt{cmake build lbda}. The resulting Makefile has three targets: \texttt{lbdaexec}, \texttt{lbdapy}, and \texttt{tests}. The first is a stand-alone executable that can read and solve problems specified in the SMPS format. The second is a compiled Python module. The third is a small test suite than can be used to verify a correct installation.
 	
 	\item If you run \texttt{make lbdaexec}, you should obtain a compiled binary in \texttt{bin/lbdaexec}. Run \texttt{bin/lbdaexec -h} to be greeted by a help message explaining the command-line interface. Finally, \texttt{make tests} compiles a suite of tests that can be ran as \texttt{bin/tests}.
 
@@ -111,8 +111,19 @@ A development installation is set-up as follows in a Unix/Linux environment. Thi
 \end{enumerate}
 
 \subsection{On Windows}
+A Windows set-up can be obtained as follows. This was tested using Visual Studio 2019. As an alternative, a WSL set-up using the Linux instructions is also fully supported.
 
-A Windows set-up can be obtained as follows. TODO
+\begin{enumerate}
+	\item Clone the repository into some folder. This also clones two submodules, \texttt{pybind11} and \texttt{carma}, which are used to compile the Python bindings.
+	
+	\item Set-up the project in Visual Studio. Although other IDEs should work, this guide was written using Visual Studio, and it might be easiest to follow along.
+	
+	\item Install Gurobi. Any recent version should do, but the code was written and tested with Gurobi 9. The header files and libraries should be available in a standard location relative to the \texttt{GUROBI\_HOME} environment variable. This variable is often automatically set to the  appropriate location during by the Gurobi installation process.
+	
+	\item Make sure you have the Armadillo library installed. Download the source code from \href{http://arma.sourceforge.net/download.html}{their website} and extract it somewhere (the code was developed against Armadillo 9.8, but any recent version should do). Then follow \href{https://stackoverflow.com/a/44659049/4316405}{these instructions}.
+	
+	\item Three build targets should now be available in Visual Studio: \texttt{lbdaexec}, \texttt{tests}, and \texttt{lbdapy}. For the \texttt{lbdaexec} you might need to provide the Unix/Linux \texttt{getopt} facilities, as explained \href{https://stackoverflow.com/a/17195644/4316405}{here}. The build targets are the same as in the Linux instructions above, and the remainder of the set-up can be found there.
+\end{enumerate}
 
 \section{Examples}
 \label{sec:examples}
