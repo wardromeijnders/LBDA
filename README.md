@@ -1,8 +1,7 @@
 # LBDA+: solving mixed-integer recourse models
 
-TODO
-
-The user manual explains how this repository works. It can be obtained [here]().
+The user manual explains how this repository works. It can be obtained [here](
+https://github.com/N-Wouda/LBDA/releases/tag/v1.0), as `manual.pdf`.
 
 ## Dependencies
 
