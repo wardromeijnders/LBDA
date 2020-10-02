@@ -4,11 +4,11 @@ set(GUROBI_HOME "$ENV{GUROBI_HOME}")
 
 find_library(
         GUROBI_C_LIBRARY
-        NAMES libgurobi90.so
+        NAMES libgurobi90.so gurobi90.lib
         PATHS "${GUROBI_HOME}/lib")
 
 find_library(GUROBI_CXX_LIBRARY
-        NAMES libgurobi_c++.a
+        NAMES libgurobi_c++.a gurobi_c++*.lib
         PATHS "${GUROBI_HOME}/lib")
 
 set(GUROBI_INCLUDES ${GUROBI_HOME}/include)
