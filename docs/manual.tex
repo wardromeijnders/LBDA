@@ -72,7 +72,7 @@ For convenience the repository does not only contain the code for LBDA, but also
 
 The algorithm is coded in C++, free to use and distribute, and also has a Python interface. A reference manual is provided in Section \ref{sec:reference_manual}. Within the algorithm, all linear and integer programs are solved using Gurobi. Moreover, SMPS input is accepted, but the problem data can also be specified manually. See Section~\ref{sec:examples} for examples on how to apply LBDA using both input methods. 
 
-The problem instances that are solved using the LBDA in \cite{vanderLaan2020} are available in SMPS format. These, and a frozen version of the code, can be found at \url{https://doi.org/10.34894/45RPGB}. The (latest) version of the code is also available as a git repository, here: \url{https://github.com/wardromeijnders/LBDA.}
+The problem instances that are solved using the LBDA in \cite{vanderLaan2020} are available in SMPS format. These, and a frozen version of the code, can be found at \url{https://doi.org/10.34894/45RPGB}. The code is also available as a git repository, here: \url{https://github.com/wardromeijnders/LBDA}, which contains the latest version.
 
 Before explaining the LBDA code in detail, we first briefly discuss in Section~\ref{subsec:model} the mathematics behind the two-stage mixed-integer recourse models that LBDA solves. This subsection coincides with part of the introduction of van der Laan and Romeijnders \cite{vanderLaan2020}.
 
@@ -88,7 +88,7 @@ Such models have many practical applications in for example energy, telecommunic
 
 We explain how to set-up a local copy of the LBDA C++ codebase for use and development. If you only want to use the Python bindings, the package is available on the Python package index as \texttt{lbdapy} for Python 3.8 on Windows and Linux. Make sure the environment variable \texttt{GUROBI\_HOME} points to the Gurobi installation directory, and Armadillo is installed on your computer. 
 
-% TODO get the package on PyPI
+TODO get the package on PyPI
 
 After following the instruction below, you can either compile your code directly against the source code of our project, or include the headers in \texttt{lbda/include} and link against the \texttt{lbda} static library.
 
